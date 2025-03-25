@@ -31,3 +31,42 @@ nmap --script ssl-enum-ciphers -p 8443 localhost
 ## Java Class Configuration
 Java configuration class:
 - src/main/java/com/base/config/TomcatSSLConfig.java
+
+# H2 Database Configuration Guide
+
+## Overview
+This guide covers H2 in-memory database setup with Spring Boot, including console access, security configuration, and production considerations.
+
+## Features
+- In-memory database for rapid development
+- Web-based management console
+- SQL compatibility with minimal configuration
+- Embedded and server modes
+
+## Quick Start
+### 1. Add Dependencies
+```
+<!-- Gradle -->
+runtimeOnly 'com.h2database:h2'
+```
+### 2. Check properties.yml
+```
+spring:
+  datasource:
+    url: jdbc:h2:mem:isldevs
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+```
+### 3. Security allow /h2-console
+- src/main/java/com/base/config/SecurityConfig.java
+### 4. Access /h2-console on web
+- http://localhost:8080/api/h2-console
