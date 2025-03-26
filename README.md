@@ -1,7 +1,7 @@
 # Tomcat SSL Configuration Guide
 
 ## Overview
-This document explains how to configure SSL/TLS for the embedded Tomcat server in the iSLDevs application using Spring Boot 3.4.3.
+This document explains how to configure SSL/TLS for the embedded Tomcat server in the iSLDevs application using Spring Boot 3.2.4.
 
 ## Prerequisites
 - Java 17+
@@ -32,7 +32,7 @@ nmap --script ssl-enum-ciphers -p 8443 localhost
 Java configuration class:
 - src/main/java/com/base/config/TomcatSSLConfig.java
 
-# PostgreSQL Configuration
+# Database Configuration
 
 This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using environment variables instead of property files, following security best practices.
 
@@ -47,28 +47,30 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
 
 - Java 17+
 - Spring Boot 3.2.4
-- PostgreSQL 12+
+- MySQL 8.0 / PostgreSQL 12+
 - Maven/Gradle
 
 ## Configuration
 
 ### Required Environment Variables
 
-| Variable        | Example Value                         | Description                |
-|-----------------|---------------------------------------|----------------------------|
-| `DB_URL`        | `jdbc:postgresql://localhost:5432/db` | PostgreSQL JDBC URL        |
-| `DB_USERNAME`   | `postgres`                            | Database username          |
-| `DB_PASSWORD`   | `your_secure_password`                | Database password          |
+| Variable          | Example Value                          | Description       |
+|-------------------|----------------------------------------|-------------------|
+| `DB_URL`          | `jdbc:{youurl}://localhost:{port}}/db` | JDBC URL          |
+| `DB_USERNAME`     | `youruser`                             | Username          |
+| `DB_PASSWORD`     | `yourpass`                             | Password          |
+| `DB_DRIVER_CLASS` | `yourdriverclassname`                  | Driver class name |
 
 ### Optional Configuration
 
-| Variable               | Default   | Description                          |
-|------------------------|-----------|--------------------------------------|
-| `DB_POOL_MAX_SIZE`     | 10        | Maximum connection pool size         |
-| `DB_POOL_MIN_IDLE`     | 5         | Minimum idle connections             |
-| `DB_CONNECTION_TIMEOUT`| 30000 (ms)| Connection timeout                   |
-| `HIBERNATE_DDL_AUTO`   | validate  | Database schema initialization mode  |
-| `HIBERNATE_SHOW_SQL`   | false     | Show SQL queries in logs             |
+| Variable                       | Default        | Description                         |
+|--------------------------------|----------------|-------------------------------------|
+| `DB_POOL_MAX_SIZE`             | 10             | Maximum connection pool size        |
+| `DB_POOL_MIN_IDLE`             | 5              | Minimum idle connections            |
+| `DB_CONNECTION_TIMEOUT`        | 5000 (ms)      | Connection timeout (5s)             |
+| `DB_IDLE_TIMEOUT `             | 120000 (ms)    | Connection timeout (2m)             |
+| `DB_MAX_LIFETIME `             | 1800000 (ms)   | Connection timeout (30m)            |
+| `DB_LEAK_DETECTION_THRESHOLD ` | 60000 (ms)     | Connection timeout (60s)            |
 
 ## Setup Guide
 
@@ -77,16 +79,16 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
 1. Set environment variables:
    ```bash
    # Linux/macOS
-   export DB_URL=jdbc:postgresql://localhost:5432/mydb
-   export DB_USERNAME=postgres
-   export DB_PASSWORD=secret
-   export DB_DRIVER_CLASS=org.postgresql.Driver
+   export DB_URL=jdbc:{youurl}://localhost:{port}}/db
+   export DB_USERNAME=youruser
+   export DB_PASSWORD=yourpass
+   export DB_DRIVER_CLASS=yourdriverclassname
 
    # Windows
-   set DB_URL=jdbc:postgresql://localhost:5432/mydb
-   set DB_USERNAME=postgres
-   set DB_PASSWORD=secret
-   set DB_DRIVER_CLASS=org.postgresql.Driver
+   set DB_URL=jdbc:{youurl}://localhost:{port}}/db
+   set DB_USERNAME=youruser
+   set DB_PASSWORD=yourpass
+   set DB_DRIVER_CLASS=yourdriverclassname
 
 ## IDE Configuration (IntelliJ/Eclipse)
 
@@ -98,18 +100,12 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
    - Select your Spring Boot application configuration
    - Under **Environment Variables**, add:
      ```
-     DB_URL=jdbc:postgresql://localhost:5432/yourdb
+     DB_URL=jdbc:{youurl}://localhost:{port}}/db
      DB_USERNAME=youruser
      DB_PASSWORD=yourpass
-     DB_DRIVER_CLASS=org.postgresql.Driver
+     DB_DRIVER_CLASS=yourdriverclassname
      ```
    - Click **Apply** → **OK**
-
-3. **Verify Variables**
-   - Run the app and check logs for:
-     ```
-     PostgreSQL connection established to: jdbc:postgresql://...
-     ```
 
 ### 🌑 Eclipse Setup
 1. **Open Run Configurations**
@@ -119,11 +115,11 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
    - Select your Spring Boot application
      - Go to **Environment** tab → **Add**:
 
-   | Name              | Value                                 |
-   |-------------------|---------------------------------------|
-   | `DB_URL`          | `jdbc:postgresql://localhost:5432/db` |
-   | `DB_USERNAME`     | `youruser`                            |
-   | `DB_PASSWORD`     | `yourpass`                            | 
-   | `DB_DRIVER_CLASS` | `org.postgresql.Driver`               | 
+   | Name              | Value                                  |
+   |-------------------|----------------------------------------|
+   | `DB_URL`          | `jdbc:{youurl}://localhost:{port}}/db` |
+   | `DB_USERNAME`     | `youruser`                             |
+   | `DB_PASSWORD`     | `yourpass`                             | 
+   | `DB_DRIVER_CLASS` | `yourdriverclassname`                  | 
 
    - Click **Apply** → **Run**
