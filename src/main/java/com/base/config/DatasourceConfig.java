@@ -2,6 +2,7 @@ package com.base.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -33,7 +34,7 @@ public class DatasourceConfig {
         config.setPassword(env.getRequiredProperty("DB_PASSWORD"));
         config.setDriverClassName(env.getRequiredProperty("DB_DRIVER_CLASS"));
 
-        config.setMaximumPoolSize(Integer.parseInt(env.getProperty("DB_POOL_MAX_SIZE",String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
+        config.setMaximumPoolSize(Integer.parseInt(env.getProperty("DB_POOL_MAX_SIZE", String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
         config.setMinimumIdle(Integer.parseInt(env.getProperty("DB_POOL_MIN_IDLE", String.valueOf(config.getMaximumPoolSize() / 2))));
         config.setConnectionTimeout(Long.parseLong(env.getProperty("DB_CONNECTION_TIMEOUT", "5000"))); // 5s
         config.setIdleTimeout(Long.parseLong(env.getProperty("DB_IDLE_TIMEOUT", "120000"))); // 2m
@@ -84,4 +85,16 @@ public class DatasourceConfig {
         return properties;
     }
 
+    @Bean
+    public Flyway flyway(DataSource dataSource) {
+
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .baselineVersion("1")
+                .baselineOnMigrate(true)
+                .load();
+        flyway.migrate();
+        return flyway;
+    }
 }
