@@ -63,14 +63,14 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
 
 ### Optional Configuration
 
-| Variable                       | Default        | Description                         |
-|--------------------------------|----------------|-------------------------------------|
-| `DB_POOL_MAX_SIZE`             | 10             | Maximum connection pool size        |
-| `DB_POOL_MIN_IDLE`             | 5              | Minimum idle connections            |
-| `DB_CONNECTION_TIMEOUT`        | 5000 (ms)      | Connection timeout (5s)             |
-| `DB_IDLE_TIMEOUT `             | 120000 (ms)    | Connection timeout (2m)             |
-| `DB_MAX_LIFETIME `             | 1800000 (ms)   | Connection timeout (30m)            |
-| `DB_LEAK_DETECTION_THRESHOLD ` | 60000 (ms)     | Connection timeout (60s)            |
+| Variable                       | Default        | Description                                               |
+|--------------------------------|----------------|-----------------------------------------------------------|
+| `DB_POOL_MAX_SIZE`             | 10             | Maximum connection pool size                              |
+| `DB_POOL_MIN_IDLE`             | 5              | Minimum idle connections                                  |
+| `DB_CONNECTION_TIMEOUT`        | 5000 (ms)      | Fail fast in production (5s)                              |
+| `DB_IDLE_TIMEOUT `             | 120000 (ms)    | Reclaim unused connections faster (2m)                    |
+| `DB_MAX_LIFETIME `             | 1800000 (ms)   | Prevent stale connections (30m)                           |
+| `DB_LEAK_DETECTION_THRESHOLD ` | 60000 (ms)     | Lead to resource exhaustion and application crashes (60s) |
 
 ## Setup Guide
 
