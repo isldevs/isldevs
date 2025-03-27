@@ -35,9 +35,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-src/main/resources/config/.*
-src/main/resources/config/*.env
-config/*.env
-config/*.dev
-config/*.prod
