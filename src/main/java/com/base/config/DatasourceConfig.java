@@ -2,7 +2,10 @@ package com.base.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -19,27 +22,35 @@ import java.util.Properties;
 @Configuration
 public class DatasourceConfig {
 
-    private final Environment env;
+    private final Dotenv env;
 
-    public DatasourceConfig(Environment env) {
-        this.env = env;
+    @Autowired
+    public DatasourceConfig(Environment environment) {
+        String activeProfile = environment.getActiveProfiles()[0];
+        this.env = Dotenv.configure()
+                .directory("./config")
+                .filename("." + activeProfile)
+                .ignoreIfMissing()
+                .load();
     }
+
 
     @Bean
     public DataSource dataSource() {
+
         HikariConfig config = new HikariConfig();
 
-        config.setJdbcUrl(env.getRequiredProperty("DB_URL"));
-        config.setUsername(env.getRequiredProperty("DB_USERNAME"));
-        config.setPassword(env.getRequiredProperty("DB_PASSWORD"));
-        config.setDriverClassName(env.getRequiredProperty("DB_DRIVER_CLASS"));
+        config.setJdbcUrl(env.get("DB_URL"));
+        config.setUsername(env.get("DB_USERNAME"));
+        config.setPassword(env.get("DB_PASSWORD"));
+        config.setDriverClassName(env.get("DB_DRIVER_CLASS"));
 
-        config.setMaximumPoolSize(Integer.parseInt(env.getProperty("DB_POOL_MAX_SIZE", String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
-        config.setMinimumIdle(Integer.parseInt(env.getProperty("DB_POOL_MIN_IDLE", String.valueOf(config.getMaximumPoolSize() / 2))));
-        config.setConnectionTimeout(Long.parseLong(env.getProperty("DB_CONNECTION_TIMEOUT", "5000"))); // 5s
-        config.setIdleTimeout(Long.parseLong(env.getProperty("DB_IDLE_TIMEOUT", "120000"))); // 2m
-        config.setMaxLifetime(Long.parseLong(env.getProperty("DB_MAX_LIFETIME", "1800000"))); // 30m
-        config.setLeakDetectionThreshold(Long.parseLong(env.getProperty("DB_LEAK_DETECTION_THRESHOLD", "60000"))); // 60s
+        config.setMaximumPoolSize(Integer.parseInt(env.get("DB_POOL_MAX_SIZE", String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
+        config.setMinimumIdle(Integer.parseInt(env.get("DB_POOL_MIN_IDLE", String.valueOf(config.getMaximumPoolSize() / 2))));
+        config.setConnectionTimeout(Long.parseLong(env.get("DB_CONNECTION_TIMEOUT", "5000"))); // 5s
+        config.setIdleTimeout(Long.parseLong(env.get("DB_IDLE_TIMEOUT", "120000"))); // 2m
+        config.setMaxLifetime(Long.parseLong(env.get("DB_MAX_LIFETIME", "1800000"))); // 30m
+        config.setLeakDetectionThreshold(Long.parseLong(env.get("DB_LEAK_DETECTION_THRESHOLD", "60000"))); // 60s
 
         if (config.getDriverClassName().contains("postgresql")) {
             config.addDataSourceProperty("prepStmtCacheSize", "250");
@@ -78,10 +89,10 @@ public class DatasourceConfig {
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.setProperty("hibernate.hbm2ddl.auto", env.getProperty("HIBERNATE_DDL_AUTO", "validate"));
-        properties.setProperty("hibernate.show_sql", env.getProperty("HIBERNATE_SHOW_SQL", "false"));
-        properties.setProperty("hibernate.format_sql", env.getProperty("HIBERNATE_FORMAT_SQL", "true"));
+        properties.setProperty("hibernate.dialect", env.get("HIBERNATE_DIALECT", "org.hibernate.dialect.PostgreSQLDialect"));
+        properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO", "validate"));
+        properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL", "false"));
+        properties.setProperty("hibernate.format_sql", env.get("HIBERNATE_FORMAT_SQL", "true"));
         return properties;
     }
 

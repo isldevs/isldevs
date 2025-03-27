@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+src/main/resources/config/.dev
+src/main/resources/config/.prod

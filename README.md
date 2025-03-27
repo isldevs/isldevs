@@ -123,3 +123,57 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
    | `DB_DRIVER_CLASS` | `yourdriverclassname`                  | 
 
    - Click **Apply** → **Run**
+
+# Environment Configuration
+## Set Spring Profile
+
+application.properties
+```bash
+spring.profiles.active=dev
+spring.env.file=classpath:config/.dev
+
+#spring.profiles.active=prod
+#spring.env.file:classpath:config/.prod
+```
+
+## Development
+resources/config/.dev
+```
+DB_URL=jdbc:{youurl}://localhost:{port}}/db
+DB_USERNAME=youruser
+DB_PASSWORD=yourpass
+DB_DRIVER_CLASS=yourdriverclassname
+
+DB_POOL_MAX_SIZE=15
+DB_POOL_MIN_IDLE=5
+DB_CONNECTION_TIMEOUT=30000
+DB_IDLE_TIMEOUT=600000
+DB_MAX_LIFETIME=1800000
+DB_LEAK_DETECTION_THRESHOLD=0
+
+HIBERNATE_DIALECT=yourhibernatedialect
+HIBERNATE_DDL_AUTO=update
+HIBERNATE_SHOW_SQL=true
+HIBERNATE_FORMAT_SQL=true
+```
+
+## Production
+resources/config/.prod
+```
+DB_URL=jdbc:{youurl}://localhost:{port}}/db
+DB_USERNAME=youruser
+DB_PASSWORD=yourpass
+DB_DRIVER_CLASS=yourdriverclassname
+
+DB_POOL_MAX_SIZE=25
+DB_POOL_MIN_IDLE=10
+DB_CONNECTION_TIMEOUT=5000
+DB_IDLE_TIMEOUT=120000
+DB_MAX_LIFETIME=900000
+DB_LEAK_DETECTION_THRESHOLD=60000
+
+HIBERNATE_DIALECT=yourhibernatedialect
+HIBERNATE_DDL_AUTO=validate
+HIBERNATE_SHOW_SQL=false
+HIBERNATE_FORMAT_SQL=true
+```
