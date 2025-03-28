@@ -1,7 +1,7 @@
-package com.base.config.core.service;
+package com.base.config.core.authentication.service;
 
-import com.base.config.core.model.User;
-import com.base.config.core.repository.UserRepository;
+import com.base.config.core.authentication.model.User;
+import com.base.config.core.authentication.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

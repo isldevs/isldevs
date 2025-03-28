@@ -1,4 +1,4 @@
-package com.base.config.core.model;
+package com.base.config.core.authentication.model;
 
 import jakarta.persistence.*;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -15,7 +15,7 @@ public class Authority extends AbstractPersistable<Long> {
     private Role role;
 
     @Column(nullable = false)
-    private String authority; // Example: "READ_PRIVILEGES", "WRITE_PRIVILEGES"
+    private String authority;
 
     protected Authority() {
     }

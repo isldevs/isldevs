@@ -1,4 +1,4 @@
-package com.base.config.core.model;
+package com.base.config.core.authentication.model;
 
 import jakarta.persistence.*;
 import org.springframework.data.jpa.domain.AbstractPersistable;

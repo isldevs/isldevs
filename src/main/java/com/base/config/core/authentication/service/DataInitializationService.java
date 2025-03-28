@@ -1,10 +1,12 @@
-package com.base.config.core.service;
+package com.base.config.core.authentication.service;
 
-import com.base.config.core.model.Authority;
-import com.base.config.core.model.Role;
-import com.base.config.core.model.User;
+import com.base.config.core.authentication.model.Authority;
+import com.base.config.core.authentication.model.Role;
+import com.base.config.core.authentication.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,17 @@ import java.util.List;
 @Service
 public class DataInitializationService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final static Logger LOGGER = LoggerFactory.getLogger(DataInitializationService.class);
+
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    public DataInitializationService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Transactional
     public void dataInitialization() {
@@ -56,6 +64,7 @@ public class DataInitializationService {
                     .isAccountNonLocked(true)
                     .build();
             entityManager.persist(adminUser);
+            LOGGER.info("Data initialization insert successfully");
         }
     }
 }

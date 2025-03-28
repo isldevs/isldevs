@@ -10,6 +10,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -55,15 +57,21 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/.well-known/openid-configuration",
-                                "/.well-known/oauth-authorization-server",
-                                "/oauth2/jwks")
+                                "/api/.well-known/openid-configuration",
+                                "/api/.well-known/oauth-authorization-server",
+                                "/api/oauth2/jwks",
+                                "/api/oauth2/token",
+                                "/api/oauth2/authorize",
+                                "/api/oauth2/introspect",
+                                "/api/oauth2/revoke"
+                        )
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults());
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 
@@ -79,8 +87,8 @@ public class SecurityConfig {
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                     .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                    .redirectUri("http://127.0.0.1:8080/login/oauth2/code/client")
-                    .postLogoutRedirectUri("http://127.0.0.1:8080/logged-out")
+                    .redirectUri("http://127.0.0.1:8080/api/login/oauth2/code/client")
+                    .postLogoutRedirectUri("http://127.0.0.1:8080/api/logged-out")
                     .scope("read")
                     .scope("write")
                     .scope("openid")
@@ -104,7 +112,7 @@ public class SecurityConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-                .issuer("http://127.0.0.1:8080")
+                .issuer("http://127.0.0.1:8080/api")
                 .build();
     }
 
