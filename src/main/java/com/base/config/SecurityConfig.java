@@ -1,5 +1,6 @@
 package com.base.config;
 
+import com.base.config.core.authentication.service.CustomTokenResponseHandler;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -47,32 +48,48 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
-        return http.formLogin(Customizer.withDefaults()).build();
+
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults())
+                .tokenEndpoint(token -> token.accessTokenResponseHandler(new CustomTokenResponseHandler()));
+        return http.build();
     }
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain resourceServerFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
+                .securityMatcher("/api/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/.well-known/openid-configuration",
-                                "/api/.well-known/oauth-authorization-server",
-                                "/api/oauth2/jwks",
-                                "/api/oauth2/token",
-                                "/api/oauth2/authorize",
-                                "/api/oauth2/introspect",
-                                "/api/oauth2/revoke"
-                        )
-                        .permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasRole("USER")
+                                "/api/public/**",
+                                "/api/.well-known/**"
+                        ).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
+                .oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(opaque -> opaque
+                        .introspectionUri("http://localhost:8080/api/oauth2/introspect")
+                        .introspectionClientCredentials("client", "secret"))
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         return http.build();
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder()
+                .issuer("http://localhost:8080/api")
+                .authorizationEndpoint("/oauth2/authorize")
+                .tokenEndpoint("/oauth2/token")
+                .tokenIntrospectionEndpoint("/oauth2/introspect")
+                .tokenRevocationEndpoint("/oauth2/revoke")
+                .jwkSetEndpoint("/.well-known/jwks.json")
+                .oidcUserInfoEndpoint("/oauth2/userinfo")
+                .build();
     }
 
     @Bean
@@ -83,52 +100,29 @@ public class SecurityConfig {
                     .clientId("client")
                     .clientSecret(passwordEncoder.encode("secret"))
                     .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                     .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                    .redirectUri("http://127.0.0.1:8080/api/login/oauth2/code/client")
-                    .postLogoutRedirectUri("http://127.0.0.1:8080/api/logged-out")
-                    .scope("read")
-                    .scope("write")
+                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                    .redirectUri("http://localhost:8080/api/login/oauth2/code/client")
+                    .postLogoutRedirectUri("http://localhost:8080/api/logged-out")
                     .scope("openid")
+                    .scope("profile")
+                    .scope("offline_access")
                     .clientSettings(ClientSettings.builder()
-                            .requireAuthorizationConsent(true)
+                            .requireAuthorizationConsent(false)
                             .requireProofKey(false)
                             .build())
-                    .tokenSettings(TokenSettings.builder()
-                            .accessTokenTimeToLive(Duration.ofHours(1))
-                            .refreshTokenTimeToLive(Duration.ofDays(30))
-                            .reuseRefreshTokens(true)
-                            .build())
+                    .tokenSettings(tokenSettings())
                     .build();
 
             registeredClientRepository.save(client);
         }
-
         return registeredClientRepository;
-    }
-
-    @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                .issuer("http://127.0.0.1:8080/api")
-                .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-    }
-
-    @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
     }
 
     @Bean
@@ -149,15 +143,35 @@ public class SecurityConfig {
     }
 
     private static KeyPair generateRsaKey() {
-        KeyPair keyPair;
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
-            keyPair = keyPairGenerator.generateKeyPair();
+            return keyPairGenerator.generateKeyPair();
         } catch (Exception ex) {
-            throw new IllegalStateException(ex);
+            throw new IllegalStateException("Failed to generate RSA key pair", ex);
         }
-        return keyPair;
     }
 
+    @Bean
+    public OAuth2AuthorizationService authorizationService(
+            JdbcTemplate jdbcTemplate,
+            RegisteredClientRepository clientRepository) {
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, clientRepository);
+    }
+
+    @Bean
+    public OAuth2AuthorizationConsentService authorizationConsentService(
+            JdbcTemplate jdbcTemplate,
+            RegisteredClientRepository clientRepository) {
+        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, clientRepository);
+    }
+
+    @Bean
+    public TokenSettings tokenSettings() {
+        return TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofMinutes(30))
+                .refreshTokenTimeToLive(Duration.ofDays(1))
+                .reuseRefreshTokens(false)
+                .build();
+    }
 }
