@@ -59,6 +59,8 @@ public class SecurityConfig {
                                 "/.well-known/oauth-authorization-server",
                                 "/oauth2/jwks")
                         .permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(Customizer.withDefaults());

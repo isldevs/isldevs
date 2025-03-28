@@ -1,25 +1,20 @@
 package com.base.config.core.model;
 
-
 import jakarta.persistence.*;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
  */
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class User extends AbstractPersistable<Long> implements UserDetails {
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -30,16 +25,34 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Authority> authorities = new HashSet<>();
+    @Column(nullable = false)
+    private boolean isAccountNonExpired;
 
-    protected User() {}
+    @Column(nullable = false)
+    private boolean isAccountNonLocked;
+
+    @Column(nullable = false)
+    private boolean isCredentialsNonExpired;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    protected User() {
+    }
 
     public User(Builder builder) {
         this.username = builder.username;
         this.password = builder.password;
         this.enabled = builder.enabled;
-        this.authorities = builder.authorities;
+        this.isAccountNonExpired = builder.isAccountNonExpired;
+        this.isAccountNonLocked = builder.isAccountNonLocked;
+        this.isCredentialsNonExpired = builder.isCredentialsNonExpired;
+        this.roles = builder.roles;
     }
 
     public static Builder builder() {
@@ -51,7 +64,10 @@ public class User implements UserDetails {
         private String username;
         private String password;
         private boolean enabled;
-        private Set<Authority> authorities;
+        private boolean isAccountNonExpired;
+        private boolean isAccountNonLocked;
+        private boolean isCredentialsNonExpired;
+        private Set<Role> roles;
 
         public User build() {
             return new User(this);
@@ -72,25 +88,33 @@ public class User implements UserDetails {
             return this;
         }
 
-        public Builder authorities(Set<Authority> authorities) {
-            this.authorities = authorities;
+        public Builder isAccountNonExpired(boolean accountNonExpired) {
+            isAccountNonExpired = accountNonExpired;
+            return this;
+        }
+
+        public Builder isAccountNonLocked(boolean accountNonLocked) {
+            isAccountNonLocked = accountNonLocked;
+            return this;
+        }
+
+        public Builder isCredentialsNonExpired(boolean credentialsNonExpired) {
+            isCredentialsNonExpired = credentialsNonExpired;
+            return this;
+        }
+
+        public Builder roles(Set<Role> roles) {
+            this.roles = roles;
             return this;
         }
     }
 
-    public void addAuthority(String authority) {
-        this.authorities.add(
-                Authority.builder()
-                        .user(this)
-                        .username(this.username)
-                        .authority(authority)
-                        .build()
-        );
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return roles.stream()
+                .flatMap(role -> role.getAuthorities().stream())
+                .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -105,21 +129,25 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return this.isAccountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.isAccountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return this.isCredentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
     }
 }

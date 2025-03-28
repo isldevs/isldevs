@@ -1,34 +1,27 @@
 package com.base.config.core.model;
 
-
 import jakarta.persistence.*;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * @author YISivlay
  */
 @Entity
 @Table(name = "authorities")
-public class Authority {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Authority extends AbstractPersistable<Long> {
 
     @ManyToOne
-    @JoinColumn(name = "username", referencedColumnName = "username", insertable = false, updatable = false)
-    private User user;
-
-    @Column(name = "username", nullable = false)
-    private String username;
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Column(nullable = false)
-    private String authority;
+    private String authority; // Example: "READ_PRIVILEGES", "WRITE_PRIVILEGES"
 
-    protected Authority() {}
+    protected Authority() {
+    }
 
     public Authority(Builder builder) {
-        this.user = builder.user;
-        this.username = builder.username;
+        this.role = builder.role;
         this.authority = builder.authority;
     }
 
@@ -38,21 +31,15 @@ public class Authority {
 
     public static class Builder {
 
-        private User user;
-        private String username;
+        private Role role;
         private String authority;
 
         public Authority build() {
             return new Authority(this);
         }
 
-        public Builder user(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public Builder username(String username) {
-            this.username = username;
+        public Builder role(Role role) {
+            this.role = role;
             return this;
         }
 
@@ -62,16 +49,8 @@ public class Authority {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getUsername() {
-        return username;
+    public Role getRole() {
+        return role;
     }
 
     public String getAuthority() {
