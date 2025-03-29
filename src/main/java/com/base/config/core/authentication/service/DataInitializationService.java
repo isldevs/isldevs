@@ -36,17 +36,17 @@ public class DataInitializationService {
 
     @Transactional
     public void dataInitialization() {
-        List<Role> adminRoleList = entityManager.createQuery("SELECT r FROM Role r WHERE r.name = 'ROLE_ADMIN'", Role.class).getResultList();
+        List<Role> adminRoleList = entityManager.createQuery("SELECT r FROM Role r WHERE r.name = 'ADMIN'", Role.class).getResultList();
         Role adminRole = adminRoleList.isEmpty() ? null : adminRoleList.getFirst();
         if (adminRole == null) {
-            adminRole = Role.builder().name("ROLE_ADMIN").build();
+            adminRole = Role.builder().name("ADMIN").build();
             entityManager.persist(adminRole);
         }
 
-        List<Authority> adminFullAccessList = entityManager.createQuery("SELECT a FROM Authority a WHERE a.authority = 'ADMIN_FULL_ACCESS'", Authority.class).getResultList();
+        List<Authority> adminFullAccessList = entityManager.createQuery("SELECT a FROM Authority a WHERE a.authority = 'FULL_ACCESS'", Authority.class).getResultList();
         Authority adminFullAccess = adminFullAccessList.isEmpty() ? null : adminFullAccessList.getFirst();
         if (adminFullAccess == null) {
-            adminFullAccess = Authority.builder().role(adminRole).authority("ADMIN_FULL_ACCESS").build();
+            adminFullAccess = Authority.builder().role(adminRole).authority("FULL_ACCESS").build();
             entityManager.persist(adminFullAccess);
         }
 

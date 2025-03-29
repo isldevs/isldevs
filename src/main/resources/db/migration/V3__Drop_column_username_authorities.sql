@@ -1,1 +1,0 @@
-ALTER TABLE authorities DROP COLUMN username;
