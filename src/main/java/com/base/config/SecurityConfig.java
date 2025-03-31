@@ -1,5 +1,6 @@
 package com.base.config;
 
+import com.base.config.core.authentication.service.CustomOAuth2RefreshTokenGenerator;
 import com.base.config.core.authentication.service.CustomTokenResponseHandler;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -20,36 +21,39 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2TokenEndpointConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -61,18 +65,21 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
 
+
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(oidc -> oidc.clientRegistrationEndpoint(Customizer.withDefaults()).userInfoEndpoint(Customizer.withDefaults()))
-                .tokenEndpoint(token -> token.accessTokenResponseHandler(new CustomTokenResponseHandler()));
-
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http, JdbcTemplate jdbcTemplate) throws Exception {
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         return http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/oauth2/token", "/api/v1/oauth2/introspect"))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .with(authorizationServerConfigurer, (authorizationServer) ->
+                        authorizationServer
+                                .registeredClientRepository(registeredClientRepository(jdbcTemplate, passwordEncoder()))
+                                .authorizationService(authorizationService(jdbcTemplate, registeredClientRepository(jdbcTemplate, passwordEncoder())))
+                                .authorizationConsentService(authorizationConsentService(jdbcTemplate, registeredClientRepository(jdbcTemplate, passwordEncoder())))
+                                .authorizationServerSettings(authorizationServerSettings())
+                                .tokenGenerator(tokenGenerator())
+                                .oidc(Customizer.withDefaults()))
                 .build();
     }
 
@@ -104,11 +111,15 @@ public class SecurityConfig {
         return AuthorizationServerSettings.builder()
                 .issuer(issuerUri)
                 .authorizationEndpoint("/oauth2/authorize")
+                .deviceAuthorizationEndpoint("/oauth2/device_authorization")
+                .deviceVerificationEndpoint("/oauth2/device_verification")
                 .tokenEndpoint("/oauth2/token")
                 .tokenIntrospectionEndpoint("/oauth2/introspect")
                 .tokenRevocationEndpoint("/oauth2/revoke")
-                .jwkSetEndpoint("/.well-known/jwks.json")
-                .oidcUserInfoEndpoint("/oauth2/userinfo")
+                .jwkSetEndpoint("/oauth2/jwks")
+                .oidcLogoutEndpoint("/connect/logout")
+                .oidcUserInfoEndpoint("/connect/userinfo")
+                .oidcClientRegistrationEndpoint("/connect/register")
                 .build();
     }
 
@@ -151,6 +162,7 @@ public class SecurityConfig {
                         .refreshTokenTimeToLive(Duration.ofDays(7))
                         .reuseRefreshTokens(false)
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                        .x509CertificateBoundAccessTokens(true)
                         .build())
                 .build();
     }
@@ -227,6 +239,69 @@ public class SecurityConfig {
         return new NimbusJwtDecoder(jwtProcessor);
     }
 
+    @Bean
+    public OAuth2TokenGenerator<?> tokenGenerator() {
+        var jwtGenerator = new JwtGenerator(new NimbusJwtEncoder(jwkSource()));
+        jwtGenerator.setJwtCustomizer(jwtCustomizer());
+        OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
+        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        return new DelegatingOAuth2TokenGenerator(jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
+    }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
+        final Map<String, String> clientSpecificClaims = Map.of(
+                "web-app", "web-app",
+                "service-account", "service-account",
+                "microservice", "microservice",
+                "iot-device", "iot-device"
+        );
+
+        return context -> {
+            if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
+                try {
+                    Authentication principal = context.getPrincipal();
+                    context.getClaims()
+                            .subject(principal.getName())
+                            .claim("user_id", principal.getName())
+                            .claim("client_id", context.getAuthorizationGrant().getName())
+                            .claim("scopes", context.getAuthorizedScopes())
+                            .claim("issued_at", Instant.now().toString())
+                            .claim("grant_type", context.getAuthorizationGrantType().getValue());
+
+                    List<String> authorities = principal.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    context.getClaims().claim("authorities", authorities);
+
+                    String clientId = context.getAuthorizationGrant().getName();
+                    if (clientSpecificClaims.containsKey(clientId)) {
+                        context.getClaims().claim("special_claim", clientSpecificClaims.get(clientId));
+                    }
+
+                    if (context.getAuthorizedScopes().contains("read")) {
+                        context.getClaims().claim("can_read", true);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error customizing access token claims: " + e.getMessage());
+
+                }
+            } else if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
+                try {
+                    Authentication principal = context.getPrincipal();
+                    context.getClaims().subject(principal.getName()).claim("user_id", principal.getName());
+                    List<String> authorities = principal.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    context.getClaims().claim("authorities", authorities);
+                } catch (Exception e) {
+                    System.err.println("Error customizing id token claims: " + e.getMessage());
+                }
+            }
+        };
+    }
+
+
     private static RSAKey generateRsa() {
         KeyPair keyPair = generateRsaKey();
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
@@ -259,5 +334,15 @@ public class SecurityConfig {
             JdbcTemplate jdbcTemplate,
             RegisteredClientRepository clientRepository) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, clientRepository);
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }

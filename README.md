@@ -1,12 +1,12 @@
 # Tomcat SSL Configuration Guide
 
 ## Overview
-This document explains how to configure SSL/TLS for the embedded Tomcat server in the iSLDevs application using Spring Boot 3.2.4.
+This document explains how to configure SSL/TLS for the embedded Tomcat server in the iSLDevs application using Spring Boot 3.4.4.
 
 ## Prerequisites
-- Java 17+
-- Spring Boot 3.2.4
-- Tomcat 10.1.x (embedded with Spring Boot 3.2.4)
+- Java 21
+- Spring Boot 3.4.4
+- Tomcat 10.1.x (embedded with Spring Boot 3.4.4)
 - Valid SSL certificate (or self-signed for development)
 
 ## Certificate Generation
@@ -34,7 +34,7 @@ Java configuration class:
 
 # Database Configuration
 
-This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using environment variables instead of property files, following security best practices.
+This project demonstrates how to configure PostgreSQL in Spring Boot 3.4.4 using environment variables instead of property files, following security best practices.
 
 ## Features
 
@@ -45,9 +45,9 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
 
 ## Prerequisites
 
-- Java 17+
-- Spring Boot 3.2.4
-- MySQL 8.0 / PostgreSQL 12+
+- Java 21
+- Spring Boot 3.4.4
+- MySQL 8.0 / PostgreSQL 16.8
 - Maven/Gradle
 
 ## Configuration

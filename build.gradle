@@ -1,9 +1,9 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.2.4'
+	id 'org.springframework.boot' version '3.4.4'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.graalvm.buildtools.native' version '0.10.5'
-	id "org.flywaydb.flyway" version "9.22.0"
+	id "org.flywaydb.flyway" version "9.22.3"
 }
 
 group = 'com.base'
@@ -22,9 +22,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.security:spring-security-cas'
-	implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.2.3'
+	implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-core:9.22.3'
 	implementation 'io.github.cdimascio:dotenv-java:3.2.0'
 	implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
 
