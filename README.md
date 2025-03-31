@@ -113,10 +113,10 @@ This project demonstrates how to configure PostgreSQL in Spring Boot 3.2.4 using
 
 2. **Add Environment Variables**
    - Select your Spring Boot application
-     - Go to **Environment** tab → **Add**:
+      - Go to **Environment** tab → **Add**:
 
    | Name              | Value                                  |
-   |-------------------|----------------------------------------|
+      |-------------------|----------------------------------------|
    | `DB_URL`          | `jdbc:{youurl}://localhost:{port}}/db` |
    | `DB_USERNAME`     | `youruser`                             |
    | `DB_PASSWORD`     | `yourpass`                             | 
@@ -177,3 +177,205 @@ HIBERNATE_DDL_AUTO=validate
 HIBERNATE_SHOW_SQL=false
 HIBERNATE_FORMAT_SQL=true
 ```
+# Spring Boot OAuth 2.1 Authorization Server Testing with Postman (Client ID Flows)
+
+This provides specific Postman endpoint configurations for testing each client ID flow.
+
+## Prerequisites
+
+* **Postman:** Download and install Postman from [www.postman.com](https://www.postman.com/).
+* **Running Application:** Ensure your Spring Boot application is running and accessible.
+* **Environment Variables (Optional):** Consider setting up Postman environment variables for host, port, and client secrets.
+
+## Client ID Flows and Postman Endpoints
+
+Here are the Postman endpoints for each client ID flow:
+
+### 1. Web/Mobile App Client (Authorization Code + PKCE)
+
+* **Client ID:** `{client-id}`
+* **Grant Type:** Authorization Code with PKCE
+
+   * **Authorization Endpoint:**
+      * **Method:** `GET`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/authorize`
+      * **Query Parameters:**
+         * `response_type`: `code`
+         * `client_id`: `{client-id}`
+         * `redirect_uri`: `http://{your-redirect-uri}:{port}/login/oauth2/code/client`
+         * `scope`: `openid profile email`
+         * `code_challenge`: `{code_challenge}` (Generate using PKCE; see PKCE generation below)
+         * `code_challenge_method`: `S256`
+         * `state`: `{state}` (Optional; recommended for security)
+
+   * **Token Endpoint (Authorization Code):**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `authorization_code`
+         * `code`: `{authorization_code}` (Obtained from the Authorization Endpoint redirect)
+         * `redirect_uri`: `http://{your-redirect-uri}:{port}/login/oauth2/code/client`
+         * `client_id`: `{client-id}`
+         * `client_secret`: `{client-secret}`
+         * `code_verifier`: `{code_verifier}` (Generated with the code challenge)
+
+   * **Token Endpoint (Refresh Token):**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `refresh_token`
+         * `refresh_token`: `{refresh_token}` (Obtained from the initial token response)
+         * `client_id`: `{client-id}`
+         * `client_secret`: `{client-secret}`
+
+   * **PKCE Code Generation (JavaScript Example):**
+
+      1.  **Generate Code Verifier:**
+          * Create a random string. It should be between 43 and 128 characters long.
+          * Example (JavaScript):
+
+             ```javascript
+             function generateCodeVerifier() {
+                 const randomString = (Math.random() + 1).toString(36).substring(7);
+                 return randomString;
+             }
+             const codeVerifier = generateCodeVerifier();
+             console.log("Code Verifier:", codeVerifier);
+             ```
+
+      2.  **Generate Code Challenge:**
+          * Hash the code verifier using SHA-256 and base64url-encode the result.
+          * Example (JavaScript):
+
+             ```javascript
+             async function generateCodeChallenge(codeVerifier) {
+                 function base64url(string) {
+                     return btoa(String.fromCharCode.apply(null, new Uint8Array(string)))
+                         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+                 }
+                 const encoder = new TextEncoder();
+                 const data = encoder.encode(codeVerifier);
+                 const digest = await crypto.subtle.digest('SHA-256', data);
+                 return base64url(digest);
+             }
+             generateCodeChallenge(codeVerifier).then(codeChallenge => {
+                 console.log("Code Challenge:", codeChallenge);
+             });
+             ```
+
+      3.  **Use in Authorization Request:**
+          * Send the `code_challenge` and `code_challenge_method=S256` in the authorization endpoint request.
+      4.  **Use Code verifier in Token Request:**
+          * Send the original `code_verifier` in the token endpoint request.
+
+### 2. Machine-to-Machine Client (Client Credentials)
+
+* **Client ID:** `service-account`
+* **Grant Type:** Client Credentials
+
+   * **Token Endpoint:**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `client_credentials`
+         * `client_id`: `{client-id}`
+         * `client_secret`: `{client-secret}`
+         * `scope`: `api.internal monitoring.read`
+
+### 3. Microservice Client (JWT Bearer)
+
+* **Client ID:** `microservice`
+* **Grant Type:** JWT Bearer
+
+   * **Token Endpoint:**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `urn:ietf:params:oauth:grant-type:jwt-bearer`
+         * `assertion`: `{signed_jwt}` (Generated JWT; see JWT creation section)
+         * `client_id`: `{client-id}`
+
+   * **JWT Creation Notes:**
+
+      1.  **Obtain Private Key:**
+          * Retrieve the private key associated with the `microservice` client. This key is used to sign the JWT.
+      2.  **Construct JWT Claims:**
+          * Create a JSON object with the required JWT claims.
+          * Required claims:
+         * `iss` (Issuer): The issuer of the JWT (your authorization server).
+         * `sub` (Subject): The `client_id` (`microservice`).
+         * `aud` (Audience): The token endpoint URL.
+         * `exp` (Expiration Time): The expiration time of the JWT (in seconds since epoch).
+         * `iat` (Issued At): The time the JWT was issued (in seconds since epoch).
+           * Example (JSON):
+
+             ```json
+             {
+                 "iss": "http://{your-authorization-server-host}:{port}",
+                 "sub": "microservice",
+                 "aud": "http://{your-authorization-server-host}:{port}/oauth2/token",
+                 "exp": 1678886400,
+                 "iat": 1678882800
+             }
+             ```
+
+      3.  **Sign the JWT:**
+          * Sign the JWT using the private key and the appropriate algorithm (e.g., RS256).
+          * Libraries in most programming languages can handle this.
+      4.  **Use in Token Request:**
+          * Send the signed JWT as the `assertion` parameter in the token endpoint request.
+### 4. Device Client (TV/IoT)
+
+* **Client ID:** `iot-device`
+* **Grant Type:** Device Code
+
+   * **Device Authorization Endpoint:**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/device_authorization`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `client_id`: `{client-id}`
+         * `scope`: `openid device.manage`
+
+   * **Token Endpoint (Polling):**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `urn:ietf:params:oauth:grant-type:device_code`
+         * `device_code`: `{device_code}` (Obtained from the Device Authorization Endpoint)
+         * `client_id`: `{client-id}`
+         * `client_secret`: `{client-secret}`
+
+   * **Token Endpoint (Refresh Token):**
+      * **Method:** `POST`
+      * **URL:** `http://{your-authorization-server-host}:{port}/oauth2/token`
+      * **Headers:**
+         * `Content-Type`: `application/x-www-form-urlencoded`
+      * **Body (x-www-form-urlencoded):**
+         * `grant_type`: `refresh_token`
+         * `refresh_token`: `{refresh_token}` (Obtained from the initial token response)
+         * `client_id`: `{client-id}`
+         * `client_secret`: `{client-secret}`
+
+## Important Notes
+
+* Replace `{your-authorization-server-host}` and `{port}` with your actual host and port values.
+* The `secret` client secrets are for development purposes only. Use secure storage in production.
+* For the JWT Bearer flow, you'll need to implement JWT creation in your application.
+* For the Device Code flow, be aware of the user interaction required.
+* For all flows, ensure your client secrets are handled securely.
+* Remember to replace any bracketed placeholders with actual values.
+* Ensure that your redirect URIs are correct for your frontend application.
+* Adjust the scopes to match the access requirements of your clients.
+* Be mindful of token expiration times and refresh token usage.

@@ -134,7 +134,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/api/v1/login/oauth2/code/client") // Frontend URL
+                .redirectUri("http://localhost:8080/api/v1/login/oauth2/code/web-app") // Frontend URL
                 .postLogoutRedirectUri("http://localhost:8080/api/v1/logged-out") // Frontend URL
                 .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);

@@ -60,7 +60,7 @@ public class TomcatSSLConfig {
             httpConnector.setPort(8080);
             httpConnector.setSecure(false);
             httpConnector.setRedirectPort(8443);
-            factory.setContextPath("/api");
+            factory.setContextPath("/api/v1");
             factory.addAdditionalTomcatConnectors(httpConnector);
         };
     }
