@@ -10,7 +10,6 @@ import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +29,7 @@ public class TomcatSSLConfig {
                 connector.setSecure(true);
                 connector.setPort(8443);
 
-                Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
+                var protocol = (Http11NioProtocol) connector.getProtocolHandler();
 
                 SSLHostConfig sslHostConfig = new SSLHostConfig();
                 sslHostConfig.setHostName("localhost");
@@ -39,9 +38,9 @@ public class TomcatSSLConfig {
                 sslHostConfig.setCiphers("TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256");
                 sslHostConfig.setHonorCipherOrder(true);
 
-                SSLHostConfigCertificate certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
-                try (InputStream is = getClass().getClassLoader().getResourceAsStream("server.p12")) {
-                    KeyStore ks = KeyStore.getInstance("PKCS12");
+                var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
+                try (var is = getClass().getClassLoader().getResourceAsStream("server.p12")) {
+                    var ks = KeyStore.getInstance("PKCS12");
                     ks.load(is, "isldevs".toCharArray());
 
                     certificate.setCertificateKeystore(ks);
@@ -55,7 +54,7 @@ public class TomcatSSLConfig {
                 sslHostConfig.addCertificate(certificate);
                 protocol.addSslHostConfig(sslHostConfig);
             });
-            Connector httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+            var httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
             httpConnector.setScheme("http");
             httpConnector.setPort(8080);
             httpConnector.setSecure(false);

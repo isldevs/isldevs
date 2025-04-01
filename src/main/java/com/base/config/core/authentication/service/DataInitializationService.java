@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * @author YISivlay
@@ -36,24 +35,24 @@ public class DataInitializationService {
 
     @Transactional
     public void dataInitialization() {
-        List<Role> adminRoleList = entityManager.createQuery("SELECT r FROM Role r WHERE r.name = 'ADMIN'", Role.class).getResultList();
-        Role adminRole = adminRoleList.isEmpty() ? null : adminRoleList.getFirst();
+        var adminRoleList = entityManager.createQuery("SELECT r FROM Role r WHERE r.name = 'ADMIN'", Role.class).getResultList();
+        var adminRole = adminRoleList.isEmpty() ? null : adminRoleList.getFirst();
         if (adminRole == null) {
             adminRole = Role.builder().name("ADMIN").build();
             entityManager.persist(adminRole);
         }
 
-        List<Authority> adminFullAccessList = entityManager.createQuery("SELECT a FROM Authority a WHERE a.authority = 'FULL_ACCESS'", Authority.class).getResultList();
-        Authority adminFullAccess = adminFullAccessList.isEmpty() ? null : adminFullAccessList.getFirst();
+        var adminFullAccessList = entityManager.createQuery("SELECT a FROM Authority a WHERE a.authority = 'FULL_ACCESS'", Authority.class).getResultList();
+        var adminFullAccess = adminFullAccessList.isEmpty() ? null : adminFullAccessList.getFirst();
         if (adminFullAccess == null) {
             adminFullAccess = Authority.builder().role(adminRole).authority("FULL_ACCESS").build();
             entityManager.persist(adminFullAccess);
         }
 
-        List<User> adminUserList = entityManager.createQuery("SELECT u FROM User u WHERE u.username = 'admin'", User.class).getResultList();
-        User adminUser = adminUserList.isEmpty() ? null : adminUserList.getFirst();
+        var adminUserList = entityManager.createQuery("SELECT u FROM User u WHERE u.username = 'admin'", User.class).getResultList();
+        var adminUser = adminUserList.isEmpty() ? null : adminUserList.getFirst();
         if (adminUser == null) {
-            String encodedPassword = passwordEncoder.encode("admin@2025!");
+            var encodedPassword = passwordEncoder.encode("admin@2025!");
             adminUser = User.builder()
                     .username("admin")
                     .password(encodedPassword)

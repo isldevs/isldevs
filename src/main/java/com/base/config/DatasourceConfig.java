@@ -25,7 +25,7 @@ public class DatasourceConfig {
 
     @Autowired
     public DatasourceConfig(Environment environment) {
-        String activeProfile = environment.getActiveProfiles()[0];
+        var activeProfile = environment.getActiveProfiles()[0];
         this.env = Dotenv.configure()
                 .directory("./config")
                 .filename("." + activeProfile)
@@ -37,7 +37,7 @@ public class DatasourceConfig {
     @Bean
     public DataSource dataSource() {
 
-        HikariConfig config = new HikariConfig();
+        var config = new HikariConfig();
 
         config.setJdbcUrl(env.get("DB_URL"));
         config.setUsername(env.get("DB_USERNAME"));
@@ -68,7 +68,7 @@ public class DatasourceConfig {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        var em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
         em.setPackagesToScan("com.base");
 
@@ -81,13 +81,13 @@ public class DatasourceConfig {
 
     @Bean
     public JpaTransactionManager transactionManager() {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        var transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         return transactionManager;
     }
 
     private Properties hibernateProperties() {
-        Properties properties = new Properties();
+        var properties = new Properties();
         properties.setProperty("hibernate.dialect", env.get("HIBERNATE_DIALECT", "org.hibernate.dialect.PostgreSQLDialect"));
         properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO", "validate"));
         properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL", "false"));
@@ -98,7 +98,7 @@ public class DatasourceConfig {
     @Bean
     public Flyway flyway(DataSource dataSource) {
 
-        Flyway flyway = Flyway.configure()
+        var flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/migration")
                 .baselineVersion("1")

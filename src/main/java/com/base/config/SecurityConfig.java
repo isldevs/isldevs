@@ -1,7 +1,5 @@
 package com.base.config;
 
-import com.base.config.core.authentication.service.CustomOAuth2RefreshTokenGenerator;
-import com.base.config.core.authentication.service.CustomTokenResponseHandler;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -9,7 +7,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +18,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -38,7 +34,6 @@ import org.springframework.security.oauth2.server.authorization.client.JdbcRegis
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2TokenEndpointConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -69,7 +64,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http, JdbcTemplate jdbcTemplate) throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
+        var authorizationServerConfigurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         return http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .with(authorizationServerConfigurer, (authorizationServer) ->
@@ -88,9 +83,9 @@ public class SecurityConfig {
     public SecurityFilterChain resourceServerFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/v1/**")
-                .formLogin(AbstractHttpConfigurer::disable) // Disable form login for pure API
-                .httpBasic(AbstractHttpConfigurer::disable) // Disable basic auth
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless API
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -125,7 +120,7 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate, PasswordEncoder encoder) {
-        JdbcRegisteredClientRepository repository = new JdbcRegisteredClientRepository(jdbcTemplate);
+        var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
         Stream.of(webClient(encoder), serviceClient(encoder), microserviceClient(), deviceClient(encoder))
                 .forEach(client -> {
                     if (repository.findByClientId(client.getClientId()) == null) {
@@ -136,7 +131,6 @@ public class SecurityConfig {
         return repository;
     }
 
-    //  Web/Mobile App Client (Authorization Code + PKCE)
     @Bean
     public RegisteredClient webClient(PasswordEncoder encoder) {
         return RegisteredClient.withId(UUID.randomUUID().toString())
@@ -167,7 +161,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    //Machine-to-Machine Client (Client Credentials)
     @Bean
     public RegisteredClient serviceClient(PasswordEncoder encoder) {
         return RegisteredClient.withId(UUID.randomUUID().toString())
@@ -185,7 +178,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    //Microservice Client (JWT Bearer)
     @Bean
     public RegisteredClient microserviceClient() {
         return RegisteredClient.withId(UUID.randomUUID().toString())
@@ -194,7 +186,7 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
                 .scope("api.write")
                 .clientSettings(ClientSettings.builder()
-                        .jwkSetUrl(issuerUri + "/.well-known/jwks.json") // Local JWKS
+                        .jwkSetUrl(issuerUri + "/.well-known/jwks.json")
                         .build())
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
@@ -202,7 +194,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    //Device Client (TV/IoT)
     @Bean
     public RegisteredClient deviceClient(PasswordEncoder encoder) {
         return RegisteredClient.withId(UUID.randomUUID().toString())
@@ -226,14 +217,14 @@ public class SecurityConfig {
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
-        RSAKey rsaKey = generateRsa();
-        JWKSet jwkSet = new JWKSet(rsaKey);
+        var rsaKey = generateRsa();
+        var jwkSet = new JWKSet(rsaKey);
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
 
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+        var jwtProcessor = new DefaultJWTProcessor<>();
         jwtProcessor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, jwkSource));
         jwtProcessor.setJWTClaimsSetVerifier(new DefaultJWTClaimsVerifier<>(new JWTClaimsSet.Builder().issuer(issuerUri).build(), new HashSet<>(Arrays.asList("sub", "iat", "exp"))));
         return new NimbusJwtDecoder(jwtProcessor);
@@ -243,14 +234,14 @@ public class SecurityConfig {
     public OAuth2TokenGenerator<?> tokenGenerator() {
         var jwtGenerator = new JwtGenerator(new NimbusJwtEncoder(jwkSource()));
         jwtGenerator.setJwtCustomizer(jwtCustomizer());
-        OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
-        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        var accessTokenGenerator = new OAuth2AccessTokenGenerator();
+        var refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
         return new DelegatingOAuth2TokenGenerator(jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
     }
 
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-        final Map<String, String> clientSpecificClaims = Map.of(
+        final var clientSpecificClaims = Map.of(
                 "web-app", "web-app",
                 "service-account", "service-account",
                 "microservice", "microservice",
@@ -260,7 +251,7 @@ public class SecurityConfig {
         return context -> {
             if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
                 try {
-                    Authentication principal = context.getPrincipal();
+                    var principal = context.getPrincipal();
                     context.getClaims()
                             .subject(principal.getName())
                             .claim("user_id", principal.getName())
@@ -269,7 +260,7 @@ public class SecurityConfig {
                             .claim("issued_at", Instant.now().toString())
                             .claim("grant_type", context.getAuthorizationGrantType().getValue());
 
-                    List<String> authorities = principal.getAuthorities().stream()
+                    var authorities = principal.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toList());
                     context.getClaims().claim("authorities", authorities);
@@ -288,9 +279,9 @@ public class SecurityConfig {
                 }
             } else if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
                 try {
-                    Authentication principal = context.getPrincipal();
+                    var principal = context.getPrincipal();
                     context.getClaims().subject(principal.getName()).claim("user_id", principal.getName());
-                    List<String> authorities = principal.getAuthorities().stream()
+                    var authorities = principal.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toList());
                     context.getClaims().claim("authorities", authorities);
@@ -303,9 +294,9 @@ public class SecurityConfig {
 
 
     private static RSAKey generateRsa() {
-        KeyPair keyPair = generateRsaKey();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        var keyPair = generateRsaKey();
+        var publicKey = (RSAPublicKey) keyPair.getPublic();
+        var privateKey = (RSAPrivateKey) keyPair.getPrivate();
         return new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
@@ -314,7 +305,7 @@ public class SecurityConfig {
 
     private static KeyPair generateRsaKey() {
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception ex) {
@@ -323,16 +314,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public OAuth2AuthorizationService authorizationService(
-            JdbcTemplate jdbcTemplate,
-            RegisteredClientRepository clientRepository) {
+    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository clientRepository) {
         return new JdbcOAuth2AuthorizationService(jdbcTemplate, clientRepository);
     }
 
     @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService(
-            JdbcTemplate jdbcTemplate,
-            RegisteredClientRepository clientRepository) {
+    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository clientRepository) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, clientRepository);
     }
 

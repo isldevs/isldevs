@@ -25,13 +25,13 @@ public class SpringProfileConfig implements EnvironmentAware {
     }
 
     private void loadEnvFile() {
-        String envFile = env.getProperty("spring.env.file");
-        String profile = env.getProperty("spring.profiles.active");
+        var envFile = env.getProperty("spring.env.file");
+        var profile = env.getProperty("spring.profiles.active");
         if (envFile != null) {
             try {
-                File file = new File(envFile);
+                var file = new File(envFile);
                 if (file.exists()) {
-                    Properties props = new Properties();
+                    var props = new Properties();
                     props.load(new FileInputStream(file));
                     props.forEach((key, value) -> System.setProperty(key.toString(), value.toString()));
                 }
