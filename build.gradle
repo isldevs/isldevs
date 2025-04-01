@@ -84,8 +84,92 @@ if (activeProfile != "dev") {
     }
 }
 
+tasks.register('generateTestClasses') {
+    group = 'Verification'
+    description = 'Generates test class scaffolds'
+
+    inputs.dir(layout.projectDirectory.dir('src/main/java'))
+    outputs.dir(layout.projectDirectory.dir('src/test/java'))
+
+    doLast {
+        def mainJavaDir = file('src/main/java')
+
+        fileTree(mainJavaDir).matching {
+            include '**/*.java'
+            exclude '**/*Test.java', '**/*Tests.java', '**/package-info.java', '**/*Application.java'
+        }.each { sourceFile ->
+            def testFile = file(sourceFile.path
+                    .replace('main/java', 'test/java')
+                    .replace('.java', 'Tests.java'))
+
+            if (!testFile.exists()) {
+                testFile.parentFile.mkdirs()
+
+                // Correct package name calculation
+                def packageName = mainJavaDir.toPath()
+                        .relativize(sourceFile.parentFile.toPath())
+                        .toString()
+                        .replace(File.separator, '.')
+
+                testFile.text = """\
+                    |package ${packageName};
+                    |
+                    |import org.junit.jupiter.api.Test;
+                    |import static org.junit.jupiter.api.Assertions.*;
+                    |
+                    |class ${sourceFile.name.replace('.java', '')}Tests {
+                    |
+                    |    @Test
+                    |    void contextLoads() {
+                    |    }
+                    |}
+                    |""".stripMargin()
+            }
+        }
+    }
+}
+
+tasks.named('compileTestJava') {
+    dependsOn(tasks.named('generateTestClasses'))
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            '-Xlint:-unchecked',
+            '-Xlint:-deprecation',
+            '-Xlint:-processing'
+    ]
+    options.encoding = 'UTF-8'
+}
+
+// Special configuration for AOT compilation
+tasks.named('compileAotJava').configure {
+    options.compilerArgs += [
+            '--add-exports=java.base/sun.nio.ch=ALL-UNNAMED',
+            '-Xlint:none',
+            '-nowarn'
+    ]
+}
+
+graalvmNative {
+    toolchainDetection = false
+    binaries {
+        main {
+            buildArgs.addAll(
+                    '--no-fallback',
+                    '-H:+SuppressWarnings',
+                    '-H:+ReportExceptionStackTraces'
+            )
+        }
+    }
+    metadataRepository {
+        enabled = true
+    }
+}
+
 tasks.named('test', Test) {
     useJUnitPlatform()
+    dependsOn(tasks.named('generateTestClasses'))
     if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
         exclude('**/test/**')
     }
