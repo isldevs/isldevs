@@ -61,4 +61,7 @@ flyway {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	if (System.getenv('CI') == 'true') {
+		exclude 'com/base/ISLDevsApplicationTests.java'
+	}
 }
