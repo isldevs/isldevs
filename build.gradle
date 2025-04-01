@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'war'
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.graalvm.buildtools.native' version '0.10.5'
@@ -139,6 +140,9 @@ licenseFormatTest {
 
 tasks.named('licenseAot') {
     enabled = false
+    exclude '**/.dev'
+    exclude '**/.prod'
+    exclude '**/.env'
     exclude '**/aot*/**'
     exclude '**/*__Generated.java'
     exclude '**/org/springframework/**'
@@ -147,6 +151,9 @@ tasks.named('licenseAot') {
 tasks.named('licenseAotTest') {
     enabled = false
     exclude '**/aot*/**'
+    exclude '**/.dev'
+    exclude '**/.prod'
+    exclude '**/.env'
     exclude '**/*__Generated.java'
     exclude '**/org/springframework/**'
 }
@@ -223,6 +230,40 @@ tasks.withType(JavaCompile).configureEach {
             '-Xlint:-processing'
     ]
     options.encoding = 'UTF-8'
+}
+
+bootWar {
+    archiveClassifier = 'boot'
+    archiveFileName = "${project.name}.war"
+}
+
+bootJar {
+    archiveFileName = "${project.name}.jar"
+    launchScript()
+}
+
+tasks.named('assemble') {
+    dependsOn bootWar, bootJar
+}
+
+war {
+    enabled = true
+    archiveClassifier = ''
+    classpath = classpath.filter { file ->
+        !file.name.contains('spring-boot-starter-tomcat') &&
+                !file.name.contains('spring-boot-starter-jetty') &&
+                !file.name.contains('spring-boot-starter-undertow')
+    }
+}
+
+tasks.named('compileJava', JavaCompile).configure {
+    options.fork = true
+    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US'])
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
 }
 
 tasks.named('test', Test) {
