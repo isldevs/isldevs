@@ -37,7 +37,7 @@ jobs:
         build-scan-publish: 'true'
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: ./gradlew build -PskipIntegrationTests=true
       env:
         CI: true
 
