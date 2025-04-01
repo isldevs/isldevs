@@ -139,8 +139,8 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/api/v1/login/oauth2/code/web-app") // Frontend URL
-                .postLogoutRedirectUri("http://localhost:8080/api/v1/logged-out") // Frontend URL
+                .redirectUri("http://localhost:8080/api/v1/login/oauth2/code/web-app")
+                .postLogoutRedirectUri("http://localhost:8080/api/v1/logged-out")
                 .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);
                     scopes.add(OidcScopes.PROFILE);
@@ -148,7 +148,7 @@ public class SecurityConfig {
                     scopes.add("api.read");
                 })
                 .clientSettings(ClientSettings.builder()
-                        .requireProofKey(true) // Enforce PKCE
+                        .requireProofKey(true)
                         .requireAuthorizationConsent(false)
                         .build())
                 .tokenSettings(TokenSettings.builder()
@@ -156,7 +156,6 @@ public class SecurityConfig {
                         .refreshTokenTimeToLive(Duration.ofDays(7))
                         .reuseRefreshTokens(false)
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
-                        .x509CertificateBoundAccessTokens(true)
                         .build())
                 .build();
     }
@@ -291,7 +290,6 @@ public class SecurityConfig {
             }
         };
     }
-
 
     private static RSAKey generateRsa() {
         var keyPair = generateRsaKey();

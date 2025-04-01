@@ -46,15 +46,15 @@ public class DatasourceConfig {
 
         config.setMaximumPoolSize(Integer.parseInt(env.get("DB_POOL_MAX_SIZE", String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
         config.setMinimumIdle(Integer.parseInt(env.get("DB_POOL_MIN_IDLE", String.valueOf(config.getMaximumPoolSize() / 2))));
-        config.setConnectionTimeout(Long.parseLong(env.get("DB_CONNECTION_TIMEOUT", "5000"))); // 5s
-        config.setIdleTimeout(Long.parseLong(env.get("DB_IDLE_TIMEOUT", "120000"))); // 2m
-        config.setMaxLifetime(Long.parseLong(env.get("DB_MAX_LIFETIME", "1800000"))); // 30m
-        config.setLeakDetectionThreshold(Long.parseLong(env.get("DB_LEAK_DETECTION_THRESHOLD", "60000"))); // 60s
+        config.setConnectionTimeout(Long.parseLong(env.get("DB_CONNECTION_TIMEOUT")));
+        config.setIdleTimeout(Long.parseLong(env.get("DB_IDLE_TIMEOUT")));
+        config.setMaxLifetime(Long.parseLong(env.get("DB_MAX_LIFETIME")));
+        config.setLeakDetectionThreshold(Long.parseLong(env.get("DB_LEAK_DETECTION_THRESHOLD")));
 
         if (config.getDriverClassName().contains("postgresql")) {
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-            config.addDataSourceProperty("socketTimeout", "30"); // 30 seconds
+            config.addDataSourceProperty("socketTimeout", "30");
         }
 
         if (config.getDriverClassName().contains("mysql")) {
@@ -88,10 +88,10 @@ public class DatasourceConfig {
 
     private Properties hibernateProperties() {
         var properties = new Properties();
-        properties.setProperty("hibernate.dialect", env.get("HIBERNATE_DIALECT", "org.hibernate.dialect.PostgreSQLDialect"));
-        properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO", "validate"));
-        properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL", "false"));
-        properties.setProperty("hibernate.format_sql", env.get("HIBERNATE_FORMAT_SQL", "true"));
+        properties.setProperty("hibernate.dialect", env.get("HIBERNATE_DIALECT"));
+        properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO"));
+        properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL"));
+        properties.setProperty("hibernate.format_sql", env.get("HIBERNATE_FORMAT_SQL"));
         return properties;
     }
 
