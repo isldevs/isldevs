@@ -59,10 +59,10 @@ flyway {
 	baselineOnMigrate = true
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
 	useJUnitPlatform()
 	println "project.hasProperty('skipIntegrationTests'): ${project.hasProperty('skipIntegrationTests')}"
-	if (project.hasProperty('skipIntegrationTests') && project.property('skipIntegrationTests') == 'true') {
+	if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
 		exclude 'com/base/ISLDevsApplicationTests.java'
 	}
 }
