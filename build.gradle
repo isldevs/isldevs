@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.graalvm.buildtools.native' version '0.10.5'
     id "org.flywaydb.flyway" version "9.22.3"
+    id "com.github.hierynomus.license" version "0.16.1"
 }
 
 group = 'com.base'
@@ -16,6 +17,13 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
 }
 
 dependencies {
@@ -66,22 +74,97 @@ sourceSets {
     test {
         output.resourcesDir = file("$buildDir/classes/java/test")
     }
-}
-if (activeProfile != "dev") {
-    sourceSets {
-        main {
-            java {
-                srcDirs = ['src/main/java']
-                exclude('**/TomcatSSLConfig.java')
-            }
-        }
-        test {
-            java {
-                srcDirs = ['src/test/java']
-                exclude('**/test/**')
-            }
-        }
+    if (findProperty("spring.profiles.active") != "dev") {
+        main.java.exclude('**/TomcatSSLConfig.java')
+        test.java.exclude('**/test/**')
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            '-parameters',
+            '-Xlint:-unchecked',
+            '-Xlint:-deprecation'
+    ]
+}
+
+license {
+    header = rootProject.file('LICENSE_HEADER')
+    strictCheck = true
+    skipExistingHeaders = true
+    excludes([
+            '**/build/**',
+            '**/generated/**',
+            '**/target/**',
+            '**/out/**',
+            '**/bin/**',
+            '**/aot*/**',
+            '**/*__Generated.java',
+            '**/org/springframework/**',
+            '**/*.properties',
+            '**/*.yml',
+            '**/*.yaml',
+            '**/*.json',
+            '**/*.xml',
+            '**/*.sql',
+            '**/*.p12',
+            '**/*.jks',
+            '**/*.keystore',
+            '**/*.sh',
+            '**/*.bat',
+            '**/*.jar',
+            '**/*.war',
+            '**/*.md',
+            '**/*.txt',
+            '**/*.html',
+            '**/gradlew*',
+            '**/gradle/wrapper/**',
+            '**/*Tests.java',
+            '**/*Test.java'
+    ])
+}
+
+tasks.named('licenseMain') {
+    mustRunAfter tasks.named('compileAotJava')
+}
+
+tasks.named('licenseTest') {
+    mustRunAfter tasks.named('compileAotJava')
+}
+
+licenseFormatTest {
+    dependsOn 'generateTestClasses'
+}
+
+tasks.named('licenseAot') {
+    enabled = false
+    exclude '**/aot*/**'
+    exclude '**/*__Generated.java'
+    exclude '**/org/springframework/**'
+}
+
+tasks.named('licenseAotTest') {
+    enabled = false
+    exclude '**/aot*/**'
+    exclude '**/*__Generated.java'
+    exclude '**/org/springframework/**'
+}
+
+licenseTest {
+    dependsOn 'generateTestClasses'
+}
+
+processTestAot {
+    logging.captureStandardOutput(LogLevel.ERROR)
+}
+
+processAot {
+    enabled = false
+}
+
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks.register('generateTestClasses') {
@@ -129,7 +212,7 @@ tasks.register('generateTestClasses') {
     }
 }
 
-tasks.named('compileTestJava') {
+compileTestJava {
     dependsOn(tasks.named('generateTestClasses'))
 }
 
@@ -140,31 +223,6 @@ tasks.withType(JavaCompile).configureEach {
             '-Xlint:-processing'
     ]
     options.encoding = 'UTF-8'
-}
-
-// Special configuration for AOT compilation
-tasks.named('compileAotJava').configure {
-    options.compilerArgs += [
-            '--add-exports=java.base/sun.nio.ch=ALL-UNNAMED',
-            '-Xlint:none',
-            '-nowarn'
-    ]
-}
-
-graalvmNative {
-    toolchainDetection = false
-    binaries {
-        main {
-            buildArgs.addAll(
-                    '--no-fallback',
-                    '-H:+SuppressWarnings',
-                    '-H:+ReportExceptionStackTraces'
-            )
-        }
-    }
-    metadataRepository {
-        enabled = true
-    }
 }
 
 tasks.named('test', Test) {

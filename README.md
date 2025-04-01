@@ -379,3 +379,88 @@ Here are the Postman endpoints for each client ID flow:
 * Ensure that your redirect URIs are correct for your frontend application.
 * Adjust the scopes to match the access requirements of your clients.
 * Be mindful of token expiration times and refresh token usage.
+
+## Adding Apache 2.0 License Headers
+
+This project uses the `gradle-license-plugin` by Hierynomus to automatically add the Apache 2.0 license header to all Java source files. This ensures compliance with the Apache 2.0 license and clearly defines the terms under which the software is distributed.
+
+**Steps to Add the License Header:**
+
+1.  **Add the Plugin Dependency to `build.gradle`:**
+
+    Open your `build.gradle` file and add the following line to the `plugins` block:
+
+    ```gradle
+    plugins {
+        // ... other plugins
+        id "com.github.hierynomus.license" version "0.16.1"
+    }
+    ```
+
+    Make sure to check the plugin's GitHub repository ([https://github.com/hierynomus/gradle-license](https://github.com/hierynomus/gradle-license)) for the latest version if needed.
+
+2.  **Create the `LICENSE_HEADER` File:**
+
+    In the root of your project directory, create a new file named `LICENSE_HEADER`.
+
+3.  **Populate `LICENSE_HEADER` with the Apache 2.0 License Text:**
+
+    Paste the following content into the `LICENSE_HEADER` file, making sure to replace `[yyyy]` with the appropriate year and `[name of copyright owner]` with the correct copyright holder:
+
+    ```
+    Copyright [yyyy] [name of copyright owner]
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    ```
+
+4.  **Configure the License Plugin in `build.gradle`:**
+
+    Add the following `license` block to your `build.gradle` file:
+
+    ```gradle
+    license {
+        header = rootProject.file('LICENSE_HEADER')
+        // You can add exclusions if needed:
+        // exclude "**/*.properties"
+        // exclude "**/*.yml"
+        // exclude "**/*.md"
+    }
+    ```
+
+5.  **Apply the License Headers:**
+
+    Open your terminal in the root of your project directory and run the following Gradle command:
+
+    ```bash
+    ./gradlew licenseFormat
+    ```
+
+    This will add the license header to all your Java source files that are missing it or have an incorrect one.
+
+6.  **Verify License Headers:**
+
+    You can verify that all files have the correct license header by running:
+
+    ```bash
+    ./gradlew licenseCheck
+    ```
+
+    This task will fail if any files are missing the header or have an incorrect one.
+
+**Important Considerations:**
+
+* **Backup:** Before running `licenseFormat` for the first time, it's recommended to commit your current changes or create a backup of your project.
+* **Existing Headers:** The plugin might replace existing license headers with the configured one. Review the changes carefully after running `licenseFormat`.
+* **Exclusions:** Use the `exclude` configuration option to prevent the plugin from adding headers to specific files or directories (e.g., configuration files, documentation).
+* **Copyright Year:** Ensure the copyright year in your `LICENSE_HEADER` is accurate.
+* **CI/CD Integration:** Consider adding the `gradle licenseCheck` task to your GitHub Actions workflow (in `gradle.yml`) to automatically verify license headers during your CI builds. This helps maintain consistency.
