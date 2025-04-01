@@ -1,39 +1,39 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.4'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.graalvm.buildtools.native' version '0.10.5'
-	id "org.flywaydb.flyway" version "9.22.3"
+    id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.graalvm.buildtools.native' version '0.10.5'
+    id "org.flywaydb.flyway" version "9.22.3"
 }
 
 group = 'com.base'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.security:spring-security-cas'
-	implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.session:spring-session-jdbc'
-	implementation 'org.flywaydb:flyway-core:9.22.3'
-	implementation 'io.github.cdimascio:dotenv-java:3.2.0'
-	implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-cas'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'org.flywaydb:flyway-core:9.22.3'
+    implementation 'io.github.cdimascio:dotenv-java:3.2.0'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
 
-	runtimeOnly 'org.postgresql:postgresql'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    runtimeOnly 'org.postgresql:postgresql'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 def env = new Properties()
@@ -41,28 +41,52 @@ def activeProfile = findProperty("spring.profiles.active") ?: "dev"
 def envFile = file("src/main/resources/config/.${activeProfile}")
 
 if (envFile.exists()) {
-	envFile.withInputStream { env.load(it) }
-	println "Loaded .${activeProfile} from: ${envFile}"
+    envFile.withInputStream { env.load(it) }
+    println "Loaded .${activeProfile} from: ${envFile}"
 } else {
-	println "No .${activeProfile} file found for profile: ${activeProfile}"
+    println "No .${activeProfile} file found for profile: ${activeProfile}"
 }
 
 bootRun {
-	environment env
+    environment env
 }
 
 flyway {
-	url = env.getProperty("DB_URL")
-	user = env.getProperty("DB_USERNAME")
-	password = env.getProperty("DB_PASSWORD")
-	locations = ['classpath:db/migration']
-	baselineOnMigrate = true
+    url = env.getProperty("DB_URL")
+    user = env.getProperty("DB_USERNAME")
+    password = env.getProperty("DB_PASSWORD")
+    locations = ['classpath:db/migration']
+    baselineOnMigrate = true
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = file("$buildDir/classes/java/main")
+    }
+    test {
+        output.resourcesDir = file("$buildDir/classes/java/test")
+    }
+}
+if (activeProfile != "dev") {
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java']
+                exclude('**/TomcatSSLConfig.java')
+            }
+        }
+        test {
+            java {
+                srcDirs = ['src/test/java']
+                exclude('**/test/**')
+            }
+        }
+    }
 }
 
 tasks.named('test', Test) {
-	useJUnitPlatform()
-	println "project.hasProperty('skipIntegrationTests'): ${project.hasProperty('skipIntegrationTests')}"
-	if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
-		exclude 'com/base/ISLDevsApplicationTests.java'
-	}
+    useJUnitPlatform()
+    if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
+        exclude('**/test/**')
+    }
 }
