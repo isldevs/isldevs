@@ -37,3 +37,4 @@ out/
 .vscode/
 
 src/main/resources/config/.*
+catalina.base_IS_UNDEFINED/

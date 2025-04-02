@@ -1,0 +1,7 @@
+,--. ,---. ,--.   ,------.
+`--''   .-'|  |   |  .-.  \  ,---.,--.  ,--.,---.
+,--.`.  `-.|  |   |  |  \  :| .-. :\  `'  /(  .-'
+|  |.-'    |  '--.|  '--'  /\   --. \    / .-'  `)
+`--'`-----'`-----'`-------'  `----'  `--'  `----'
+        Spring Boot ${spring-boot.version} | Java ${java.version}
+          Running on ${spring.profiles.active} environment.

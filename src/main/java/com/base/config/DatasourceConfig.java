@@ -20,6 +20,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -95,6 +96,13 @@ public class DatasourceConfig {
     }
 
     @Bean
+    public JpaProperties jpaProperties() {
+        JpaProperties jpaProperties = new JpaProperties();
+        jpaProperties.setOpenInView(false);
+        return jpaProperties;
+    }
+
+    @Bean
     public JpaTransactionManager transactionManager() {
         var transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
@@ -103,7 +111,6 @@ public class DatasourceConfig {
 
     private Properties hibernateProperties() {
         var properties = new Properties();
-        properties.setProperty("hibernate.dialect", env.get("HIBERNATE_DIALECT"));
         properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO"));
         properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL"));
         properties.setProperty("hibernate.format_sql", env.get("HIBERNATE_FORMAT_SQL"));
