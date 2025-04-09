@@ -15,18 +15,31 @@
  */
 package com.base;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.base.config.AbstractApplicationConfig;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author YISivlay
  */
-@SpringBootApplication
-public class ISLDevsApplication {
+public class ISLDevsApplication extends SpringBootServletInitializer {
+
+    @Import({AbstractApplicationConfig.class})
+    public static final class Configuration {
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return configureApplication(builder);
+    }
+
+    private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
+        return builder.sources(Configuration.class);
+    }
 
     public static void main(String[] args) {
-        SpringApplication.run(ISLDevsApplication.class, args);
+        configureApplication(new SpringApplicationBuilder(ISLDevsApplication.class)).run(args);
     }
 
 }

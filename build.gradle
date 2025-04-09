@@ -14,16 +14,17 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
     mavenCentral()
 }
 
-configurations {
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
+configurations.configureEach {
+    resolutionStrategy {
+        force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
     }
 }
 
@@ -32,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.security:spring-security-cas'
     implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
+    implementation 'org.springframework.integration:spring-integration-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'org.flywaydb:flyway-core:9.22.3'
@@ -75,7 +77,7 @@ sourceSets {
     test {
         output.resourcesDir = file("$buildDir/classes/java/test")
     }
-    if (findProperty("spring.profiles.active") != "dev") {
+    if (activeProfile != "dev") {
         main.java.exclude('**/TomcatSSLConfig.java')
         test.java.exclude('**/test/**')
     }
@@ -112,6 +114,8 @@ license {
             '**/*.p12',
             '**/*.jks',
             '**/*.keystore',
+            '**/*.dev',
+            '**/*.prod',
             '**/*.sh',
             '**/*.bat',
             '**/*.jar',

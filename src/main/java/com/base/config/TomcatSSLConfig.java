@@ -17,12 +17,12 @@ package com.base.config;
 
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.apache.tomcat.util.net.SSLHostConfig;
-import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -31,10 +31,21 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 /**
+ * Configuration class for customizing Tomcat with SSL and HTTP connectors.
  * @author YISivlay
  */
 @Configuration
 public class TomcatSSLConfig {
+
+    // Configuration constants
+    private static final String KEYSTORE_PATH = "/server.p12";
+    private static final String KEYSTORE_PASSWORD = "isldevs";
+    private static final String KEY_ALIAS = "server";
+    private static final String KEYSTORE_TYPE = "PKCS12";
+
+    private static final int HTTPS_PORT = 8443;
+    private static final int HTTP_PORT = 8080;
+    private static final String CONTEXT_PATH = "/api/v1";
 
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> webServerFactoryCustomizer() {
@@ -54,13 +65,13 @@ public class TomcatSSLConfig {
                 sslHostConfig.setHonorCipherOrder(true);
 
                 var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
-                try (var is = getClass().getClassLoader().getResourceAsStream("server.p12")) {
-                    var ks = KeyStore.getInstance("PKCS12");
-                    ks.load(is, "isldevs".toCharArray());
+                try (var is = getClass().getClassLoader().getResourceAsStream(KEYSTORE_PATH)) {
+                    var ks = KeyStore.getInstance(KEYSTORE_TYPE);
+                    ks.load(is, KEYSTORE_PASSWORD.toCharArray());
 
                     certificate.setCertificateKeystore(ks);
-                    certificate.setCertificateKeyAlias("server");
-                    certificate.setCertificateKeystorePassword("isldevs");
+                    certificate.setCertificateKeyAlias(KEY_ALIAS);
+                    certificate.setCertificateKeystorePassword(KEYSTORE_PASSWORD);
 
                 } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
                     throw new RuntimeException(e);
@@ -71,12 +82,11 @@ public class TomcatSSLConfig {
             });
             var httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
             httpConnector.setScheme("http");
-            httpConnector.setPort(8080);
+            httpConnector.setPort(HTTP_PORT);
             httpConnector.setSecure(false);
-            httpConnector.setRedirectPort(8443);
-            factory.setContextPath("/api/v1");
+            httpConnector.setRedirectPort(HTTPS_PORT);
+            factory.setContextPath(CONTEXT_PATH);
             factory.addAdditionalTomcatConnectors(httpConnector);
         };
     }
-
 }
