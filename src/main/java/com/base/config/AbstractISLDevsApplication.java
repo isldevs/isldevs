@@ -23,7 +23,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -47,5 +46,5 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({DatasourceConfig.class})
 @ComponentScan(basePackages = {"com.base.**", "com.base.config"})
 @IntegrationComponentScan(basePackages = {"com.base.**", "com.base.config"})
-public abstract class AbstractApplicationConfig {
+public abstract class AbstractISLDevsApplication {
 }

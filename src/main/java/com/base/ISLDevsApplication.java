@@ -15,7 +15,7 @@
  */
 package com.base;
 
-import com.base.config.AbstractApplicationConfig;
+import com.base.config.AbstractISLDevsApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import;
  */
 public class ISLDevsApplication extends SpringBootServletInitializer {
 
-    @Import({AbstractApplicationConfig.class})
+    @Import({AbstractISLDevsApplication.class})
     public static final class Configuration {
     }
 

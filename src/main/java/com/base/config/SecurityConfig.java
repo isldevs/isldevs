@@ -31,6 +31,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,6 +72,7 @@ import java.util.stream.Stream;
  * @author YISivlay
  */
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Value("${spring.security.oauth2.issuer-uri}")
@@ -121,16 +123,16 @@ public class SecurityConfig {
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
                 .issuer(issuerUri)
-                .authorizationEndpoint("/oauth2/authorize")
-                .deviceAuthorizationEndpoint("/oauth2/device_authorization")
-                .deviceVerificationEndpoint("/oauth2/device_verification")
-                .tokenEndpoint("/oauth2/token")
-                .tokenIntrospectionEndpoint("/oauth2/introspect")
-                .tokenRevocationEndpoint("/oauth2/revoke")
-                .jwkSetEndpoint("/oauth2/jwks")
-                .oidcLogoutEndpoint("/connect/logout")
-                .oidcUserInfoEndpoint("/connect/userinfo")
-                .oidcClientRegistrationEndpoint("/connect/register")
+                .authorizationEndpoint("/api/v1/oauth2/authorize")
+                .deviceAuthorizationEndpoint("/api/v1/oauth2/device_authorization")
+                .deviceVerificationEndpoint("/api/v1/oauth2/device_verification")
+                .tokenEndpoint("/api/v1/oauth2/token")
+                .tokenIntrospectionEndpoint("/api/v1/oauth2/introspect")
+                .tokenRevocationEndpoint("/api/v1/oauth2/revoke")
+                .jwkSetEndpoint("/api/v1/oauth2/jwks")
+                .oidcLogoutEndpoint("/api/v1/connect/logout")
+                .oidcUserInfoEndpoint("/api/v1/connect/userinfo")
+                .oidcClientRegistrationEndpoint("/api/v1/connect/register")
                 .build();
     }
 
@@ -155,8 +157,8 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/api/v1/login/oauth2/code/web-app")
-                .postLogoutRedirectUri("http://localhost:8080/api/v1/logged-out")
+                .redirectUri("https://localhost:8443/api/v1/login/oauth2/code/web-app")
+                .postLogoutRedirectUri("https://localhost:8443/api/v1/logged-out")
                 .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);
                     scopes.add(OidcScopes.PROFILE);
@@ -234,7 +236,7 @@ public class SecurityConfig {
     public JWKSource<SecurityContext> jwkSource() {
         var rsaKey = generateRsa();
         var jwkSet = new JWKSet(rsaKey);
-        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+        return (jwkSelector, _) -> jwkSelector.select(jwkSet);
     }
 
     @Bean

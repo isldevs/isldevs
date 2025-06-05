@@ -38,7 +38,7 @@ import java.security.cert.CertificateException;
 public class TomcatSSLConfig {
 
     // Configuration constants
-    private static final String KEYSTORE_PATH = "/server.p12";
+    private static final String KEYSTORE_PATH = "server.p12";
     private static final String KEYSTORE_PASSWORD = "isldevs";
     private static final String KEY_ALIAS = "server";
     private static final String KEYSTORE_TYPE = "PKCS12";
@@ -58,14 +58,17 @@ public class TomcatSSLConfig {
                 var protocol = (Http11NioProtocol) connector.getProtocolHandler();
 
                 SSLHostConfig sslHostConfig = new SSLHostConfig();
-                sslHostConfig.setHostName("localhost");
+                sslHostConfig.setHostName("_default_");
                 sslHostConfig.setProtocols("TLSv1.2+TLSv1.3");
-                sslHostConfig.setCertificateVerification("false");
+                sslHostConfig.setCertificateVerification("none");
                 sslHostConfig.setCiphers("TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256");
                 sslHostConfig.setHonorCipherOrder(true);
 
                 var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
                 try (var is = getClass().getClassLoader().getResourceAsStream(KEYSTORE_PATH)) {
+                    if (is == null) {
+                        throw new RuntimeException("Keystore not found at classpath path: " + KEYSTORE_PATH);
+                    }
                     var ks = KeyStore.getInstance(KEYSTORE_TYPE);
                     ks.load(is, KEYSTORE_PASSWORD.toCharArray());
 
@@ -78,6 +81,7 @@ public class TomcatSSLConfig {
                 }
 
                 sslHostConfig.addCertificate(certificate);
+                protocol.setSSLEnabled(true);
                 protocol.addSslHostConfig(sslHostConfig);
             });
             var httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
