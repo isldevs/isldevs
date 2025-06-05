@@ -464,3 +464,21 @@ This project uses the `gradle-license-plugin` by Hierynomus to automatically add
 * **Exclusions:** Use the `exclude` configuration option to prevent the plugin from adding headers to specific files or directories (e.g., configuration files, documentation).
 * **Copyright Year:** Ensure the copyright year in your `LICENSE_HEADER` is accurate.
 * **CI/CD Integration:** Consider adding the `gradle licenseCheck` task to your GitHub Actions workflow (in `gradle.yml`) to automatically verify license headers during your CI builds. This helps maintain consistency.
+
+# **Project Dependency Management**
+
+## **Overview**
+This project uses the Gradle Versions Plugin to maintain dependency hygiene, security, and stability. The system provides automated checks for outdated libraries with configurable update policies.
+
+## **Quick Start**
+
+### **Check for Dependency Updates**
+1.Standard check
+```bash
+./gradlew dependencyUpdate
+```
+
+2.Stable releases only
+```bash
+./gradlew dependencyUpdate -Drevision=release
+```

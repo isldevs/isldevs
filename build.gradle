@@ -6,6 +6,7 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.5'
     id "org.flywaydb.flyway" version "9.22.3"
     id "com.github.hierynomus.license" version "0.16.1"
+    id 'com.github.ben-manes.versions' version '0.51.0'
 }
 
 group = 'com.base'
@@ -20,11 +21,13 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
 }
 
 configurations.configureEach {
     resolutionStrategy {
         force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
+        cacheChangingModulesFor 10, 'minutes'
     }
 }
 
@@ -49,37 +52,91 @@ dependencies {
 
 def env = new Properties()
 def activeProfile = findProperty("spring.profiles.active") ?: "dev"
-def envFile = file("src/main/resources/config/.${activeProfile}")
+def envFiles = [
+        file("src/main/resources/config/.${activeProfile}"),
+        file(".env")
+]
 
-if (envFile.exists()) {
-    envFile.withInputStream { env.load(it) }
-    println "Loaded .${activeProfile} from: ${envFile}"
-} else {
-    println "No .${activeProfile} file found for profile: ${activeProfile}"
+envFiles.each { envFile ->
+    if (envFile.exists()) {
+        envFile.withInputStream { env.load(it) }
+        println "Loaded environment from: ${envFile}"
+    }
+}
+
+dependencyUpdates {
+    rejectVersionIf {
+        isNonStable(it.candidate.version)
+    }
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "report"
+}
+
+static boolean isNonStable(String version) {
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
+    def regex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(version ==~ regex)
+}
+
+flyway {
+    url = env.getProperty("DB_URL") ?: System.getenv("DB_URL")
+    user = env.getProperty("DB_USERNAME") ?: System.getenv("DB_USERNAME")
+    password = env.getProperty("DB_PASSWORD") ?: System.getenv("DB_PASSWORD")
+    locations = ['classpath:db/migration']
+    baselineOnMigrate = true
+    validateMigrationNaming = true
 }
 
 bootRun {
     environment env
+    jvmArgs = [
+            "-Dspring.profiles.active=${activeProfile}",
+            "-Dfile.encoding=UTF-8",
+            "-XX:+HeapDumpOnOutOfMemoryError"
+    ]
+    systemProperties = System.properties
 }
 
-flyway {
-    url = env.getProperty("DB_URL")
-    user = env.getProperty("DB_USERNAME")
-    password = env.getProperty("DB_PASSWORD")
-    locations = ['classpath:db/migration']
-    baselineOnMigrate = true
+bootWar {
+    archiveClassifier = 'boot'
+    archiveFileName = "${project.name}.war"
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': archiveVersion,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version')
+        )
+    }
+}
+
+bootJar {
+    archiveFileName = "${project.name}.jar"
+    launchScript()
+    manifest {
+        attributes(
+                'Main-Class': 'org.springframework.boot.loader.JarLauncher',
+                'Start-Class': "${group}.Application"
+        )
+    }
 }
 
 sourceSets {
     main {
         output.resourcesDir = file("$buildDir/classes/java/main")
+        java {
+            if (activeProfile != "dev") {
+                exclude '**/TomcatSSLConfig.java'
+            }
+        }
     }
     test {
         output.resourcesDir = file("$buildDir/classes/java/test")
-    }
-    if (activeProfile != "dev") {
-        main.java.exclude('**/TomcatSSLConfig.java')
-        test.java.exclude('**/test/**')
+        java {
+            if (activeProfile != "dev") {
+                exclude '**/test/**'
+            }
+        }
     }
 }
 
@@ -88,7 +145,8 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
             '-parameters',
             '-Xlint:-unchecked',
-            '-Xlint:-deprecation'
+            '-Xlint:-deprecation',
+            '--enable-preview'
     ]
 }
 
@@ -96,6 +154,9 @@ license {
     header = rootProject.file('LICENSE_HEADER')
     strictCheck = true
     skipExistingHeaders = true
+    mapping {
+        java = 'SLASHSTAR_STYLE'
+    }
     excludes([
             '**/build/**',
             '**/generated/**',
@@ -236,16 +297,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-bootWar {
-    archiveClassifier = 'boot'
-    archiveFileName = "${project.name}.war"
-}
-
-bootJar {
-    archiveFileName = "${project.name}.jar"
-    launchScript()
-}
-
 tasks.named('assemble') {
     dependsOn bootWar, bootJar
 }
@@ -272,6 +323,16 @@ tasks.withType(AbstractArchiveTask).configureEach {
 
 tasks.named('test', Test) {
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
+    maxHeapSize = '1G'
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+    filter {
+        includeTestsMatching "*Test"
+        includeTestsMatching "*Tests"
+    }
     dependsOn(tasks.named('generateTestClasses'))
     if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
         exclude('**/test/**')
