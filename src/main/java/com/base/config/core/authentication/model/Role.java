@@ -29,7 +29,7 @@ import java.util.Set;
 public class Role extends AbstractPersistable<Long> {
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Authority> authorities = new HashSet<>();
+    private final Set<Authority> authorities = new HashSet<>();
 
     @Column(unique = true, nullable = false)
     private String name;
