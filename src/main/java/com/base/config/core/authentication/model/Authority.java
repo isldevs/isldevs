@@ -26,11 +26,15 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 public class Authority extends AbstractPersistable<Long> {
 
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role_id")
     private Role role;
 
     @Column(nullable = false)
     private String authority;
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     protected Authority() {
     }

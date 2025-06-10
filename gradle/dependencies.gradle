@@ -6,11 +6,11 @@ dependencies {
     implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
     implementation 'org.springframework.integration:spring-integration-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.session:spring-session-jdbc'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.flywaydb:flyway-core:9.22.3'
     implementation 'io.github.cdimascio:dotenv-java:3.2.0'
     implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
 
     runtimeOnly 'org.postgresql:postgresql'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

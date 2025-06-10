@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config;
+package com.base.config.security;
 
 import com.base.config.core.authentication.service.CustomUserDetailsService;
+import com.base.config.security.filter.HttpBasicAuthenticationFilter;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -37,8 +38,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -61,7 +60,11 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.sql.DataSource;
 import java.security.KeyPair;
@@ -89,75 +92,83 @@ public class SecurityConfig {
                                                                       OAuth2AuthorizationService authorizationService,
                                                                       OAuth2TokenGenerator<?> tokenGenerator,
                                                                       RegisteredClientRepository registeredClientRepository,
+                                                                      HttpBasicAuthenticationFilter httpBasicAuthenticationFilter,
                                                                       HttpSecurity http) throws Exception {
         var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.ignoringRequestMatchers(configurer.getEndpointsMatcher()))
-                .with(configurer, (authorizationServer) -> {
-                    authorizationServer
-                            .oidc(Customizer.withDefaults())
-                            .tokenEndpoint(tokenEndpoint ->
-                                    tokenEndpoint.accessTokenRequestConverter(
-                                                    new DelegatingAuthenticationConverter(
-                                                            Arrays.asList(
-                                                                    new OAuth2PasswordAuthenticationConverter(),
-                                                                    new OAuth2RefreshTokenAuthenticationConverter(),
-                                                                    new OAuth2AuthorizationCodeAuthenticationConverter(),
-                                                                    new OAuth2ClientCredentialsAuthenticationConverter()
-                                                            )
-                                                    )
-                                            )
-                                            .authenticationProvider(
-                                                    new OAuth2PasswordAuthenticationProvider(
-                                                    authenticationProvider,
-                                                    authorizationService,
-                                                    tokenGenerator,
-                                                    registeredClientRepository
-                                            ))
-                            );
-                })
+                .with(configurer, (authorizationServer) -> authorizationServer
+                        .oidc(Customizer.withDefaults())
+                        .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                                .accessTokenRequestConverter(
+                                        new DelegatingAuthenticationConverter(
+                                                Arrays.asList(
+                                                        new OAuth2PasswordAuthenticationConverter(),
+                                                        new OAuth2RefreshTokenAuthenticationConverter(),
+                                                        new OAuth2AuthorizationCodeAuthenticationConverter(),
+                                                        new OAuth2ClientCredentialsAuthenticationConverter()
+                                                )
+                                        ))
+                                .authenticationProvider(
+                                        new OAuth2PasswordAuthenticationProvider(
+                                                authenticationProvider,
+                                                authorizationService,
+                                                tokenGenerator,
+                                                registeredClientRepository
+                                        ))
+                        ))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(configurer.getEndpointsMatcher()).authenticated()
-                        .anyRequest().permitAll()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                        .anyRequest().permitAll())
+                .addFilterBefore(httpBasicAuthenticationFilter, BasicAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
-                                                            PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().issuer(issuerUri).build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        var provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                .issuer(issuerUri)
-                .build();
+    public CorsConfigurationSource corsConfigurationSource() {
+        var configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        Stream.of(webClient(), serviceClient(), microserviceClient(), deviceClient())
-                .forEach(client -> {
-                    if (repository.findByClientId(client.getClientId()) == null) {
-                        repository.save(client);
-                    }
-                });
+        Stream.of(webClient(), serviceClient(), microserviceClient(), deviceClient()).forEach(client -> {
+            if (repository.findByClientId(client.getClientId()) == null) {
+                repository.save(client);
+            }
+        });
 
         return repository;
     }
 
     @Bean
     public RegisteredClient webClient() {
-        return RegisteredClient.withId(UUID.randomUUID().toString())
+        return RegisteredClient
+                .withId(UUID.randomUUID().toString())
                 .clientId("web-app")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -173,11 +184,13 @@ public class SecurityConfig {
                     scopes.add("read");
                     scopes.add("write");
                 })
-                .clientSettings(ClientSettings.builder()
-                        .requireProofKey(false)
+                .clientSettings(ClientSettings
+                        .builder()
+                        .requireProofKey(true)
                         .requireAuthorizationConsent(false)
                         .build())
-                .tokenSettings(TokenSettings.builder()
+                .tokenSettings(TokenSettings
+                        .builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(30))
                         .refreshTokenTimeToLive(Duration.ofDays(7))
                         .reuseRefreshTokens(true)
@@ -188,7 +201,8 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClient serviceClient() {
-        return RegisteredClient.withId(UUID.randomUUID().toString())
+        return RegisteredClient
+                .withId(UUID.randomUUID().toString())
                 .clientId("service-account")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
@@ -197,15 +211,18 @@ public class SecurityConfig {
                     scopes.add("api.internal");
                     scopes.add("monitoring.read");
                 })
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenTimeToLive(Duration.ofHours(1))
-                        .build())
+                .tokenSettings(
+                        TokenSettings.builder()
+                                .accessTokenTimeToLive(Duration.ofHours(1))
+                                .build()
+                )
                 .build();
     }
 
     @Bean
     public RegisteredClient microserviceClient() {
-        return RegisteredClient.withId(UUID.randomUUID().toString())
+        return RegisteredClient
+                .withId(UUID.randomUUID().toString())
                 .clientId("microservice")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT)
                 .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
@@ -221,7 +238,8 @@ public class SecurityConfig {
 
     @Bean
     public RegisteredClient deviceClient() {
-        return RegisteredClient.withId(UUID.randomUUID().toString())
+        return RegisteredClient
+                .withId(UUID.randomUUID().toString())
                 .clientId("iot-device")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
@@ -256,11 +274,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
-
-    @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }
@@ -291,28 +304,15 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-        final var clientSpecificClaims = Map.of(
-                "web-app", "web-app",
-                "service-account", "service-account",
-                "microservice", "microservice",
-                "iot-device", "iot-device"
-        );
+        final var clientSpecificClaims = Map.of("web-app", "web-app", "service-account", "service-account", "microservice", "microservice", "iot-device", "iot-device");
 
         return context -> {
             if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
                 try {
                     var principal = context.getPrincipal();
-                    context.getClaims()
-                            .subject(principal.getName())
-                            .claim("user_id", principal.getName())
-                            .claim("client_id", context.getAuthorizationGrant().getName())
-                            .claim("scopes", context.getAuthorizedScopes())
-                            .claim("issued_at", Instant.now().toString())
-                            .claim("grant_type", context.getAuthorizationGrantType().getValue());
+                    context.getClaims().subject(principal.getName()).claim("user_id", principal.getName()).claim("client_id", context.getAuthorizationGrant().getName()).claim("scopes", context.getAuthorizedScopes()).claim("issued_at", Instant.now().toString()).claim("grant_type", context.getAuthorizationGrantType().getValue());
 
-                    var authorities = principal.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
+                    var authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
                     context.getClaims().claim("authorities", authorities);
 
                     String clientId = context.getAuthorizationGrant().getName();
@@ -330,10 +330,8 @@ public class SecurityConfig {
             } else if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
                 try {
                     var principal = context.getPrincipal();
-                    context.getClaims().subject(principal.getName()).claim("user_id", principal.getName());
-                    var authorities = principal.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
+                    context.getClaims().subject(principal.getName()).claim("user_id", principal.getName()).claim("email", principal.getName()).claim("name", principal.getName());
+                    var authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
                     context.getClaims().claim("authorities", authorities);
                 } catch (Exception e) {
                     System.err.println("Error customizing id token claims: " + e.getMessage());
@@ -346,10 +344,7 @@ public class SecurityConfig {
         var keyPair = generateRsaKey();
         var publicKey = (RSAPublicKey) keyPair.getPublic();
         var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKey.Builder(publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build();
+        return new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
     }
 
     private static KeyPair generateRsaKey() {

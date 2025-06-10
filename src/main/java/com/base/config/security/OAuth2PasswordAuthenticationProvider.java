@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config;
+package com.base.config.security;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,27 +62,23 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         OAuth2PasswordAuthenticationToken authRequest = (OAuth2PasswordAuthenticationToken) authentication;
 
-        // Get RegisteredClient by clientId
         RegisteredClient registeredClient = registeredClientRepository.findByClientId(authRequest.getClientId());
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
 
-        // Authenticate user (uses your CustomUserDetailsService via AuthenticationManager)
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
 
         Authentication userAuthentication = authenticationProvider.authenticate(usernamePasswordAuthenticationToken);
         if (userAuthentication == null || !userAuthentication.isAuthenticated()) {
-            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_GRANT);
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT), "User authentication failed");
         }
 
-        // Create context for token generation
         OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userAuthentication.getName())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .attribute(Principal.class.getName(), userAuthentication);
 
-        // Generate access token
         OAuth2TokenContext tokenContext = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
                 .principal(userAuthentication)
@@ -98,7 +94,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR), "Access token generation failed");
         }
         OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt());
-        // Generate refresh token if supported
+
         OAuth2RefreshToken refreshToken = null;
         if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
             tokenContext = DefaultOAuth2TokenContext.builder()
@@ -113,7 +109,6 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             refreshToken = (OAuth2RefreshToken) tokenGenerator.generate(tokenContext);
         }
 
-        // Save authorization
         authorizationBuilder.accessToken(accessToken);
         if (refreshToken != null) {
             authorizationBuilder.refreshToken(refreshToken);

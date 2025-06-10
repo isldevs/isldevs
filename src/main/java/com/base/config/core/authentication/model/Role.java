@@ -28,7 +28,7 @@ import java.util.Set;
 @Table(name = "roles")
 public class Role extends AbstractPersistable<Long> {
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private final Set<Authority> authorities = new HashSet<>();
 
     @Column(unique = true, nullable = false)
