@@ -1,12 +1,13 @@
 plugins {
     id 'java'
     id 'war'
-    id 'org.springframework.boot' version '3.4.4'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.graalvm.buildtools.native' version '0.10.5'
-    id "org.flywaydb.flyway" version "9.22.3"
-    id "com.github.hierynomus.license" version "0.16.1"
-    id 'com.github.ben-manes.versions' version '0.51.0'
+    id 'com.diffplug.spotless'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'org.graalvm.buildtools.native'
+    id 'org.flywaydb.flyway'
+    id 'com.github.hierynomus.license'
+    id 'com.github.ben-manes.versions'
 }
 
 group = 'com.base'
@@ -21,7 +22,7 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
+    maven { url = 'https://repo.spring.io/milestone' }
 }
 
 configurations.configureEach {
@@ -31,26 +32,7 @@ configurations.configureEach {
     }
 }
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.security:spring-security-core'
-    implementation 'org.springframework.security:spring-security-cas'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
-    implementation 'org.springframework.integration:spring-integration-core'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'org.flywaydb:flyway-core:9.22.3'
-    implementation 'io.github.cdimascio:dotenv-java:3.2.0'
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.2'
-
-    runtimeOnly 'org.postgresql:postgresql'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+apply from: 'gradle/dependencies.gradle'
 
 def env = new Properties()
 def activeProfile = findProperty("spring.profiles.active") ?: "dev"
@@ -129,13 +111,24 @@ sourceSets {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    options.fork = true
     options.encoding = 'UTF-8'
+    options.compilerArgs += "--enable-preview"
+    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US'])
     options.compilerArgs += [
             '-parameters',
             '-Xlint:-unchecked',
             '-Xlint:-deprecation',
             '--enable-preview'
     ]
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += "--enable-preview"
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += "--enable-preview"
 }
 
 license {
@@ -299,11 +292,6 @@ war {
     }
 }
 
-tasks.named('compileJava', JavaCompile).configure {
-    options.fork = true
-    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US'])
-}
-
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
@@ -315,7 +303,7 @@ tasks.named('test', Test) {
     maxHeapSize = '1G'
     testLogging {
         events "passed", "skipped", "failed"
-        exceptionFormat "full"
+        exceptionFormat = "full"
     }
     filter {
         includeTestsMatching "*Test"
