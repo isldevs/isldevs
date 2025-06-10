@@ -60,26 +60,23 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2PasswordAuthenticationToken authRequest = (OAuth2PasswordAuthenticationToken) authentication;
+        var authRequest = (OAuth2PasswordAuthenticationToken) authentication;
 
-        RegisteredClient registeredClient = registeredClientRepository.findByClientId(authRequest.getClientId());
+        var registeredClient = registeredClientRepository.findByClientId(authRequest.getClientId());
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
-
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
-
-        Authentication userAuthentication = authenticationProvider.authenticate(usernamePasswordAuthenticationToken);
+        var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
+        var userAuthentication = authenticationProvider.authenticate(usernamePasswordAuthenticationToken);
         if (userAuthentication == null || !userAuthentication.isAuthenticated()) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT), "User authentication failed");
         }
-
-        OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
+        var authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userAuthentication.getName())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .attribute(Principal.class.getName(), userAuthentication);
 
-        OAuth2TokenContext tokenContext = DefaultOAuth2TokenContext.builder()
+        var tokenContext = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
                 .principal(userAuthentication)
                 .authorization(authorizationBuilder.build())
@@ -89,11 +86,11 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
                 .build();
 
-        OAuth2Token oAuth2Token = tokenGenerator.generate(tokenContext);
+        var oAuth2Token = tokenGenerator.generate(tokenContext);
         if (oAuth2Token == null) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR), "Access token generation failed");
         }
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt());
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt());
 
         OAuth2RefreshToken refreshToken = null;
         if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
@@ -113,7 +110,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         if (refreshToken != null) {
             authorizationBuilder.refreshToken(refreshToken);
         }
-        OAuth2Authorization authorization = authorizationBuilder.build();
+        var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
 
         return new OAuth2AccessTokenAuthenticationToken(

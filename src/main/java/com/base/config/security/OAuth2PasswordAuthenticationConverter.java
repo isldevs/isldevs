@@ -33,14 +33,14 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
+        var grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
         if (!AuthorizationGrantType.PASSWORD.getValue().equals(grantType)) {
             return null;
         }
 
-        String username = request.getParameter(OAuth2ParameterNames.USERNAME);
-        String password = request.getParameter(OAuth2ParameterNames.PASSWORD);
-        String scope = request.getParameter(OAuth2ParameterNames.SCOPE);
+        var username = request.getParameter(OAuth2ParameterNames.USERNAME);
+        var password = request.getParameter(OAuth2ParameterNames.PASSWORD);
+        var scope = request.getParameter(OAuth2ParameterNames.SCOPE);
 
         if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
             throw new IllegalArgumentException("Username and password must be provided.");
@@ -61,7 +61,7 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
             }
         });
 
-        Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
+        var clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
         return new OAuth2PasswordAuthenticationToken(
                 username,
                 password,

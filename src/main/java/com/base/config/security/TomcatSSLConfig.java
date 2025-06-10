@@ -57,7 +57,7 @@ public class TomcatSSLConfig {
 
                 var protocol = (Http11NioProtocol) connector.getProtocolHandler();
 
-                SSLHostConfig sslHostConfig = new SSLHostConfig();
+                var sslHostConfig = new SSLHostConfig();
                 sslHostConfig.setHostName("_default_");
                 sslHostConfig.setProtocols("TLSv1.2+TLSv1.3");
                 sslHostConfig.setCertificateVerification("none");

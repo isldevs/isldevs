@@ -53,7 +53,7 @@ public class HttpBasicAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        StopWatch stopWatch = new StopWatch();
+        var stopWatch = new StopWatch();
         stopWatch.start();
         try {
             if ("POST".equals(request.getMethod()) && request.getRequestURL().toString().contains(TOKEN_ENDPOINT_URI)) {
@@ -71,7 +71,7 @@ public class HttpBasicAuthenticationFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } finally {
             stopWatch.stop();
-            final RequestLog log = RequestLog.builder()
+            final var log = RequestLog.builder()
                     .startTime(stopWatch.getStartInstant().toEpochMilli())
                     .stopTime(stopWatch.getStopInstant().toEpochMilli())
                     .duration(stopWatch.getDuration().toMillis())
@@ -84,7 +84,7 @@ public class HttpBasicAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Map<String, String[]> parameters(HttpServletRequest request) {
-        final Map<String, String[]> parameters = new HashMap<>(request.getParameterMap());
+        final var parameters = new HashMap<>(request.getParameterMap());
         parameters.remove("password");
         parameters.remove("_");
         return parameters;

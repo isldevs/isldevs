@@ -23,12 +23,12 @@ import java.util.Map;
  */
 public class RequestLog {
 
-    private long startTime;
-    private long stopTime;
-    private long duration;
-    private String method;
-    private String url;
-    private Map<String, String[]> parameters;
+    private final long startTime;
+    private final long stopTime;
+    private final long duration;
+    private final String method;
+    private final String url;
+    private final Map<String, String[]> parameters;
 
     public RequestLog(Builder builder) {
         this.startTime = builder.startTime;
