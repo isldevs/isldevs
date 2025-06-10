@@ -102,25 +102,11 @@ bootRun {
 bootWar {
     archiveClassifier = 'boot'
     archiveFileName = "${project.name}.war"
-    manifest {
-        attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': archiveVersion,
-                'Built-By': System.getProperty('user.name'),
-                'Built-JDK': System.getProperty('java.version')
-        )
-    }
 }
 
 bootJar {
     archiveFileName = "${project.name}.jar"
     launchScript()
-    manifest {
-        attributes(
-                'Main-Class': 'org.springframework.boot.loader.JarLauncher',
-                'Start-Class': "${group}.Application"
-        )
-    }
 }
 
 sourceSets {
