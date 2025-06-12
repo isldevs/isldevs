@@ -165,6 +165,8 @@ license {
             '**/*.md',
             '**/*.txt',
             '**/*.html',
+            '**/*.private',
+            '**/*.public',
             '**/gradlew*',
             '**/gradle/wrapper/**',
             '**/*Tests.java',

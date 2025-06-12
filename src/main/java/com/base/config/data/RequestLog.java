@@ -25,7 +25,6 @@ public class RequestLog {
 
     private final long startTime;
     private final long stopTime;
-    private final long duration;
     private final String method;
     private final String url;
     private final Map<String, String[]> parameters;
@@ -33,7 +32,6 @@ public class RequestLog {
     public RequestLog(Builder builder) {
         this.startTime = builder.startTime;
         this.stopTime = builder.stopTime;
-        this.duration = builder.duration;
         this.method = builder.method;
         this.url = builder.url;
         this.parameters = builder.parameters;
@@ -46,7 +44,6 @@ public class RequestLog {
     public static class Builder {
         private long startTime;
         private long stopTime;
-        private long duration;
         private String method;
         private String url;
         private Map<String, String[]> parameters;
@@ -62,11 +59,6 @@ public class RequestLog {
 
         public Builder stopTime(long stopTime) {
             this.stopTime = stopTime;
-            return this;
-        }
-
-        public Builder duration(long duration) {
-            this.duration = duration;
             return this;
         }
 
@@ -92,10 +84,6 @@ public class RequestLog {
 
     public long getStopTime() {
         return stopTime;
-    }
-
-    public long getDuration() {
-        return duration;
     }
 
     public String getMethod() {

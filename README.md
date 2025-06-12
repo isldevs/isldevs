@@ -482,3 +482,45 @@ This project uses the Gradle Versions Plugin to maintain dependency hygiene, sec
 ```bash
 ./gradlew dependencyUpdate -Drevision=release
 ```
+
+# JWT Key Management and Configuration Guide
+
+This document explains how to manage and configure RSA key pairs for JWT signing and verification, including secure storage and key loading in a Spring Boot application.
+
+---
+
+## 1. Generate RSA Key Pair
+
+Use OpenSSL to generate a 2048-bit RSA private key and extract its public key:
+
+```bash
+# Generate private key
+openssl genrsa -out key.private 2048
+
+# Extract public key
+openssl rsa -in key.private -pubout -out key.public
+```
+
+## 2. Store Keys
+Place the generated keys (key.private and key.public) in the src/main/resources directory for easy classpath loading.
+
+## 3. Convert Salt Value
+The salt value is used for encrypting the private key or other cryptographic operations. You can derive the salt from a meaningful string by converting it to hexadecimal.
+
+For example, for "isldevs":
+```bash
+echo -n "isldevs" | xxd -p
+# Output: 69736c64657673
+# Use the hex string 69736c64657673 as your salt value.
+```
+
+## 4. Application Properties
+Configure your application.properties or application.yml with the following properties:
+```
+jwt.key.public=classpath:key.public
+jwt.key.private=classpath:key.private
+jwt.key.id=isldevs
+jwt.persistence.password=iamsldevs
+jwt.persistence.salt=69736c64657673
+```
+

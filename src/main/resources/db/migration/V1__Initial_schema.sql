@@ -36,6 +36,14 @@ CREATE TABLE oauth2_authorization
     PRIMARY KEY (id)
 );
 
+CREATE TABLE oauth2_authorization_consent
+(
+    registered_client_id varchar(100)  NOT NULL,
+    principal_name       varchar(200)  NOT NULL,
+    authorities          varchar(1000) NOT NULL,
+    PRIMARY KEY (registered_client_id, principal_name)
+);
+
 CREATE TABLE oauth2_registered_client
 (
     id                            varchar(100)                            NOT NULL,
@@ -56,23 +64,30 @@ CREATE TABLE oauth2_registered_client
 
 CREATE TABLE users
 (
-    id                      BIGSERIAL PRIMARY KEY,
-    username                VARCHAR(50)  NOT NULL UNIQUE,
-    password                VARCHAR(500) NOT NULL,
-    enabled                 BOOLEAN      NOT NULL DEFAULT true,
-    isAccountNonExpired     BOOLEAN      NOT NULL DEFAULT true,
-    isAccountNonLocked      boolean      NOT NULL DEFAULT true,
-    isCredentialsNonExpired boolean      NOT NULL DEFAULT true
+    id                         BIGSERIAL PRIMARY KEY,
+    username                   VARCHAR(50)  NOT NULL UNIQUE,
+    password                   VARCHAR(500) NOT NULL,
+    provider                   VARCHAR(50)  NOT NULL DEFAULT 'LOCAL',
+    provider_id                VARCHAR(100),
+    name                       VARCHAR(255),
+    email                      VARCHAR(255),
+    avatar_url                 TEXT,
+    locale                     VARCHAR(20),
+    access_token               TEXT,
+    refresh_token              TEXT,
+    token_expiry               TIMESTAMP,
+    enabled                    BOOLEAN      NOT NULL DEFAULT true,
+    is_account_non_expired     BOOLEAN      NOT NULL DEFAULT true,
+    is_account_non_locked      boolean      NOT NULL DEFAULT true,
+    is_credentials_non_expired boolean      NOT NULL DEFAULT true
 );
 
--- Create authorities table with ID as SERIAL primary key
 CREATE TABLE authorities
 (
     id        BIGSERIAL PRIMARY KEY,
     authority VARCHAR(50) NOT NULL
 );
 
--- Add indexes for better OAuth2 performance
 CREATE INDEX idx_oauth2_authorization_token_values ON oauth2_authorization (
                                                                             authorization_code_value,
                                                                             access_token_value,

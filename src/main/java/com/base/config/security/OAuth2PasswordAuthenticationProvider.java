@@ -17,6 +17,7 @@ package com.base.config.security;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,11 +27,9 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
 import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     @Autowired
     public OAuth2PasswordAuthenticationProvider(AuthenticationProvider authenticationProvider,
                                                 OAuth2AuthorizationService authorizationService,
-                                                OAuth2TokenGenerator<?> tokenGenerator,
+                                                @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator,
                                                 RegisteredClientRepository registeredClientRepository) {
         this.authenticationProvider = authenticationProvider;
         this.authorizationService = authorizationService;
