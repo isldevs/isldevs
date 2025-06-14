@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,9 +69,12 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -107,7 +111,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.ignoringRequestMatchers(
                         new AntPathRequestMatcher("/api/v1/oauth2/**"),
-                        new AntPathRequestMatcher("/api/v1/public/**")
+                        new AntPathRequestMatcher("/api/v1/public/**"),
+                        new AntPathRequestMatcher("/api/v1/device/**")
                 ))
                 .with(configurer, (authorizationServer) -> authorizationServer
                         .oidc(Customizer.withDefaults())
@@ -134,7 +139,8 @@ public class SecurityConfig {
                                 })
                         ))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/oauth2/**", "/api/v1/public/**").permitAll()
+                        .requestMatchers("/api/v1/userinfo", "/api/v1/connect/userinfo").authenticated()
+                        .requestMatchers("/api/v1/oauth2/**","/api/v1/device/**", "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
@@ -151,7 +157,11 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/oauth2/**")).permitAll()
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/api/v1/oauth2/**"),
+                                new AntPathRequestMatcher("/api/v1/device/**"),
+                                new AntPathRequestMatcher("/api/v1/public/**")
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
@@ -237,8 +247,10 @@ public class SecurityConfig {
                 .postLogoutRedirectUri("http://127.0.0.1:8080/")
                 .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);
-                    scopes.add(OidcScopes.PROFILE);
                     scopes.add(OidcScopes.EMAIL);
+                    scopes.add(OidcScopes.PROFILE);
+                    scopes.add(OidcScopes.PHONE);
+                    scopes.add(OidcScopes.ADDRESS);
                     scopes.add("read");
                     scopes.add("write");
                 })
@@ -302,8 +314,14 @@ public class SecurityConfig {
                 .clientSecret(passwordEncoder().encode("secret"))
                 .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .scope(OidcScopes.OPENID)
-                .scope("device.manage")
+                .scopes(scopes -> {
+                    scopes.add(OidcScopes.OPENID);
+                    scopes.add(OidcScopes.EMAIL);
+                    scopes.add(OidcScopes.PROFILE);
+                    scopes.add(OidcScopes.PHONE);
+                    scopes.add(OidcScopes.ADDRESS);
+                    scopes.add("device.manage");
+                })
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofDays(1))
                         .refreshTokenTimeToLive(Duration.ofDays(30))
