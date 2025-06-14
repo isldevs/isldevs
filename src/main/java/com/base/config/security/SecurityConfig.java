@@ -16,15 +16,24 @@
 package com.base.config.security;
 
 import com.base.config.core.authentication.service.CustomUserDetailsService;
+import com.base.config.security.converter.JwtBearerAuthenticationConverter;
+import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;
+import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
 import com.base.config.security.filter.HttpAuthenticationFilter;
 import com.base.config.security.filter.JwtAuthenticationFilter;
-import com.base.config.security.service.keypairs.RSAKeyPairRepository;
+import com.base.config.security.provider.JwtAuthenticationProvider;
+import com.base.config.security.provider.JwtBearerAuthenticationProvider;
+import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
+import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,6 +65,7 @@ import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -80,13 +90,6 @@ public class SecurityConfig {
 
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
-
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @Autowired
-    public SecurityConfig(final CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-    }
 
     @Bean
     @Order(1)
@@ -138,7 +141,7 @@ public class SecurityConfig {
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint())
                 );
         return http.build();
     }
@@ -157,7 +160,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint())
                 );
 
         return http.build();
@@ -337,4 +340,17 @@ public class SecurityConfig {
     public Clock clock() {
         return Clock.systemUTC();
     }
+
+    @Bean
+    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of(
+                    "error", "unauthorized",
+                    "error_description", authException.getMessage()
+            )));
+        };
+    }
+
 }

@@ -16,7 +16,7 @@
 package com.base.config.security.service;
 
 
-import com.base.config.security.service.keypairs.KeyProvider;
+import com.base.config.security.keypairs.KeyProvider;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;

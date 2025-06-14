@@ -18,6 +18,7 @@ package com.base.config.security.filter;
 import com.base.config.data.RequestLog;
 import com.base.config.serialization.ToApiJsonSerializer;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;

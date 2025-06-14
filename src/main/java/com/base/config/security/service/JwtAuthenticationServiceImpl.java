@@ -15,7 +15,7 @@
  */
 package com.base.config.security.service;
 
-import com.base.config.security.service.keypairs.KeyProvider;
+import com.base.config.security.keypairs.KeyProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
