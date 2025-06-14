@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -42,7 +43,7 @@ public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserial
     }
 
     @Override
-    public RSAPublicKey deserialize(InputStream inputStream) throws IOException {
+    public RSAPublicKey deserialize(InputStream inputStream) {
         try {
             var pem = textEncryptor.decrypt(FileCopyUtils.copyToString(new InputStreamReader(inputStream)));
             var publicKeyPEM = pem
@@ -63,6 +64,6 @@ public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserial
         var pem = "-----BEGIN PUBLIC KEY-----\n" +
                 Base64.getMimeEncoder().encodeToString(x509EncodedKeySpec.getEncoded()) +
                 "\n-----END PUBLIC KEY-----";
-        outputStream.write(this.textEncryptor.encrypt(pem).getBytes());
+        outputStream.write(this.textEncryptor.encrypt(pem).getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -21,10 +21,8 @@ import org.springframework.core.serializer.Serializer;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -42,9 +40,9 @@ public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deseri
     }
 
     @Override
-    public RSAPrivateKey deserialize(InputStream inputStream) throws IOException {
-        try {
-            var pem = this.textEncryptor.decrypt(FileCopyUtils.copyToString(new InputStreamReader(inputStream)));
+    public RSAPrivateKey deserialize(InputStream inputStream) {
+        try (var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            var pem = this.textEncryptor.decrypt(FileCopyUtils.copyToString(reader));
             var privateKeyPEM = pem
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "");
@@ -62,6 +60,6 @@ public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deseri
         var pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(object.getEncoded());
         var string = "-----BEGIN PRIVATE KEY-----\n" + Base64.getMimeEncoder().encodeToString(pkcs8EncodedKeySpec.getEncoded())
                 + "\n-----END PRIVATE KEY-----";
-        outputStream.write(this.textEncryptor.encrypt(string).getBytes());
+        outputStream.write(this.textEncryptor.encrypt(string).getBytes(StandardCharsets.UTF_8));
     }
 }

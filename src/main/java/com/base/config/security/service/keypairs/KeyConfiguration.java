@@ -57,7 +57,7 @@ public class KeyConfiguration {
 
     @Bean
     ApplicationListener<RSAKeyPairGenerationRequestEvent> keyPairGenerationRequestListener(Keys keys, RSAKeyPairRepository repository) {
-        String keyId = UUID.randomUUID().toString();
+        var keyId = UUID.randomUUID().toString();
         return _ -> repository.save(keys.generateKeyPair(keyId, new Timestamp(System.currentTimeMillis())));
     }
 
@@ -100,7 +100,7 @@ public class KeyConfiguration {
                     var authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
                     context.getClaims().claim("authorities", authorities);
 
-                    String clientId = context.getAuthorizationGrant().getName();
+                    var clientId = context.getAuthorizationGrant().getName();
                     if (clientSpecificClaims.containsKey(clientId)) {
                         context.getClaims().claim("client_type", clientSpecificClaims.get(clientId));
                     }

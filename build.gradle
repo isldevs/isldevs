@@ -170,7 +170,13 @@ license {
             '**/gradlew*',
             '**/gradle/wrapper/**',
             '**/*Tests.java',
-            '**/*Test.java'
+            '**/*Test.java',
+            '**/.dev',
+            '**/.prod',
+            '**/.env',
+            '**/aot*/**',
+            '**/*__Generated.java',
+            '**/org/springframework/**'
     ])
 }
 
@@ -188,22 +194,10 @@ licenseFormatTest {
 
 tasks.named('licenseAot') {
     enabled = false
-    exclude '**/.dev'
-    exclude '**/.prod'
-    exclude '**/.env'
-    exclude '**/aot*/**'
-    exclude '**/*__Generated.java'
-    exclude '**/org/springframework/**'
 }
 
 tasks.named('licenseAotTest') {
     enabled = false
-    exclude '**/aot*/**'
-    exclude '**/.dev'
-    exclude '**/.prod'
-    exclude '**/.env'
-    exclude '**/*__Generated.java'
-    exclude '**/org/springframework/**'
 }
 
 licenseTest {

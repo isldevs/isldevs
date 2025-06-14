@@ -28,9 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -52,10 +55,16 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
     private static final String TOKEN_ENDPOINT = "/api/v1/oauth2/token";
 
     private final ToApiJsonSerializer toApiJsonSerializer;
+    private final PasswordEncoder passwordEncoder;
+    private final RegisteredClientRepository registeredClientRepository;
 
     @Autowired
-    public HttpAuthenticationFilter(ToApiJsonSerializer toApiJsonSerializer) {
+    public HttpAuthenticationFilter(ToApiJsonSerializer toApiJsonSerializer,
+                                    PasswordEncoder passwordEncoder,
+                                    RegisteredClientRepository registeredClientRepository) {
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.passwordEncoder = passwordEncoder;
+        this.registeredClientRepository = registeredClientRepository;
     }
 
     @Override
@@ -83,20 +92,57 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
                                 "Tenant-Type Value Mismatch"
                         );
                     }
-                    final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-                    if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Basic ")) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Missing or invalid Authorization header");
+                    String clientId = request.getParameter("client_id");
+                    if (StringUtils.isBlank(clientId)) {
+                        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                        if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Basic ")) {
+                            String decoded = new String(Base64.getDecoder().decode(authHeader.substring("Basic ".length()).trim()), StandardCharsets.UTF_8);
+                            String[] parts = decoded.split(":", 2);
+                            if (parts.length == 2) {
+                                clientId = parts[0];
+                            }
+                        }
                     }
-                    final var base64Credentials = authHeader.substring("Basic ".length()).trim();
-                    final var decoded = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
-                    final var parts = decoded.split(":", 2);
-                    if (parts.length != 2) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Invalid Basic authorization format");
+
+                    if (StringUtils.isBlank(clientId)) {
+                        throw new OAuth2AuthenticationException(
+                                new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
+                                "Missing client_id"
+                        );
                     }
-                    final var clientId = parts[0];
-                    final var clientSecret = parts[1];
-                    if (!"web-app".equals(clientId) || !"secret".equals(clientSecret)) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT), "Invalid client credentials");
+
+                    var registeredClient = registeredClientRepository.findByClientId(clientId);
+                    if (registeredClient == null) {
+                        throw new OAuth2AuthenticationException(
+                                new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
+                                "Client not found"
+                        );
+                    }
+
+                    if (registeredClient.getClientAuthenticationMethods().contains(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
+                        final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                        if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Basic ")) {
+                            throw new OAuth2AuthenticationException(
+                                    new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
+                                    "Missing Basic auth for client_secret_basic client"
+                            );
+                        }
+                        final var base64Credentials = authHeader.substring("Basic ".length()).trim();
+                        final var decoded = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
+                        final var parts = decoded.split(":", 2);
+                        if (parts.length != 2) {
+                            throw new OAuth2AuthenticationException(
+                                    new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
+                                    "Invalid Basic authorization format"
+                            );
+                        }
+                        final var clientSecret = parts[1];
+                        if (!passwordEncoder.matches(clientSecret, registeredClient.getClientSecret())) {
+                            throw new OAuth2AuthenticationException(
+                                    new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
+                                    "Invalid client credentials"
+                            );
+                        }
                     }
                 }
             }

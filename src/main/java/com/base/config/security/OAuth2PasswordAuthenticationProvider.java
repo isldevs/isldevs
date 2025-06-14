@@ -49,7 +49,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     @Autowired
     public OAuth2PasswordAuthenticationProvider(AuthenticationProvider authenticationProvider,
                                                 OAuth2AuthorizationService authorizationService,
-                                                @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator,
+                                                OAuth2TokenGenerator<?> tokenGenerator,
                                                 RegisteredClientRepository registeredClientRepository) {
         this.authenticationProvider = authenticationProvider;
         this.authorizationService = authorizationService;

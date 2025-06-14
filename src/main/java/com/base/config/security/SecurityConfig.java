@@ -17,6 +17,8 @@ package com.base.config.security;
 
 import com.base.config.core.authentication.service.CustomUserDetailsService;
 import com.base.config.security.filter.HttpAuthenticationFilter;
+import com.base.config.security.filter.JwtAuthenticationFilter;
+import com.base.config.security.service.keypairs.RSAKeyPairRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +27,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +42,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
@@ -61,6 +66,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.sql.DataSource;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Stream;
@@ -75,8 +81,12 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Autowired
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    public SecurityConfig(final CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+    }
 
     @Bean
     @Order(1)
@@ -85,6 +95,8 @@ public class SecurityConfig {
                                                                       @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator,
                                                                       RegisteredClientRepository registeredClientRepository,
                                                                       HttpAuthenticationFilter httpAuthenticationFilter,
+                                                                      JwtAuthenticationFilter jwtAuthenticationFilter,
+                                                                      JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
                                                                       HttpSecurity http) throws Exception {
         var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         http
@@ -100,6 +112,7 @@ public class SecurityConfig {
                                 .accessTokenRequestConverter(
                                         new DelegatingAuthenticationConverter(
                                                 Arrays.asList(
+                                                        new JwtBearerAuthenticationConverter(),
                                                         new OAuth2PasswordAuthenticationConverter(),
                                                         new OAuth2RefreshTokenAuthenticationConverter(),
                                                         new OAuth2AuthorizationCodeAuthenticationConverter(),
@@ -107,6 +120,7 @@ public class SecurityConfig {
                                                 )
                                         ))
                                 .authenticationProviders(providers -> {
+                                    providers.add(jwtBearerAuthenticationProvider);
                                     providers.add(new OAuth2PasswordAuthenticationProvider(
                                             authenticationProvider,
                                             authorizationService,
@@ -122,6 +136,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 );
@@ -151,6 +166,25 @@ public class SecurityConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().issuer(issuerUri).build();
+    }
+
+    @Bean
+    public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
+                                                                           RegisteredClientRepository registeredClientRepository,
+                                                                           OAuth2AuthorizationService authorizationService,
+                                                                           @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator) {
+        return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService, tokenGenerator);
+    }
+
+    @Bean
+    public JwtAuthenticationProvider jwtAuthenticationProvider(RegisteredClientRepository registeredClientRepository,
+                                                               RSAKeyPairRepository rsaKeyPairRepository) {
+        return new JwtAuthenticationProvider(registeredClientRepository, new ClientAssertionJwtDecoderFactory(rsaKeyPairRepository));
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider) {
+        return new ProviderManager(List.of(jwtBearerAuthenticationProvider));
     }
 
     @Bean
@@ -299,4 +333,8 @@ public class SecurityConfig {
         return new HttpSessionEventPublisher();
     }
 
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
 }

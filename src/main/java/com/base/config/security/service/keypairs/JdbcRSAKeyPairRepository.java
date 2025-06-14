@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
@@ -65,8 +66,8 @@ public class JdbcRSAKeyPairRepository implements RSAKeyPairRepository {
             this.rsaPublicKeyConverter.serialize(keyPair.publicKey(), publicBAOS);
             var updated = this.jdbc.update(sql,
                     keyPair.id(),
-                    privateBAOS.toString(),
-                    publicBAOS.toString(),
+                    privateBAOS.toString(StandardCharsets.UTF_8),
+                    publicBAOS.toString(StandardCharsets.UTF_8),
                     new Date(keyPair.created().getTime()));
             Assert.state(updated == 0 || updated == 1, "no more than one record should have been updated");
         } catch (IOException e) {
