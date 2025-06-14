@@ -36,6 +36,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -87,8 +89,7 @@ public class JwtBearerAuthenticationProvider implements AuthenticationProvider {
                     new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Invalid token audience");
         }
         if (jwt.getExpiresAt() == null || Instant.now().isAfter(jwt.getExpiresAt())) {
-            throw new OAuth2AuthenticationException(
-                    new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN), "Token expired");
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN), "Token expired");
         }
         var accessTokenValue = UUID.randomUUID().toString();
         var authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
@@ -116,12 +117,15 @@ public class JwtBearerAuthenticationProvider implements AuthenticationProvider {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR), "Failed to generate access token");
         }
         var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt());
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("scope", String.join(" ", registeredClient.getScopes()));
+        additionalParameters.put("client_id", clientId);
         return new OAuth2AccessTokenAuthenticationToken(
                 registeredClient,
                 jwtBearerToken,
                 accessToken,
                 null,
-                Collections.emptyMap()
+                additionalParameters
         );
     }
 

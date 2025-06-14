@@ -1,7 +1,7 @@
-DB_URL=jdbc:{youurl}://localhost:{port}}/db
-DB_USERNAME=youruser
-DB_PASSWORD=yourpass
-DB_DRIVER_CLASS=yourdriverclassname
+DB_URL=jdbc:postgresql://localhost:5432/isldevs_db
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_DRIVER_CLASS=org.postgresql.Driver
 
 DB_POOL_MAX_SIZE=15
 DB_POOL_MIN_IDLE=5
@@ -10,7 +10,7 @@ DB_IDLE_TIMEOUT=600000
 DB_MAX_LIFETIME=1800000
 DB_LEAK_DETECTION_THRESHOLD=0
 
-HIBERNATE_DIALECT=yourhibernatedialect
+HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
 HIBERNATE_DDL_AUTO=update
-HIBERNATE_SHOW_SQL=true
+HIBERNATE_SHOW_SQL=false
 HIBERNATE_FORMAT_SQL=true

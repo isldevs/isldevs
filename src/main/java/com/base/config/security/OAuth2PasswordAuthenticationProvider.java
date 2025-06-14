@@ -34,6 +34,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author YISivlay
@@ -111,12 +113,15 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         }
         var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
+        Map<String, Object> additionalParameters = new HashMap<>();
+        additionalParameters.put("scope", String.join(" ", registeredClient.getScopes()));
 
         return new OAuth2AccessTokenAuthenticationToken(
                 registeredClient,
                 userAuthentication,
                 accessToken,
-                refreshToken
+                refreshToken,
+                additionalParameters
         );
     }
 
