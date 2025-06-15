@@ -44,6 +44,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -69,12 +70,14 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
+import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -110,9 +113,10 @@ public class SecurityConfig {
                 .securityMatcher(configurer.getEndpointsMatcher())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.ignoringRequestMatchers(
-                        new AntPathRequestMatcher("/api/v1/oauth2/**"),
-                        new AntPathRequestMatcher("/api/v1/public/**"),
-                        new AntPathRequestMatcher("/api/v1/device/**")
+                        "/api/v1/oauth2/token",
+                        "/api/v1/oauth2/device_authorization",
+                        "/api/v1/oauth2/token/introspect",
+                        "/api/v1/oauth2/token/revoke"
                 ))
                 .with(configurer, (authorizationServer) -> authorizationServer
                         .oidc(Customizer.withDefaults())
@@ -139,15 +143,25 @@ public class SecurityConfig {
                                 })
                         ))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/userinfo", "/api/v1/connect/userinfo").authenticated()
-                        .requestMatchers("/api/v1/oauth2/**","/api/v1/device/**", "/api/v1/public/**").permitAll()
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/api/v1/oauth2/**"),
+                                new AntPathRequestMatcher("/api/v1/device/**"),
+                                new AntPathRequestMatcher("/api/v1/public/**")
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(customAuthenticationEntryPoint())
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new AntPathRequestMatcher("/login", "GET")
+                        )
+                        .defaultAuthenticationEntryPointFor(
+                                customAuthenticationEntryPoint(),
+                                new AntPathRequestMatcher("/api/**")
+                        )
                 );
         return http.build();
     }
@@ -158,9 +172,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                new AntPathRequestMatcher("/api/v1/oauth2/**"),
-                                new AntPathRequestMatcher("/api/v1/device/**"),
-                                new AntPathRequestMatcher("/api/v1/public/**")
+                                "/api/v1/oauth2/**",
+                                "/api/v1/device/**",
+                                "/api/v1/public/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -170,7 +184,14 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(customAuthenticationEntryPoint())
+                        .defaultAuthenticationEntryPointFor(
+                                new LoginUrlAuthenticationEntryPoint("/login"),
+                                new AntPathRequestMatcher("/login", "GET")
+                        )
+                        .defaultAuthenticationEntryPointFor(
+                                customAuthenticationEntryPoint(),
+                                new AntPathRequestMatcher("/api/**")
+                        )
                 );
 
         return http.build();
@@ -358,6 +379,18 @@ public class SecurityConfig {
     public Clock clock() {
         return Clock.systemUTC();
     }
+
+    @Bean
+    public AuthenticationEntryPoint delegatingAuthenticationEntryPoint() {
+
+        var entryPoints = new LinkedHashMap<RequestMatcher, AuthenticationEntryPoint>();
+        entryPoints.put(new AntPathRequestMatcher("/api/**"), customAuthenticationEntryPoint());
+        DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
+        entryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
+
+        return entryPoint;
+    }
+
 
     @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint() {
