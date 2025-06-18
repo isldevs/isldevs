@@ -22,6 +22,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author YISivlay
  */
@@ -33,9 +38,14 @@ public class JwtBearerAuthenticationConverter implements AuthenticationConverter
 
         var clientId = request.getParameter("client_id");
         var assertion = request.getParameter("assertion");
+        var scope = request.getParameter("scope");
 
         if (StringUtils.hasText(clientId) && StringUtils.hasText(assertion)) {
-            return new JwtBearerAuthenticationToken(clientId, assertion);
+            Set<String> scopes = StringUtils.hasText(scope)
+                    ? new HashSet<>(Arrays.asList(scope.split(" ")))
+                    : Collections.emptySet();
+
+            return new JwtBearerAuthenticationToken(clientId, assertion, scopes);
         }
         return null;
     }

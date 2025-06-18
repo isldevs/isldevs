@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +43,7 @@ public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantA
         this.username = username;
         this.password = password;
         this.clientId = clientPrincipal.getName();
-        this.scopes = scopes;
+        this.scopes = (scopes != null) ? Collections.unmodifiableSet(scopes) : Collections.emptySet();
     }
 
     public String getUsername() {

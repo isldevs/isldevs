@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author YISivlay
@@ -77,9 +78,16 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .attribute(Principal.class.getName(), userAuthentication);
 
+        Set<String> authorizedScopes = authRequest.getScopes();
+        if (authorizedScopes == null || authorizedScopes.isEmpty()) {
+            authorizedScopes = registeredClient.getScopes();
+        }
+        authorizationBuilder.attribute("authorized_scopes", authorizedScopes);
+
         var tokenContext = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
                 .principal(userAuthentication)
+                .authorizedScopes(authorizedScopes)
                 .authorization(authorizationBuilder.build())
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .authorizationGrant(authRequest)
@@ -91,7 +99,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         if (oAuth2Token == null) {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR), "Access token generation failed");
         }
-        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt());
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token.getExpiresAt(), authorizedScopes);
 
         OAuth2RefreshToken refreshToken = null;
         if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)) {
@@ -114,7 +122,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
         Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put("scope", String.join(" ", registeredClient.getScopes()));
+        additionalParameters.put("scope", String.join(" ", authorizedScopes));
         additionalParameters.put("client_id", registeredClient.getClientId());
 
         return new OAuth2AccessTokenAuthenticationToken(

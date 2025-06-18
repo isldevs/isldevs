@@ -18,6 +18,7 @@ package com.base.config.security.keypairs;
 
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,7 +30,9 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.*;
@@ -67,7 +70,6 @@ public class KeyConfiguration {
         return Encryptors.text(pw, salt);
     }
 
-
     @Bean
     NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
@@ -93,7 +95,7 @@ public class KeyConfiguration {
                             .subject(principal.getName())
                             .claim("user_id", principal.getName())
                             .claim("client_id", context.getRegisteredClient().getClientId())
-                            .claim("scopes", context.getAuthorizedScopes())
+                            .claim("scopes", String.join(" ", context.getAuthorizedScopes()))
                             .claim("issued_at", Instant.now().toString())
                             .claim("grant_type", context.getAuthorizationGrantType().getValue());
 
@@ -109,7 +111,7 @@ public class KeyConfiguration {
                         context.getClaims().claim("can_read", true);
                     }
                 } catch (Exception e) {
-                    System.err.println("Error customizing access token claims: " + e.getMessage());
+                    System.err.println(STR."Error customizing access token claims: \{e.getMessage()}");
 
                 }
             } else if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
