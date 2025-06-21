@@ -45,7 +45,10 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.*;
@@ -73,6 +76,7 @@ import org.springframework.security.web.authentication.DelegatingAuthenticationC
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -142,7 +146,13 @@ public class SecurityConfig {
                         ))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                new AntPathRequestMatcher("/api/v1/oauth2/**"),
+                                new AntPathRequestMatcher("/api/v1/oauth2/token"),
+                                new AntPathRequestMatcher("/api/v1/oauth2/device_authorization"),
+                                new AntPathRequestMatcher("/api/v1/oauth2/token/introspect"),
+                                new AntPathRequestMatcher("/api/v1/oauth2/token/revoke"),
+                                new AntPathRequestMatcher("/.well-known/oauth-authorization-server"),
+                                new AntPathRequestMatcher("/.well-known/openid-configuration"),
+                                new AntPathRequestMatcher("/jwks"),
                                 new AntPathRequestMatcher("/api/v1/device/**"),
                                 new AntPathRequestMatcher("/api/v1/public/**")
                         ).permitAll()
@@ -151,16 +161,32 @@ public class SecurityConfig {
                 .formLogin(Customizer.withDefaults())
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
-                .exceptionHandling(e -> e
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new AntPathRequestMatcher("/login", "GET")
-                        )
-                        .defaultAuthenticationEntryPointFor(
-                                customAuthenticationEntryPoint(),
-                                new AntPathRequestMatcher("/api/**")
-                        )
+                .exceptionHandling(e -> e.authenticationEntryPoint(delegatingAuthenticationEntryPoint()))
+                .headers(headers -> headers
+                        .xssProtection(Customizer.withDefaults()) //Protects against Cross-Site Scripting (XSS) attacks
+                        .cacheControl(Customizer.withDefaults()) //Controls caching behavior to prevent sensitive data from being stored
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; " +
+                                        "script-src 'self'; " +
+                                        "style-src 'self'; " +
+                                        "img-src 'self' data:; " +
+                                        "font-src 'self'; " +
+                                        "connect-src 'self'; " +
+                                        "form-action 'self'; " +
+                                        "frame-ancestors 'none'; " +
+                                        "block-all-mixed-content")
+                        ) //Mitigates XSS, clickjacking, and other code injection attacks
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny) //Prevents clickjacking attacks
+                        .contentTypeOptions(Customizer.withDefaults()) //Prevents MIME type sniffing
+                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)) //Enforces HTTPS connections
+                        .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'")) //Controls which browser features/APIs can be used
+                        .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)) //Controls referrer information in requests
+                )
+                .requiresChannel(channel -> channel
+                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto")!= null) //Ensures HTTPS is used when behind a proxy
+                        .requiresSecure()
                 );
+
         return http.build();
     }
 
@@ -187,7 +213,13 @@ public class SecurityConfig {
                                         .jwtAuthenticationConverter(jwtAuthenticationTokenConverter())
                                 )
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true)
+                        .sessionRegistry(sessionRegistry())
+                )
                 .exceptionHandling(e -> e
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
@@ -200,67 +232,6 @@ public class SecurityConfig {
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().issuer(issuerUri).build();
-    }
-
-    @Bean
-    public Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationTokenConverter() {
-        return new CustomJwtAuthenticationConverter();
-    }
-
-    @Bean
-    public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
-                                                                           RegisteredClientRepository registeredClientRepository,
-                                                                           OAuth2AuthorizationService authorizationService,
-                                                                           @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator) {
-        return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService, tokenGenerator);
-    }
-
-    @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(RegisteredClientRepository registeredClientRepository,
-                                                               RSAKeyPairRepository rsaKeyPairRepository) {
-        return new JwtAuthenticationProvider(registeredClientRepository, new ClientAssertionJwtDecoderFactory(rsaKeyPairRepository));
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider) {
-        return new ProviderManager(List.of(jwtBearerAuthenticationProvider));
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        var provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        var configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Bean
-    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-        var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        Stream.of(webClient(), serviceClient(), microserviceClient(), deviceClient()).forEach(client -> {
-            if (repository.findByClientId(client.getClientId()) == null) {
-                repository.save(client);
-            }
-        });
-
-        return repository;
     }
 
     @Bean
@@ -361,6 +332,68 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().issuer(issuerUri).build();
+    }
+
+    @Bean
+    public Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationTokenConverter() {
+        return new CustomJwtAuthenticationConverter();
+    }
+
+    @Bean
+    public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
+                                                                           RegisteredClientRepository registeredClientRepository,
+                                                                           OAuth2AuthorizationService authorizationService,
+                                                                           @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator) {
+        return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService, tokenGenerator);
+    }
+
+    @Bean
+    public JwtAuthenticationProvider jwtAuthenticationProvider(RegisteredClientRepository registeredClientRepository,
+                                                               RSAKeyPairRepository rsaKeyPairRepository) {
+        return new JwtAuthenticationProvider(registeredClientRepository, new ClientAssertionJwtDecoderFactory(rsaKeyPairRepository));
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
+                                                       AuthenticationProvider authenticationProvider) {
+        return new ProviderManager(List.of(jwtBearerAuthenticationProvider, authenticationProvider));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        var provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        var configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("https://127.0.0.1:8443", "http://127.0.0.1:8080", "http://127.0.0.1:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+        var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
+        Stream.of(webClient(), serviceClient(), microserviceClient(), deviceClient()).forEach(client -> {
+            if (repository.findByClientId(client.getClientId()) == null) {
+                repository.save(client);
+            }
+        });
+
+        return repository;
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
@@ -378,11 +411,6 @@ public class SecurityConfig {
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
-    }
-
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
     }
 
     @Bean
@@ -412,5 +440,15 @@ public class SecurityConfig {
                     "error_description", authException.getMessage()
             )));
         };
+    }
+
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
     }
 }
