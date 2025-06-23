@@ -30,7 +30,7 @@ import java.sql.Timestamp;
 @Component
 public class Keys {
 
-    RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
+    public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
         var keyPair = generateRsaKey();
         var publicKey = (RSAPublicKey) keyPair.getPublic();
         var privateKey = (RSAPrivateKey) keyPair.getPrivate();

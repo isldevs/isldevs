@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.security.keypairs;
+package com.base.config.core.schedule.service;
 
+import com.base.config.security.keypairs.Keys;
+import com.base.config.security.keypairs.RSAKeyPairRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -30,8 +31,8 @@ import java.util.UUID;
 /**
  * @author YISivlay
  */
-@Component
-public class ScheduledKeyRotator {
+@Component("rsaKeyRotator")
+public class ScheduledKeyRotator implements Runnable {
 
     private final static Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
 
@@ -44,21 +45,26 @@ public class ScheduledKeyRotator {
         this.keys = keys;
     }
 
-    @Scheduled(cron = "0 0 0 */30 * *")
-    public void autoRotateKey() {
-        var keyPairs = repository.findKeyPairs();
-        var newestKey = keyPairs.stream().max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
-        var shouldRotate = newestKey.isEmpty() || newestKey.get().created().toInstant().isBefore(Instant.now().minus(30, ChronoUnit.DAYS));
+    @Override
+    public void run() {
+        try {
+            var keyPairs = repository.findKeyPairs();
+            var newestKey = keyPairs.stream()
+                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+            var shouldRotate = newestKey.isEmpty() ||
+                    newestKey.get().created().toInstant().isBefore(Instant.now().minus(30, ChronoUnit.DAYS));
 
-        if (shouldRotate) {
-            String keyId = UUID.randomUUID().toString();
-            var created = new Timestamp(System.currentTimeMillis());
-            var newKey = keys.generateKeyPair(keyId, created);
-            repository.save(newKey);
-            logger.info("ScheduledKeyRotator: Rotated RSA key with ID {} on new created {}", keyId, created);
-        } else {
-            logger.info("ScheduledKeyRotator: Key rotation not required yet.");
+            if (shouldRotate) {
+                String keyId = UUID.randomUUID().toString();
+                Timestamp created = new Timestamp(System.currentTimeMillis());
+                var newKey = keys.generateKeyPair(keyId, created);
+                repository.save(newKey);
+                logger.info("New rotated RSA key with ID {} on {}", keyId, created);
+            } else {
+                logger.info("RSA key not expired yet.");
+            }
+        } catch (Exception e) {
+            logger.error("RSA key rotation failed", e);
         }
     }
-
 }
