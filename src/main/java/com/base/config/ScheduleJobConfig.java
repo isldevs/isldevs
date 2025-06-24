@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.schedule.service;
+package com.base.config;
 
 import com.base.config.core.schedule.model.ScheduleJob;
 import com.base.config.core.schedule.model.ScheduledJobHistory;
@@ -40,17 +40,17 @@ import java.time.ZoneId;
  */
 @Configuration
 @EnableScheduling
-public class ScheduleJobService implements SchedulingConfigurer {
+public class ScheduleJobConfig implements SchedulingConfigurer {
 
-    private final Logger logger = LoggerFactory.getLogger(ScheduleJobService.class);
+    private final Logger logger = LoggerFactory.getLogger(ScheduleJobConfig.class);
 
     private final ApplicationContext applicationContext;
     private final ScheduleJobRepository jobRepository;
     private final ScheduledJobHistoryRepository jobHistoryRepository;
 
-    public ScheduleJobService(final ApplicationContext applicationContext,
-                              final ScheduleJobRepository jobRepository,
-                              final ScheduledJobHistoryRepository jobHistoryRepository) {
+    public ScheduleJobConfig(final ApplicationContext applicationContext,
+                             final ScheduleJobRepository jobRepository,
+                             final ScheduledJobHistoryRepository jobHistoryRepository) {
         this.applicationContext = applicationContext;
         this.jobRepository = jobRepository;
         this.jobHistoryRepository = jobHistoryRepository;
