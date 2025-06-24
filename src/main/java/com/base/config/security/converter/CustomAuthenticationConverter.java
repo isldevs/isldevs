@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * @author YISivlay
  */
-public class JwtBearerAuthenticationConverter implements AuthenticationConverter {
+public class CustomAuthenticationConverter implements AuthenticationConverter {
     @Override
     public Authentication convert(HttpServletRequest request) {
         var grantType = request.getParameter("grant_type");

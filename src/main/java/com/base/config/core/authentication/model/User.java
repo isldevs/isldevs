@@ -15,11 +15,16 @@
  */
 package com.base.config.core.authentication.model;
 
+import com.base.config.core.authentication.controller.UserConstants;
+import com.base.config.core.authentication.data.UserCreateDTO;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +32,8 @@ import java.util.stream.Collectors;
 /**
  * @author YISivlay
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class User extends AbstractPersistable<Long> implements UserDetails {
@@ -84,7 +91,7 @@ public class User extends AbstractPersistable<Long> implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
-    protected User() {
+    public User() {
     }
 
     public User(Builder builder) {
@@ -212,6 +219,48 @@ public class User extends AbstractPersistable<Long> implements UserDetails {
             this.roles = roles;
             return this;
         }
+
+        public Builder authority(Collection<? extends GrantedAuthority> authorities) {
+            this.roles = authorities.stream()
+                    .map(grantedAuthority -> {
+                        Role role = new Role();
+                        role.setName(grantedAuthority.getAuthority());
+                        Set<Authority> authoritySet = new HashSet<>();
+                        Authority authority = new Authority();
+                        authority.setAuthority(grantedAuthority.getAuthority());
+                        authoritySet.add(authority);
+                        role.setAuthorities(authoritySet);
+                        return role;
+                    })
+                    .collect(Collectors.toSet());
+            return this;
+        }
+    }
+
+    public Map<String, Object> changed(PasswordEncoder passwordEncoder, UserCreateDTO dto) {
+        Map<String, Object> changes = new HashMap<>(7);
+
+        if (!this.username.equals(dto.getUsername())) {
+            this.username = dto.getUsername();
+            changes.put(UserConstants.USERNAME, dto.getUsername());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            this.password = passwordEncoder.encode(dto.getPassword());
+            changes.put(UserConstants.PASSWORD, "CHANGED");
+        }
+
+        if (!Objects.equals(this.name, dto.getName())) {
+            this.name = dto.getName();
+            changes.put(UserConstants.NAME, dto.getName());
+        }
+
+        if (!Objects.equals(this.email, dto.getEmail())) {
+            this.email = dto.getEmail();
+            changes.put(UserConstants.EMAIL, dto.getEmail());
+        }
+
+        return changes;
     }
 
     @Override
@@ -251,9 +300,5 @@ public class User extends AbstractPersistable<Long> implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.enabled;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
     }
 }

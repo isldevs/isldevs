@@ -15,28 +15,30 @@
  */
 package com.base.config.core.authentication.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * @author YISivlay
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "authorities")
 public class Authority extends AbstractPersistable<Long> {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
+    @JsonIgnore
     private Role role;
 
     @Column(nullable = false)
     private String authority;
 
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    protected Authority() {
+    public Authority() {
     }
 
     public Authority(Builder builder) {
@@ -66,13 +68,5 @@ public class Authority extends AbstractPersistable<Long> {
             this.authority = authority;
             return this;
         }
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public String getAuthority() {
-        return authority;
     }
 }

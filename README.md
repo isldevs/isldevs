@@ -524,3 +524,25 @@ jwt.persistence.password=iamsldevs
 jwt.persistence.salt=69736c64657673
 ```
 
+## 🔒 Dependency Locking
+This project uses Gradle dependency locking to ensure consistent builds across all environments.
+
+A gradle.lockfile is automatically generated and tracked in version control.
+
+This file captures the exact resolved versions of all dependencies and prevents unexpected upgrades due to dynamic or transitive versions.
+
+Dependency locking is enabled via dependencyLocking in build.gradle.
+
+* 🔧 To update the lock file:
+  Use the following command to regenerate it after modifying dependencies:
+
+```
+./gradlew dependencies --write-locks
+```
+* To refresh all dependencies and update the lock file:
+
+```
+./gradlew dependencies --write-locks --refresh-dependencies
+```
+💡 The gradle.lockfile is intentionally located at the project root, following Gradle's standard behavior.
+

@@ -16,8 +16,8 @@
 package com.base.config.security;
 
 import com.base.config.core.authentication.service.CustomUserDetailsService;
-import com.base.config.security.converter.CustomJwtAuthenticationConverter;
-import com.base.config.security.converter.JwtBearerAuthenticationConverter;
+import com.base.config.security.converter.CustomConverter;
+import com.base.config.security.converter.CustomAuthenticationConverter;
 import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;
 import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
 import com.base.config.security.filter.HttpAuthenticationFilter;
@@ -26,15 +26,13 @@ import com.base.config.security.provider.JwtAuthenticationProvider;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
 import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
 import com.base.config.security.keypairs.RSAKeyPairRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletResponse;
+import com.base.config.security.service.CustomAuthenticationEntryPoint;
+import com.base.config.security.service.CustomTokenCustomizer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,7 +52,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
@@ -64,12 +61,12 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
@@ -126,7 +123,7 @@ public class SecurityConfig {
                                 .accessTokenRequestConverter(
                                         new DelegatingAuthenticationConverter(
                                                 Arrays.asList(
-                                                        new JwtBearerAuthenticationConverter(),
+                                                        new CustomAuthenticationConverter(),
                                                         new OAuth2PasswordAuthenticationConverter(),
                                                         new OAuth2RefreshTokenAuthenticationConverter(),
                                                         new OAuth2AuthorizationCodeAuthenticationConverter(),
@@ -183,7 +180,7 @@ public class SecurityConfig {
                         .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)) //Controls referrer information in requests
                 )
                 .requiresChannel(channel -> channel
-                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto")!= null) //Ensures HTTPS is used when behind a proxy
+                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null) //Ensures HTTPS is used when behind a proxy
                         .requiresSecure()
                 );
 
@@ -210,7 +207,7 @@ public class SecurityConfig {
                         oauth2 -> oauth2
                                 .jwt(jwt -> jwt
                                         .decoder(jwtDecoder)
-                                        .jwtAuthenticationConverter(jwtAuthenticationTokenConverter())
+                                        .jwtAuthenticationConverter(new CustomConverter())
                                 )
                 )
                 .sessionManagement(session -> session
@@ -220,16 +217,7 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(true)
                         .sessionRegistry(sessionRegistry())
                 )
-                .exceptionHandling(e -> e
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new AntPathRequestMatcher("/login", "GET")
-                        )
-                        .defaultAuthenticationEntryPointFor(
-                                customAuthenticationEntryPoint(),
-                                new AntPathRequestMatcher("/api/**")
-                        )
-                );
+                .exceptionHandling(e -> e.authenticationEntryPoint(delegatingAuthenticationEntryPoint()));
 
         return http.build();
     }
@@ -263,6 +251,7 @@ public class SecurityConfig {
                         .build())
                 .tokenSettings(TokenSettings
                         .builder()
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofMinutes(30))
                         .refreshTokenTimeToLive(Duration.ofDays(7))
                         .reuseRefreshTokens(true)
@@ -285,6 +274,7 @@ public class SecurityConfig {
                 })
                 .tokenSettings(
                         TokenSettings.builder()
+                                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                                 .accessTokenTimeToLive(Duration.ofHours(1))
                                 .build()
                 )
@@ -303,6 +293,7 @@ public class SecurityConfig {
                         .jwkSetUrl(STR."\{issuerUri}/.well-known/jwks.json")
                         .build())
                 .tokenSettings(TokenSettings.builder()
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
                         .build())
                 .build();
@@ -325,6 +316,7 @@ public class SecurityConfig {
                     scopes.add("device.manage");
                 })
                 .tokenSettings(TokenSettings.builder()
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofDays(1))
                         .refreshTokenTimeToLive(Duration.ofDays(30))
                         .build())
@@ -332,13 +324,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().issuer(issuerUri).build();
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+        return new CustomTokenCustomizer();
     }
 
     @Bean
-    public Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationTokenConverter() {
-        return new CustomJwtAuthenticationConverter();
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().issuer(issuerUri).build();
     }
 
     @Bean
@@ -422,24 +414,11 @@ public class SecurityConfig {
     public AuthenticationEntryPoint delegatingAuthenticationEntryPoint() {
 
         var entryPoints = new LinkedHashMap<RequestMatcher, AuthenticationEntryPoint>();
-        entryPoints.put(new AntPathRequestMatcher("/api/**"), customAuthenticationEntryPoint());
+        entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint());
         DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
         entryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
 
         return entryPoint;
-    }
-
-
-    @Bean
-    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
-        return (_, response, authException) -> {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(new ObjectMapper().writeValueAsString(Map.of(
-                    "error", "unauthorized",
-                    "error_description", authException.getMessage()
-            )));
-        };
     }
 
     @Bean

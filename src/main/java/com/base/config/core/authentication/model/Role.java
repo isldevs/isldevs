@@ -15,7 +15,11 @@
  */
 package com.base.config.core.authentication.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import java.util.HashSet;
@@ -24,17 +28,20 @@ import java.util.Set;
 /**
  * @author YISivlay
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "roles")
 public class Role extends AbstractPersistable<Long> {
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
-    private final Set<Authority> authorities = new HashSet<>();
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<Authority> authorities = new HashSet<>();
 
     @Column(unique = true, nullable = false)
     private String name;
 
-    protected Role() {}
+    public Role() {}
 
     public Role(Builder builder) {
         this.name = builder.name;
@@ -58,11 +65,4 @@ public class Role extends AbstractPersistable<Long> {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Set<Authority> getAuthorities() {
-        return authorities;
-    }
 }

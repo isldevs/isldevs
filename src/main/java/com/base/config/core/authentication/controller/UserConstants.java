@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2025 iSLDevs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.authentication.repository;
+package com.base.config.core.authentication.controller;
 
-import com.base.config.core.authentication.model.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
  * @author YISivlay
  */
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
-    Optional<Role> findByName(String roleName);
+public class UserConstants {
+
+    public static final String API_PATH = "/users";
+
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String NAME = "name";
+    public static final String EMAIL = "email";
+    public static final String ROLES = "roles";
+
 }

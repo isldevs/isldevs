@@ -1,9 +1,9 @@
-package com.base.config.security.converter;
+package com.base.config.core.authentication.controller;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CustomJwtAuthenticationConverterTests {
+class UserConstantsTests {
 
     @Test
     void contextLoads() {

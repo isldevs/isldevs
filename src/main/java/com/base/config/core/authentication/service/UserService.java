@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2025 iSLDevs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.authentication.repository;
+package com.base.config.core.authentication.service;
 
-import com.base.config.core.authentication.model.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.base.config.core.authentication.data.UserCreateDTO;
+import com.base.config.core.authentication.data.UserDTO;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+
+import java.util.Map;
 
 /**
  * @author YISivlay
  */
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
-    Optional<Role> findByName(String roleName);
+public interface UserService {
+
+    UserDTO createUser(@Valid UserCreateDTO dto);
+
+    UserDTO getUserById(Long id);
+
+    Page<UserDTO> listUsers(Integer page, Integer size, String search);
+
+    Map<String, Object> updateUser(Long id, @Valid UserCreateDTO dto);
+
+    void deleteUser(Long id);
+
 }

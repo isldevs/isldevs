@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2025 iSLDevs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.authentication.repository;
+package com.base.config.security.service;
 
-import com.base.config.core.authentication.model.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.base.config.core.authentication.model.User;
 
 /**
  * @author YISivlay
  */
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
-    Optional<Role> findByName(String roleName);
+public interface SecurityContext {
+
+    User authenticatedUser();
+
+    boolean isAdmin();
+
+    boolean hasAuthority(String authority);
+
 }

@@ -35,7 +35,7 @@ public class DeviceVerificationApiResource {
         return "oauth2/device-verification";
     }
 
-    @GetMapping
+    @GetMapping("/")
     public String verificationSuccess(@RequestParam(value = "success", required = false) String success, Model model) {
         model.addAttribute("message", "Device verification successful!");
         return "oauth2/device-verification-success";

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2025 iSLDevs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.authentication.repository;
+package com.base.config.core.authentication.data;
 
-import com.base.config.core.authentication.model.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Set;
 
 /**
  * @author YISivlay
  */
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
-    Optional<Role> findByName(String roleName);
+@Getter
+@Setter
+public class UserCreateDTO {
+
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
+
+    private String name;
+
+    @Email
+    private String email;
+
+    private Set<String> roles;
+
+    public UserCreateDTO() {
+    }
+
 }

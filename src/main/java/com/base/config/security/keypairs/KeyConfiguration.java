@@ -76,67 +76,10 @@ public class KeyConfiguration {
     }
 
     @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-        final var clientSpecificClaims = Map.of(
-                "web-app", "web-app",
-                "service-account",
-                "service-account",
-                "microservice",
-                "microservice",
-                "iot-device",
-                "iot-device"
-        );
-
-        return context -> {
-            if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
-                try {
-                    var principal = context.getPrincipal();
-                    context.getClaims()
-                            .subject(principal.getName())
-                            .claim("user_id", principal.getName())
-                            .claim("client_id", context.getRegisteredClient().getClientId())
-                            .claim("scopes", String.join(" ", context.getAuthorizedScopes()))
-                            .claim("issued_at", Instant.now().toString())
-                            .claim("grant_type", context.getAuthorizationGrantType().getValue());
-
-                    var authorities = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-                    context.getClaims().claim("authorities", authorities);
-
-                    var clientId = context.getAuthorizationGrant().getName();
-                    if (clientSpecificClaims.containsKey(clientId)) {
-                        context.getClaims().claim("client_type", clientSpecificClaims.get(clientId));
-                    }
-
-                    if (context.getAuthorizedScopes().contains("read")) {
-                        context.getClaims().claim("can_read", true);
-                    }
-                } catch (Exception e) {
-                    System.err.println(STR."Error customizing access token claims: \{e.getMessage()}");
-
-                }
-            } else if (context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)) {
-                try {
-                    var principal = context.getPrincipal();
-                    context.getClaims().subject(principal.getName())
-                            .claim("user_id", principal.getName())
-                            .claim("email", principal.getName())
-                            .claim("name", principal.getName());
-                    var authorities = principal.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
-                    context.getClaims().claim("authorities", authorities);
-                } catch (Exception e) {
-                    System.err.println("Error customizing id token claims: " + e.getMessage());
-                }
-            }
-        };
-    }
-
-    @Bean
     OAuth2TokenGenerator<OAuth2Token> delegatingOAuth2TokenGenerator(JwtEncoder encoder,
-                                                                     OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer) {
+                                                                     OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
         var generator = new JwtGenerator(encoder);
-        generator.setJwtCustomizer(jwtCustomizer);
+        generator.setJwtCustomizer(customTokenCustomizer);
         return new DelegatingOAuth2TokenGenerator(generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
     }
 }

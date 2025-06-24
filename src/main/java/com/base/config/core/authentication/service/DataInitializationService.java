@@ -65,7 +65,7 @@ public class DataInitializationService {
         }
 
         var adminUserList = entityManager.createQuery("SELECT u FROM User u WHERE u.username = 'admin'", User.class).getResultList();
-        var adminUser = adminUserList.isEmpty() ? null : adminUserList.getFirst();
+        var adminUser = adminUserList.isEmpty() ? User.builder().build() : adminUserList.getFirst();
         if (adminUser == null) {
             var encodedPassword = passwordEncoder.encode("admin@2025!");
             adminUser = User.builder()
