@@ -15,10 +15,13 @@
  */
 package com.base.config.security;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.session.StandardManager;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
+import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -91,6 +94,15 @@ public class TomcatSSLConfig {
             httpConnector.setRedirectPort(HTTPS_PORT);
             factory.setContextPath(CONTEXT_PATH);
             factory.addAdditionalTomcatConnectors(httpConnector);
+        };
+    }
+
+    @Bean
+    public TomcatContextCustomizer tomcatContextCustomizer() {
+        return context -> {
+            StandardManager manager = new StandardManager();
+            manager.setPathname(null); // disables session persistence
+            context.setManager(manager);
         };
     }
 }
