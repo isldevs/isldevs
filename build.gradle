@@ -34,6 +34,10 @@ configurations.configureEach {
 
 apply from: 'gradle/dependencies.gradle'
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 def env = new Properties()
 def activeProfile = findProperty("spring.profiles.active") ?: "dev"
 def envFiles = [
