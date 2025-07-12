@@ -46,7 +46,7 @@ public class TomcatSSLConfig {
     private static final String KEY_ALIAS = "server";
     private static final String KEYSTORE_TYPE = "PKCS12";
 
-    private static final int HTTPS_PORT = 8443;
+    private static final int HTTPS_PORT = 8444;
     private static final int HTTP_PORT = 8080;
     private static final String CONTEXT_PATH = "/api/v1";
 
@@ -56,7 +56,7 @@ public class TomcatSSLConfig {
             factory.addConnectorCustomizers(connector -> {
                 connector.setScheme("https");
                 connector.setSecure(true);
-                connector.setPort(8443);
+                connector.setPort(HTTPS_PORT);
 
                 var protocol = (Http11NioProtocol) connector.getProtocolHandler();
 

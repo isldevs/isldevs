@@ -17,7 +17,10 @@ package com.base.config.core.authentication.controller;
 
 import com.base.config.core.authentication.data.UserCreateDTO;
 import com.base.config.core.authentication.data.UserDTO;
+import com.base.config.core.authentication.handler.UserCommandBuilder;
 import com.base.config.core.authentication.service.UserService;
+import com.base.config.core.command.data.Command;
+import com.base.config.core.serializer.service.JsonSerializerImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -34,17 +37,25 @@ import java.util.Map;
 @RequestMapping(UserConstants.API_PATH)
 public class UserController {
 
+    private final JsonSerializerImpl<UserDTO> serializer;
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(final JsonSerializerImpl<UserDTO> serializer,
+                          final UserService userService) {
+        this.serializer = serializer;
         this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO dto) {
-        var createdUser = userService.createUser(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    public ResponseEntity<UserDTO> createUser(@RequestBody String json) {
+
+        final Command command = new UserCommandBuilder()
+                .create()
+                .json(json)
+                .build();
+
+        return this.serializer.serialize(json);
     }
 
     @GetMapping("/{id}")

@@ -21,6 +21,7 @@ package com.base.config.core.authentication.controller;
  */
 public class UserConstants {
 
+    public static final String PERMISSION = "USER";
     public static final String API_PATH = "/users";
 
     public static final String USERNAME = "username";
