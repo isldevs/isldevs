@@ -244,7 +244,7 @@ Here are the Postman endpoints for each client ID flow:
                  return randomString;
              }
              const codeVerifier = generateCodeVerifier();
-             console.log("Code Verifier:", codeVerifier);
+             console.logs("Code Verifier:", codeVerifier);
              ```
 
       2.  **Generate Code Challenge:**
@@ -263,7 +263,7 @@ Here are the Postman endpoints for each client ID flow:
                  return base64url(digest);
              }
              generateCodeChallenge(codeVerifier).then(codeChallenge => {
-                 console.log("Code Challenge:", codeChallenge);
+                 console.logs("Code Challenge:", codeChallenge);
              });
              ```
 

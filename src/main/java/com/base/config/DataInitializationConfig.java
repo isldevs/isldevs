@@ -15,7 +15,7 @@
  */
 package com.base.config;
 
-import com.base.config.core.authentication.service.DataInitializationService;
+import com.base.config.core.service.DataInitializationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +38,7 @@ public class DataInitializationConfig {
 
     @Bean
     public CommandLineRunner dataInitialization() {
-        return args -> {
+        return _ -> {
             dataInitializationService.dataInitialization();
         };
     }

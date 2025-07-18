@@ -16,20 +16,21 @@
 package com.base.config.core.exception;
 
 
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import com.base.config.core.data.ErrorData;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 /**
  * @author YISivlay
@@ -37,62 +38,74 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private final MessageSource messageSource;
+
+    public GlobalExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        Map<String, String> error = Map.of(
-                "error", "Bad Request",
-                "error_description", ex.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    public ResponseEntity<ErrorData> handleIllegalArgumentException(IllegalArgumentException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, message, null);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Map<String, String>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
-        return buildResponseEntity(HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage());
+    public ResponseEntity<ErrorData> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.METHOD_NOT_ALLOWED, message, null);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<Map<String, String>> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
-        return buildResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage());
+    public ResponseEntity<ErrorData> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message, null);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining("; "));
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, message);
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorData> handleBadRequestException(BadRequestException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, message, ex.getArgs());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        ex.printStackTrace();
-        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    public ResponseEntity<ErrorData> handleGenericException(Exception ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, message, null);
     }
 
     @ExceptionHandler(value = { AccessDeniedException.class })
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Map<String, Object> handleAccessDeniedException(AccessDeniedException ex) {
-        return Map.of(
-                "error", "Forbidden",
-                "error_description", ex.getMessage()
-        );
+    public ResponseEntity<ErrorData> handleAccessDeniedException(AccessDeniedException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.FORBIDDEN, message, null);
     }
 
-    @ExceptionHandler(value = { AuthenticationException.class })
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Map<String, Object> handleAuthenticationException(AuthenticationException ex) {
-        return Map.of(
-                "error", "Unauthorized",
-                "error_description", ex.getMessage()
-        );
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorData> handleAuthenticationException(AuthenticationException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, message, null);
     }
 
-    private ResponseEntity<Map<String, String>> buildResponseEntity(HttpStatus status, String message) {
-        Map<String, String> errorBody = Map.of(
-                "error", status.getReasonPhrase(),
-                "error_description", message
-        );
-        return ResponseEntity.status(status).body(errorBody);
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorData> handleNotFoundException(NotFoundException ex, Locale locale) {
+        var message  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.NOT_FOUND, message, ex.getArgs());
+    }
+
+    private ResponseEntity<ErrorData> buildResponseEntity(HttpStatus status, String message, Object[] args) {
+
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
+
+        var errorData = ErrorData.builder()
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .description(message)
+                .args(args)
+                .build();
+
+        return new ResponseEntity<>(errorData, headers, status);
     }
 }

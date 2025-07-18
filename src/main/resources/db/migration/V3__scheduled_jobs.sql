@@ -8,7 +8,7 @@ CREATE TABLE scheduled_job
 
 CREATE TABLE scheduled_job_history
 (
-    id               SERIAL PRIMARY KEY,
+    id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     job_name         TEXT         NOT NULL,
     executed_at      TIMESTAMP(0) NOT NULL,
     next_executed_at TIMESTAMP(0),

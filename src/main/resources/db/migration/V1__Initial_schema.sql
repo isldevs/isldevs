@@ -64,13 +64,13 @@ CREATE TABLE oauth2_registered_client
 
 CREATE TABLE users
 (
-    id                         BIGSERIAL PRIMARY KEY,
+    id                         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username                   VARCHAR(50)  NOT NULL UNIQUE,
     password                   VARCHAR(500) NOT NULL,
-    provider                   VARCHAR(50)  NOT NULL DEFAULT 'LOCAL',
-    provider_id                VARCHAR(100),
     name                       VARCHAR(255),
     email                      VARCHAR(255),
+    provider                   VARCHAR(50)  NOT NULL DEFAULT 'LOCAL',
+    provider_id                VARCHAR(100),
     avatar_url                 TEXT,
     locale                     VARCHAR(20),
     access_token               TEXT,
@@ -84,7 +84,7 @@ CREATE TABLE users
 
 CREATE TABLE authorities
 (
-    id        BIGSERIAL PRIMARY KEY,
+    id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     authority VARCHAR(50) NOT NULL
 );
 

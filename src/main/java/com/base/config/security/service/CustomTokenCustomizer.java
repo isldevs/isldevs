@@ -16,13 +16,11 @@
 package com.base.config.security.service;
 
 
-import com.base.config.core.authentication.model.Authority;
-import com.base.config.core.authentication.model.Role;
+import com.base.config.core.authentication.user.model.Authority;
+import com.base.config.core.authentication.user.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
@@ -32,8 +30,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -56,7 +52,7 @@ public class CustomTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
                     .claim("issued_at", Instant.now().toString())
                     .claim("grant_type", context.getAuthorizationGrantType().getValue());
 
-            if (principal.getPrincipal() instanceof com.base.config.core.authentication.model.User user) {
+            if (principal.getPrincipal() instanceof User user) {
                 List<Map<String, Object>> roles = user.getRoles().stream()
                         .map(role -> {
                             Map<String, Object> roleMap = new HashMap<>();

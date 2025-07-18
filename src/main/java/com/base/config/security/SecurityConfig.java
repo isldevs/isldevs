@@ -15,7 +15,7 @@
  */
 package com.base.config.security;
 
-import com.base.config.core.authentication.service.CustomUserDetailsService;
+import com.base.config.core.authentication.user.service.CustomUserDetailsService;
 import com.base.config.security.converter.CustomConverter;
 import com.base.config.security.converter.CustomAuthenticationConverter;
 import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;
@@ -28,8 +28,11 @@ import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
 import com.base.config.security.keypairs.RSAKeyPairRepository;
 import com.base.config.security.service.CustomAuthenticationEntryPoint;
 import com.base.config.security.service.CustomTokenCustomizer;
+import com.base.config.security.service.CustomTokenErrorResponseHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -97,6 +100,9 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(AuthenticationProvider authenticationProvider,
@@ -130,6 +136,7 @@ public class SecurityConfig {
                                                         new OAuth2ClientCredentialsAuthenticationConverter()
                                                 )
                                         ))
+                                .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
                                 .authenticationProviders(providers -> {
                                     providers.add(jwtBearerAuthenticationProvider);
                                     providers.add(new OAuth2PasswordAuthenticationProvider(
@@ -209,6 +216,7 @@ public class SecurityConfig {
                                         .decoder(jwtDecoder)
                                         .jwtAuthenticationConverter(new CustomConverter())
                                 )
+                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(messageSource))
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -216,8 +224,7 @@ public class SecurityConfig {
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(true)
                         .sessionRegistry(sessionRegistry())
-                )
-                .exceptionHandling(e -> e.authenticationEntryPoint(delegatingAuthenticationEntryPoint()));
+                );
 
         return http.build();
     }
@@ -414,7 +421,7 @@ public class SecurityConfig {
     public AuthenticationEntryPoint delegatingAuthenticationEntryPoint() {
 
         var entryPoints = new LinkedHashMap<RequestMatcher, AuthenticationEntryPoint>();
-        entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint());
+        entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint(messageSource));
         DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
         entryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
 

@@ -15,7 +15,7 @@
  */
 package com.base.config.security.filter;
 
-import com.base.config.core.authentication.service.CustomUserDetailsService;
+import com.base.config.core.authentication.user.service.CustomUserDetailsService;
 import com.base.config.security.service.JwtAuthenticationService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -15,7 +15,7 @@
  */
 package com.base.config.security.service;
 
-import com.base.config.core.authentication.model.User;
+import com.base.config.core.authentication.user.model.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
