@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.exception;
+package com.base.config.core.authentication.role.service;
+
+
+import com.base.config.core.authentication.role.data.RoleDTO;
+import com.base.config.core.command.data.JsonCommand;
+import com.base.config.core.command.data.LogData;
+import org.springframework.data.domain.Page;
 
 /**
  * @author YISivlay
  */
-public class BadRequestException extends RuntimeException {
+public interface RoleService {
+    LogData createRole(JsonCommand command);
 
-    private final Object[] args;
+    LogData updateRole(Long id, JsonCommand command);
 
-    public BadRequestException(String msgCode, Object... args) {
-        super(msgCode);
-        this.args = args;
-    }
+    LogData deleteRole(Long id);
 
-    public Object[] getArgs() {
-        return args;
-    }
+    RoleDTO getRoleById(Long id);
 
+    Page<RoleDTO> listRoles(Integer page, Integer size, String search);
 }

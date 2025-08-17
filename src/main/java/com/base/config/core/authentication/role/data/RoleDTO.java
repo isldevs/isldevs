@@ -15,22 +15,69 @@
  */
 package com.base.config.core.authentication.role.data;
 
-
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
 /**
  * @author YISivlay
  */
-@Getter
-@Setter
 public class RoleDTO {
 
-    private String name;
-    private Set<String> authorities;
+    private final Long id;
 
-    public RoleDTO() {
+    @NotBlank(message = "{role.name.required}")
+    @Size(min = 3, max = 50, message = "{role.name.size}")
+    private final String name;
+
+    private final Set<String> authorities;
+
+    public RoleDTO(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.authorities = builder.authorities;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Long id;
+        private String name;
+        private Set<String> authorities;
+
+        public RoleDTO build() {
+            return new RoleDTO(this);
+        }
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder authorities(Set<String> authorities) {
+            this.authorities = authorities;
+            return this;
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Set<String> getAuthorities() {
+        return authorities;
     }
 }

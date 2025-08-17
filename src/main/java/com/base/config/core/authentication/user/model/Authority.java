@@ -1,12 +1,12 @@
 /**
  * Copyright 2025 iSLDevs
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,10 @@ package com.base.config.core.authentication.user.model;
 import com.base.config.core.authentication.role.model.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author YISivlay
  */
-@Getter
-@Setter
 @Entity
 @Table(name = "authorities")
 public class Authority {
@@ -35,7 +31,7 @@ public class Authority {
     @SequenceGenerator(name = "authority_id_seq", sequenceName = "authority_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "role_id")
     @JsonIgnore
     private Role role;
@@ -73,5 +69,29 @@ public class Authority {
             this.authority = authority;
             return this;
         }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public String getAuthority() {
+        return authority;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public void setAuthority(String authority) {
+        this.authority = authority;
     }
 }

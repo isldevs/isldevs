@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.authentication.user.handler;
+package com.base.config.core.authentication.role.handler;
 
 
 import com.base.config.core.annotation.CommandType;
-import com.base.config.core.authentication.user.controller.UserConstants;
-import com.base.config.core.authentication.user.service.UserService;
-import com.base.config.core.command.data.LogData;
+import com.base.config.core.authentication.role.api.RoleConstants;
+import com.base.config.core.authentication.role.service.RoleService;
 import com.base.config.core.command.data.JsonCommand;
+import com.base.config.core.command.data.LogData;
 import com.base.config.core.command.service.CommandHandlerProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@CommandType(action = "CREATE", entity = UserConstants.PERMISSION)
-public class CreateUserHandlerProcessing implements CommandHandlerProcessing {
+@CommandType(action = "CREATE", entity = RoleConstants.PERMISSION)
+public class CreateRoleHandlerProcessing implements CommandHandlerProcessing {
 
-    private final UserService service;
+    private final RoleService service;
 
     @Autowired
-    public CreateUserHandlerProcessing(UserService service) {
+    public CreateRoleHandlerProcessing(RoleService service) {
         this.service = service;
     }
 
     @Override
     public LogData process(JsonCommand command) {
-        return this.service.createUser(command);
+        return this.service.createRole(command);
     }
 }

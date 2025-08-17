@@ -171,13 +171,13 @@ public class UserServiceImpl implements UserService {
                 .map(Role::getName)
                 .collect(Collectors.toSet());
 
-        var dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setRoles(roleNames);
-        dto.setEnabled(user.isEnabled());
-        return dto;
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .email(user.getEmail())
+                .roles(roleNames)
+                .enabled(user.isEnabled())
+                .build();
     }
 }

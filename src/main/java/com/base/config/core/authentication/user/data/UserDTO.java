@@ -15,22 +15,98 @@
  */
 package com.base.config.core.authentication.user.data;
 
-
-import lombok.Data;
-
 import java.util.Set;
 
 /**
  * @author YISivlay
  */
-@Data
 public class UserDTO {
 
-    private Long id;
-    private String username;
-    private String name;
-    private String email;
-    private Set<String> roles;
-    private boolean enabled;
+    private final Long id;
+    private final String username;
+    private final String name;
+    private final String email;
+    private final Set<String> roles;
+    private final boolean enabled;
 
+    public UserDTO(Builder builder) {
+        this.id = builder.id;
+        this.username = builder.username;
+        this.name = builder.name;
+        this.email = builder.email;
+        this.roles = builder.roles;
+        this.enabled = builder.enabled;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Long id;
+        private String username;
+        private String name;
+        private String email;
+        private Set<String> roles;
+        private boolean enabled;
+
+        public UserDTO build() {
+            return new UserDTO(this);
+        }
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder roles(Set<String> roles) {
+            this.roles = roles;
+            return this;
+        }
+
+        public Builder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public boolean enabled() {
+        return enabled;
+    }
 }

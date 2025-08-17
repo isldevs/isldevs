@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.core.exception;
+package com.base.config.core.authentication.role.api;
+
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * @author YISivlay
  */
-public class BadRequestException extends RuntimeException {
-
-    private final Object[] args;
-
-    public BadRequestException(String msgCode, Object... args) {
-        super(msgCode);
-        this.args = args;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
+public class RoleConstants {
+    public static final String API_PATH = "/roles";
+    public static final String PERMISSION = "ROLE";
+    public static final String NAME = "name";
+    public static final String AUTHORITIES = "authorities";
+    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(NAME, AUTHORITIES));
 }

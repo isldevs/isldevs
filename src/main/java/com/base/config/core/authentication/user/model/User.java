@@ -1,12 +1,12 @@
 /**
  * Copyright 2025 iSLDevs
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +21,12 @@ import com.base.config.core.authentication.role.repository.RoleRepository;
 import com.base.config.core.command.data.JsonCommand;
 import com.base.config.core.exception.NotFoundException;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,12 +34,11 @@ import java.util.stream.Collectors;
 /**
  * @author YISivlay
  */
-@Getter
-@Setter
 @Entity
 @Table(name = "users")
 public class User implements UserDetails, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -332,5 +330,117 @@ public class User implements UserDetails, Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public String getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void setTokenExpiry(String tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
+
+    public void enabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void isAccountNonExpired(boolean accountNonExpired) {
+        isAccountNonExpired = accountNonExpired;
+    }
+
+    public void isAccountNonLocked(boolean accountNonLocked) {
+        isAccountNonLocked = accountNonLocked;
+    }
+
+    public void isCredentialsNonExpired(boolean credentialsNonExpired) {
+        isCredentialsNonExpired = credentialsNonExpired;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

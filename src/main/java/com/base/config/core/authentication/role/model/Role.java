@@ -15,20 +15,17 @@
  */
 package com.base.config.core.authentication.role.model;
 
+import com.base.config.core.authentication.role.api.RoleConstants;
 import com.base.config.core.authentication.user.model.Authority;
+import com.base.config.core.command.data.JsonCommand;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author YISivlay
  */
-@Getter
-@Setter
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -49,6 +46,7 @@ public class Role {
 
     public Role(Builder builder) {
         this.name = builder.name;
+        this.authorities = builder.authorities;
     }
 
     public static Builder builder() {
@@ -58,6 +56,7 @@ public class Role {
     public static class Builder {
 
         private String name;
+        private Set<Authority> authorities = new HashSet<>();
 
         public Role build() {
             return new Role(this);
@@ -67,6 +66,52 @@ public class Role {
             this.name = name;
             return this;
         }
+
+        public Builder authorities(Set<Authority> authorities) {
+            this.authorities = authorities;
+            return this;
+        }
     }
 
+    public Map<String, Object> changed(final JsonCommand command) {
+        final Map<String, Object> changes = new HashMap<>(7);
+
+        if (command.isChangeAsString(RoleConstants.NAME, this.name)) {
+            final var value = command.extractString(RoleConstants.NAME);
+            this.name = value;
+            changes.put(RoleConstants.NAME, value);
+        }
+        if (command.isChangeAsArray(RoleConstants.AUTHORITIES, this.authorities, Authority.class)) {
+            final var value = command.extractArrayAs(RoleConstants.AUTHORITIES, Authority.class);
+            this.authorities = value;
+            changes.put(RoleConstants.AUTHORITIES, value);
+        }
+
+        return changes;
+
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
