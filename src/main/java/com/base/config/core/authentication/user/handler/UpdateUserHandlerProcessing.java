@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@CommandType(action = "CREATE", entity = UserConstants.PERMISSION)
+@CommandType(action = "UPDATE", entity = UserConstants.PERMISSION)
 public class UpdateUserHandlerProcessing implements CommandHandlerProcessing {
 
     private final UserService service;
@@ -43,6 +43,6 @@ public class UpdateUserHandlerProcessing implements CommandHandlerProcessing {
 
     @Override
     public LogData process(JsonCommand command) {
-        return this.service.createUser(command);
+        return this.service.updateUser(command.getId(), command);
     }
 }
