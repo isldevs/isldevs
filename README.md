@@ -544,5 +544,10 @@ Dependency locking is enabled via dependencyLocking in build.gradle.
 ```
 ./gradlew dependencies --write-locks --refresh-dependencies
 ```
-💡 The gradle.lockfile is intentionally located at the project root, following Gradle's standard behavior.
 
+* To verify all dependencies:
+
+```
+./gradlew dependencyUpdates
+```
+💡 The gradle.lockfile is intentionally located at the project root, following Gradle's standard behavior.
