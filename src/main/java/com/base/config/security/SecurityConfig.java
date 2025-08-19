@@ -36,6 +36,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -77,12 +78,15 @@ import org.springframework.security.web.authentication.DelegatingAuthenticationE
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import javax.sql.DataSource;
 import java.time.Clock;
@@ -107,7 +111,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(AuthenticationProvider authenticationProvider,
                                                                       OAuth2AuthorizationService authorizationService,
-                                                                      @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator,
+                                                                      OAuth2TokenGenerator<?> tokenGenerator,
                                                                       RegisteredClientRepository registeredClientRepository,
                                                                       HttpAuthenticationFilter httpAuthenticationFilter,
                                                                       JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -150,22 +154,24 @@ public class SecurityConfig {
                         ))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                new AntPathRequestMatcher("/api/v1/oauth2/token"),
-                                new AntPathRequestMatcher("/api/v1/oauth2/device_authorization"),
-                                new AntPathRequestMatcher("/api/v1/oauth2/token/introspect"),
-                                new AntPathRequestMatcher("/api/v1/oauth2/token/revoke"),
-                                new AntPathRequestMatcher("/.well-known/oauth-authorization-server"),
-                                new AntPathRequestMatcher("/.well-known/openid-configuration"),
-                                new AntPathRequestMatcher("/jwks"),
-                                new AntPathRequestMatcher("/api/v1/device/**"),
-                                new AntPathRequestMatcher("/api/v1/public/**")
-                        ).permitAll()
+                                "/api/v1/oauth2/token",
+                                "/api/v1/oauth2/device_authorization",
+                                "/api/v1/oauth2/token/introspect",
+                                "/api/v1/oauth2/token/revoke",
+                                "/.well-known/oauth-authorization-server",
+                                "/.well-known/openid-configuration",
+                                "/jwks",
+                                "/api/v1/device/**",
+                                "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
-                .exceptionHandling(e -> e.authenticationEntryPoint(delegatingAuthenticationEntryPoint()))
+                .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/oauth2/authorization/my-client"),
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
+                )
                 .headers(headers -> headers
                         .xssProtection(Customizer.withDefaults()) //Protects against Cross-Site Scripting (XSS) attacks
                         .cacheControl(Customizer.withDefaults()) //Controls caching behavior to prevent sensitive data from being stored
@@ -344,7 +350,7 @@ public class SecurityConfig {
     public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
                                                                            RegisteredClientRepository registeredClientRepository,
                                                                            OAuth2AuthorizationService authorizationService,
-                                                                           @Qualifier("delegatingOAuth2TokenGenerator") OAuth2TokenGenerator<?> tokenGenerator) {
+                                                                           OAuth2TokenGenerator<?> tokenGenerator) {
         return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService, tokenGenerator);
     }
 
@@ -415,17 +421,6 @@ public class SecurityConfig {
     @Bean
     public Clock clock() {
         return Clock.systemUTC();
-    }
-
-    @Bean
-    public AuthenticationEntryPoint delegatingAuthenticationEntryPoint() {
-
-        var entryPoints = new LinkedHashMap<RequestMatcher, AuthenticationEntryPoint>();
-        entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint(messageSource));
-        DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
-        entryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
-
-        return entryPoint;
     }
 
     @Bean

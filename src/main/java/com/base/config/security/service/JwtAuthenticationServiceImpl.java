@@ -19,7 +19,6 @@ import com.base.config.security.keypairs.KeyProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -79,12 +78,12 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
                 .toList();
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(Date.from(Instant.now(clock)))
-                .setExpiration(Date.from(Instant.now(clock).plusSeconds(expiration)))
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(Date.from(Instant.now(clock)))
+                .expiration(Date.from(Instant.now(clock).plusSeconds(expiration)))
                 .claim("authorities", authorities)
-                .signWith(keyProvider.privateKey(), SignatureAlgorithm.RS256)
+                .signWith(keyProvider.privateKey())
                 .compact();
     }
 
@@ -108,11 +107,11 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
     public Claims extractAllClaims(String token) {
         try {
             return Jwts
-                    .parserBuilder()
-                    .setSigningKey(keyProvider.publicKey())
+                    .parser()
+                    .verifyWith(keyProvider.publicKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (JwtException e) {
             throw new RuntimeException("Invalid or expired JWT token", e);
         }
