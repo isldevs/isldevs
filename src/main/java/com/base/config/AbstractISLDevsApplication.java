@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,7 +46,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         JdbcTemplateAutoConfiguration.class,
         LiquibaseAutoConfiguration.class})
 @Import({DatasourceConfig.class})
-@ComponentScan(basePackages = {"com.base.**", "com.base.config"})
-@IntegrationComponentScan(basePackages = {"com.base.**", "com.base.config"})
+@ComponentScan(basePackages = {"com.base"})
+@EnableJpaRepositories(basePackages = {"com.base"})
+@IntegrationComponentScan(basePackages = {"com.base"})
 public abstract class AbstractISLDevsApplication {
 }
