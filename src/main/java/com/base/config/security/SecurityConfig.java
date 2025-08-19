@@ -15,7 +15,7 @@
  */
 package com.base.config.security;
 
-import com.base.config.core.authentication.user.service.CustomUserDetailsService;
+import com.base.core.authentication.user.service.CustomUserDetailsService;
 import com.base.config.security.converter.CustomConverter;
 import com.base.config.security.converter.CustomAuthenticationConverter;
 import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;

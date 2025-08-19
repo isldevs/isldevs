@@ -15,7 +15,7 @@
  */
 package com.base.config;
 
-import com.base.config.core.service.DataInitializationService;
+import com.base.core.service.DataInitializationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

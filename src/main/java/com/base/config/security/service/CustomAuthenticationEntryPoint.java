@@ -16,7 +16,7 @@
 package com.base.config.security.service;
 
 
-import com.base.config.core.data.ErrorData;
+import com.base.core.data.ErrorData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

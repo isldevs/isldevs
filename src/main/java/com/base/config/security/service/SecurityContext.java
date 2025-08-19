@@ -16,7 +16,7 @@
 package com.base.config.security.service;
 
 
-import com.base.config.core.authentication.user.model.User;
+import com.base.core.authentication.user.model.User;
 
 /**
  * @author YISivlay

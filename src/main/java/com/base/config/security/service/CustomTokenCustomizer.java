@@ -16,8 +16,8 @@
 package com.base.config.security.service;
 
 
-import com.base.config.core.authentication.user.model.Authority;
-import com.base.config.core.authentication.user.model.User;
+import com.base.core.authentication.user.model.Authority;
+import com.base.core.authentication.user.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;

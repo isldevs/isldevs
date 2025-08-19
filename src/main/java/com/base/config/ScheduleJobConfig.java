@@ -15,10 +15,10 @@
  */
 package com.base.config;
 
-import com.base.config.core.schedule.model.ScheduleJob;
-import com.base.config.core.schedule.model.ScheduledJobHistory;
-import com.base.config.core.schedule.repository.ScheduleJobRepository;
-import com.base.config.core.schedule.repository.ScheduledJobHistoryRepository;
+import com.base.core.schedule.model.ScheduleJob;
+import com.base.core.schedule.model.ScheduledJobHistory;
+import com.base.core.schedule.repository.ScheduleJobRepository;
+import com.base.core.schedule.repository.ScheduledJobHistoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;

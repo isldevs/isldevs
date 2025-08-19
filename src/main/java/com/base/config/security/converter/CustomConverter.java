@@ -15,10 +15,10 @@
  */
 package com.base.config.security.converter;
 
-import com.base.config.core.authentication.role.data.RoleDTO;
-import com.base.config.core.authentication.user.model.Authority;
-import com.base.config.core.authentication.role.model.Role;
-import com.base.config.core.authentication.user.model.User;
+import com.base.core.authentication.role.data.RoleDTO;
+import com.base.core.authentication.user.model.Authority;
+import com.base.core.authentication.role.model.Role;
+import com.base.core.authentication.user.model.User;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

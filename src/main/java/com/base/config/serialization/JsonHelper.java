@@ -16,7 +16,7 @@
 package com.base.config.serialization;
 
 
-import com.base.config.core.exception.BadRequestException;
+import com.base.core.exception.BadRequestException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
