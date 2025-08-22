@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService {
 
         Set<Role> roles = new HashSet<>();
         for (var roleName : roleNames) {
-            var role = roleRepository.findByName(roleName)
+            var role = roleRepository.findByName("ROLE_" + roleName)
                     .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName));
             roles.add(role);
         }

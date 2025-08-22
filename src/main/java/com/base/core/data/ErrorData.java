@@ -24,12 +24,14 @@ public final class ErrorData {
     private final Integer status;
     private final String error;
     private final String description;
+    private final String message;
     private final Object[] args;
 
     public ErrorData(Builder builder) {
         this.status = builder.status;
         this.error = builder.error;
         this.description = builder.description;
+        this.message = builder.message;
         this.args = builder.args;
     }
 
@@ -42,6 +44,7 @@ public final class ErrorData {
         private Integer status;
         private String error;
         private String description;
+        private String message;
         private Object[] args;
 
         public ErrorData build() {
@@ -63,6 +66,11 @@ public final class ErrorData {
             return this;
         }
 
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
         public Builder args(Object... args) {
             this.args = args;
             return this;
@@ -79,6 +87,10 @@ public final class ErrorData {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public Object[] getArgs() {

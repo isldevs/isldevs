@@ -80,7 +80,6 @@ public class CustomConverter implements Converter<Jwt, AbstractAuthenticationTok
                                 .map(authStr -> {
                                     Authority authority = new Authority();
                                     authority.setAuthority(authStr);
-                                    authority.setRole(role);
                                     return authority;
                                 })
                                 .collect(Collectors.toSet());

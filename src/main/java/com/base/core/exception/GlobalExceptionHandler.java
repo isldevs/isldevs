@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -30,7 +31,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author YISivlay
@@ -74,11 +79,25 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, message, null);
     }
 
-    @ExceptionHandler(value = { AccessDeniedException.class })
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<ErrorData> handleAccessDeniedException(AccessDeniedException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.FORBIDDEN, message, null);
+    @ExceptionHandler(value = {AuthorizationDeniedException.class})
+    public ResponseEntity<ErrorData> handleAccessDeniedException(AuthorizationDeniedException ex, Locale locale) {
+        var headers = new HttpHeaders();
+
+        List<String> args = extract(ex);
+        String message = messageSource.getMessage("msg.access.denied",args.toArray(),ex.getMessage(),locale);
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
+
+        var errorData = ErrorData.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
+                .description("Access Denied")
+                .message(message)
+                .args(args)
+                .build();
+
+        return new ResponseEntity<>(errorData, headers, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -102,10 +121,34 @@ public class GlobalExceptionHandler {
         var errorData = ErrorData.builder()
                 .status(status.value())
                 .error(status.getReasonPhrase())
-                .description(message)
+                .message(message)
                 .args(args)
                 .build();
 
         return new ResponseEntity<>(errorData, headers, status);
     }
+
+    private List<String> extract(AuthorizationDeniedException ex) {
+        String msg = ex.getMessage();
+        if (msg == null) return null;
+
+        List<String> result = new ArrayList<>();
+        Pattern singlePattern = Pattern.compile("has(Role|Authority)\\('([^']+)'\\)");
+        Matcher singleMatcher = singlePattern.matcher(ex.getAuthorizationResult().toString());
+        while (singleMatcher.find()) {
+            result.add(singleMatcher.group(2));
+        }
+
+        Pattern multiplePattern = Pattern.compile("hasAny(Role|Authority)\\('([^']+)'(?:,'([^']+)')*\\)");
+        Matcher multipleMatcher = multiplePattern.matcher(ex.getAuthorizationResult().toString());
+        while (multipleMatcher.find()) {
+            String group2 = multipleMatcher.group(2);
+            if (group2 != null) result.add(group2);
+            String group3 = multipleMatcher.group(3);
+            if (group3 != null) result.add(group3);
+        }
+
+        return result.isEmpty() ? null : result;
+    }
+
 }

@@ -18,7 +18,6 @@ package com.base.config.security.filter;
 import com.base.config.data.RequestLog;
 import com.base.config.serialization.ToApiJsonSerializer;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -55,14 +54,14 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
     private static final String EXPECTED_TENANT = "iSLDevs";
     private static final String TOKEN_ENDPOINT = "/api/v1/oauth2/token";
 
-    private final ToApiJsonSerializer toApiJsonSerializer;
+    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final PasswordEncoder passwordEncoder;
     private final RegisteredClientRepository registeredClientRepository;
 
     @Autowired
-    public HttpAuthenticationFilter(ToApiJsonSerializer toApiJsonSerializer,
-                                    PasswordEncoder passwordEncoder,
-                                    RegisteredClientRepository registeredClientRepository) {
+    public HttpAuthenticationFilter(final ToApiJsonSerializer<Object> toApiJsonSerializer,
+                                    final PasswordEncoder passwordEncoder,
+                                    final RegisteredClientRepository registeredClientRepository) {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.passwordEncoder = passwordEncoder;
         this.registeredClientRepository = registeredClientRepository;

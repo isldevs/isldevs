@@ -1,4 +1,4 @@
-CREATE TABLE oauth2_authorization
+CREATE TABLE IF NOT EXISTS oauth2_authorization
 (
     id                            varchar(100) NOT NULL,
     registered_client_id          varchar(100) NOT NULL,
@@ -36,15 +36,7 @@ CREATE TABLE oauth2_authorization
     PRIMARY KEY (id)
 );
 
-CREATE TABLE oauth2_authorization_consent
-(
-    registered_client_id varchar(100)  NOT NULL,
-    principal_name       varchar(200)  NOT NULL,
-    authorities          varchar(1000) NOT NULL,
-    PRIMARY KEY (registered_client_id, principal_name)
-);
-
-CREATE TABLE oauth2_registered_client
+CREATE TABLE IF NOT EXISTS oauth2_registered_client
 (
     id                            varchar(100)                            NOT NULL,
     client_id                     varchar(100)                            NOT NULL,
@@ -62,30 +54,51 @@ CREATE TABLE oauth2_registered_client
     PRIMARY KEY (id)
 );
 
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS oauth2_authorization_consent
+(
+    registered_client_id varchar(100)  NOT NULL,
+    principal_name       varchar(200)  NOT NULL,
+    authorities          varchar(1000) NOT NULL,
+    PRIMARY KEY (registered_client_id, principal_name)
+);
+
+CREATE TABLE IF NOT EXISTS users
 (
     id                         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username                   VARCHAR(50)  NOT NULL UNIQUE,
     password                   VARCHAR(500) NOT NULL,
     name                       VARCHAR(255),
     email                      VARCHAR(255),
-    provider                   VARCHAR(50)  NOT NULL DEFAULT 'LOCAL',
-    provider_id                VARCHAR(100),
-    avatar_url                 TEXT,
-    locale                     VARCHAR(20),
-    access_token               TEXT,
-    refresh_token              TEXT,
-    token_expiry               TIMESTAMP,
     enabled                    BOOLEAN      NOT NULL DEFAULT true,
     is_account_non_expired     BOOLEAN      NOT NULL DEFAULT true,
     is_account_non_locked      boolean      NOT NULL DEFAULT true,
     is_credentials_non_expired boolean      NOT NULL DEFAULT true
 );
 
-CREATE TABLE authorities
+CREATE TABLE IF NOT EXISTS roles
+(
+    id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS authorities
 (
     id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     authority VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_roles
+(
+    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    role_id BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE IF NOT EXISTS role_authorities
+(
+    role_id      BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+    authority_id BIGINT NOT NULL REFERENCES authorities (id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, authority_id)
 );
 
 CREATE INDEX idx_oauth2_authorization_token_values ON oauth2_authorization (

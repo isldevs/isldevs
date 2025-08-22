@@ -52,32 +52,11 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String provider = "LOCAL";
-
-    @Column(name = "provider_id")
-    private String providerId;
-
     @Column(name = "name")
     private String name;
 
     @Column(name = "email")
     private String email;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    @Column(name = "locale")
-    private String locale;
-
-    @Column(name = "access_token")
-    private String accessToken;
-
-    @Column(name = "refresh_token")
-    private String refreshToken;
-
-    @Column(name = "token_expiry")
-    private String tokenExpiry;
 
     @Column(nullable = false)
     private boolean enabled;
@@ -105,15 +84,8 @@ public class User implements UserDetails, Serializable {
     public User(Builder builder) {
         this.username = builder.username;
         this.password = builder.password;
-        this.provider = builder.provider != null ? builder.provider : "LOCAL";
-        this.providerId = builder.providerId;
         this.name = builder.name;
         this.email = builder.email;
-        this.avatarUrl = builder.avatarUrl;
-        this.locale = builder.locale;
-        this.accessToken = builder.accessToken;
-        this.refreshToken = builder.refreshToken;
-        this.tokenExpiry = builder.tokenExpiry;
         this.enabled = builder.enabled;
         this.isAccountNonExpired = builder.isAccountNonExpired;
         this.isAccountNonLocked = builder.isAccountNonLocked;
@@ -129,15 +101,8 @@ public class User implements UserDetails, Serializable {
 
         private String username;
         private String password;
-        private String provider;
-        private String providerId;
         private String name;
         private String email;
-        private String avatarUrl;
-        private String locale;
-        private String accessToken;
-        private String refreshToken;
-        private String tokenExpiry;
         private boolean enabled;
         private boolean isAccountNonExpired;
         private boolean isAccountNonLocked;
@@ -158,16 +123,6 @@ public class User implements UserDetails, Serializable {
             return this;
         }
 
-        public Builder provider(String provider) {
-            this.provider = provider;
-            return this;
-        }
-
-        public Builder providerId(String providerId) {
-            this.providerId = providerId;
-            return this;
-        }
-
         public Builder name(String name) {
             this.name = name;
             return this;
@@ -175,31 +130,6 @@ public class User implements UserDetails, Serializable {
 
         public Builder email(String email) {
             this.email = email;
-            return this;
-        }
-
-        public Builder avatarUrl(String avatarUrl) {
-            this.avatarUrl = avatarUrl;
-            return this;
-        }
-
-        public Builder locale(String locale) {
-            this.locale = locale;
-            return this;
-        }
-
-        public Builder accessToken(String accessToken) {
-            this.accessToken = accessToken;
-            return this;
-        }
-
-        public Builder refreshToken(String refreshToken) {
-            this.refreshToken = refreshToken;
-            return this;
-        }
-
-        public Builder tokenExpiry(String tokenExpiry) {
-            this.tokenExpiry = tokenExpiry;
             return this;
         }
 
@@ -271,7 +201,7 @@ public class User implements UserDetails, Serializable {
         if (command.isChangeAsArray(UserConstants.ROLES, this.roles.stream().map(Role::getName).collect(Collectors.toSet()), String.class)) {
             final Set<String> newRoles = command.extractArrayAs(UserConstants.ROLES, String.class);
             this.roles = newRoles.stream()
-                    .map(roleName -> roleRepository.findByName(roleName)
+                    .map(roleName -> roleRepository.findByName("ROLE_" + roleName)
                             .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName)))
                     .collect(Collectors.toSet());
             changes.put(UserConstants.ROLES, newRoles);
@@ -336,40 +266,12 @@ public class User implements UserDetails, Serializable {
         return id;
     }
 
-    public String getProvider() {
-        return provider;
-    }
-
-    public String getProviderId() {
-        return providerId;
-    }
-
     public String getName() {
         return name;
     }
 
     public String getEmail() {
         return email;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public String getTokenExpiry() {
-        return tokenExpiry;
     }
 
     public Set<Role> getRoles() {
@@ -388,40 +290,12 @@ public class User implements UserDetails, Serializable {
         this.password = password;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void setTokenExpiry(String tokenExpiry) {
-        this.tokenExpiry = tokenExpiry;
     }
 
     public void enabled(boolean enabled) {

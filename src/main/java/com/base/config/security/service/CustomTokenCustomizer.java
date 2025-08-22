@@ -18,8 +18,6 @@ package com.base.config.security.service;
 
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.user.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
@@ -30,14 +28,13 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author YISivlay
  */
 @Component
 public class CustomTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
-
-    private static final Logger logger = LoggerFactory.getLogger(CustomTokenCustomizer.class);
 
     @Override
     public void customize(JwtEncodingContext context) {
@@ -46,6 +43,7 @@ public class CustomTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
         if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
             context.getClaims()
                     .subject(principal.getName())
+                    .claim("jti", UUID.randomUUID().toString())
                     .claim("user_id", principal.getName())
                     .claim("client_id", context.getRegisteredClient().getClientId())
                     .claim("scopes", String.join(" ", context.getAuthorizedScopes()))

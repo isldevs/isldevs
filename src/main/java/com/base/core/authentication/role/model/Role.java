@@ -18,7 +18,6 @@ package com.base.core.authentication.role.model;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.command.data.JsonCommand;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.*;
@@ -35,8 +34,12 @@ public class Role {
     @SequenceGenerator(name = "role_id_seq", sequenceName = "role_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "role_authorities",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
+    )
     private Set<Authority> authorities = new HashSet<>();
 
     @Column(unique = true, nullable = false)

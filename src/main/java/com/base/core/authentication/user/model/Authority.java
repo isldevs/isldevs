@@ -15,8 +15,6 @@
  */
 package com.base.core.authentication.user.model;
 
-import com.base.core.authentication.role.model.Role;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 /**
@@ -31,11 +29,6 @@ public class Authority {
     @SequenceGenerator(name = "authority_id_seq", sequenceName = "authority_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    @JsonIgnore
-    private Role role;
-
     @Column(nullable = false)
     private String authority;
 
@@ -43,7 +36,6 @@ public class Authority {
     }
 
     public Authority(Builder builder) {
-        this.role = builder.role;
         this.authority = builder.authority;
     }
 
@@ -53,16 +45,10 @@ public class Authority {
 
     public static class Builder {
 
-        private Role role;
         private String authority;
 
         public Authority build() {
             return new Authority(this);
-        }
-
-        public Builder role(Role role) {
-            this.role = role;
-            return this;
         }
 
         public Builder authority(String authority) {
@@ -75,20 +61,12 @@ public class Authority {
         return id;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
     public String getAuthority() {
         return authority;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public void setAuthority(String authority) {

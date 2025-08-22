@@ -15,68 +15,54 @@
  */
 package com.base.config.security;
 
-import com.base.core.authentication.user.service.CustomUserDetailsService;
-import com.base.config.security.converter.CustomConverter;
-import com.base.config.security.converter.CustomAuthenticationConverter;
-import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;
 import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
-import com.base.config.security.filter.HttpAuthenticationFilter;
-import com.base.config.security.filter.JwtAuthenticationFilter;
+import com.base.config.security.keypairs.RSAKeyPairRepository;
 import com.base.config.security.provider.JwtAuthenticationProvider;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
-import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
-import com.base.config.security.keypairs.RSAKeyPairRepository;
-import com.base.config.security.service.CustomAuthenticationEntryPoint;
 import com.base.config.security.service.CustomTokenCustomizer;
-import com.base.config.security.service.CustomTokenErrorResponseHandler;
+import com.base.core.authentication.user.model.User;
+import com.base.core.authentication.user.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.collection.spi.PersistentSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.*;
+import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.*;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
-import org.springframework.security.oauth2.server.authorization.token.*;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -84,7 +70,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.sql.DataSource;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -92,146 +81,24 @@ import java.util.stream.Stream;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
 
+    private final CustomUserDetailsService userDetailsService;
+
     @Autowired
-    private MessageSource messageSource;
-
-    @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(AuthenticationProvider authenticationProvider,
-                                                                      OAuth2AuthorizationService authorizationService,
-                                                                      OAuth2TokenGenerator<?> tokenGenerator,
-                                                                      RegisteredClientRepository registeredClientRepository,
-                                                                      HttpAuthenticationFilter httpAuthenticationFilter,
-                                                                      JwtAuthenticationFilter jwtAuthenticationFilter,
-                                                                      JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
-                                                                      HttpSecurity http) throws Exception {
-        var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
-        http
-                .securityMatcher(configurer.getEndpointsMatcher())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.ignoringRequestMatchers(
-                        "/api/v1/oauth2/token",
-                        "/api/v1/oauth2/device_authorization",
-                        "/api/v1/oauth2/token/introspect",
-                        "/api/v1/oauth2/token/revoke"
-                ))
-                .with(configurer, (authorizationServer) -> authorizationServer
-                        .oidc(Customizer.withDefaults())
-                        .tokenEndpoint(tokenEndpoint -> tokenEndpoint
-                                .accessTokenRequestConverter(
-                                        new DelegatingAuthenticationConverter(
-                                                Arrays.asList(
-                                                        new CustomAuthenticationConverter(),
-                                                        new OAuth2PasswordAuthenticationConverter(),
-                                                        new OAuth2RefreshTokenAuthenticationConverter(),
-                                                        new OAuth2AuthorizationCodeAuthenticationConverter(),
-                                                        new OAuth2ClientCredentialsAuthenticationConverter()
-                                                )
-                                        ))
-                                .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
-                                .authenticationProviders(providers -> {
-                                    providers.add(jwtBearerAuthenticationProvider);
-                                    providers.add(new OAuth2PasswordAuthenticationProvider(
-                                            authenticationProvider,
-                                            authorizationService,
-                                            tokenGenerator,
-                                            registeredClientRepository
-                                    ));
-                                    providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService, tokenGenerator));
-                                })
-                        ))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(
-                                "/api/v1/oauth2/token",
-                                "/api/v1/oauth2/device_authorization",
-                                "/api/v1/oauth2/token/introspect",
-                                "/api/v1/oauth2/token/revoke",
-                                "/.well-known/oauth-authorization-server",
-                                "/.well-known/openid-configuration",
-                                "/jwks",
-                                "/api/v1/device/**",
-                                "/api/v1/public/**").permitAll()
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
-                .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
-                .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
-                .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(
-                        new LoginUrlAuthenticationEntryPoint("/login"),
-                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
-                )
-                .headers(headers -> headers
-                        .xssProtection(Customizer.withDefaults()) //Protects against Cross-Site Scripting (XSS) attacks
-                        .cacheControl(Customizer.withDefaults()) //Controls caching behavior to prevent sensitive data from being stored
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives("default-src 'self'; " +
-                                        "script-src 'self'; " +
-                                        "style-src 'self'; " +
-                                        "img-src 'self' data:; " +
-                                        "font-src 'self'; " +
-                                        "connect-src 'self'; " +
-                                        "form-action 'self'; " +
-                                        "frame-ancestors 'none'; " +
-                                        "block-all-mixed-content")
-                        ) //Mitigates XSS, clickjacking, and other code injection attacks
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny) //Prevents clickjacking attacks
-                        .contentTypeOptions(Customizer.withDefaults()) //Prevents MIME type sniffing
-                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)) //Enforces HTTPS connections
-                        .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'")) //Controls which browser features/APIs can be used
-                        .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)) //Controls referrer information in requests
-                )
-                .requiresChannel(channel -> channel
-                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null) //Ensures HTTPS is used when behind a proxy
-                        .requiresSecure()
-                );
-
-        return http.build();
+    public SecurityConfig(final CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 
     @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(JwtDecoder jwtDecoder,
-                                                          HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/oauth2/**",
-                                "/api/v1/device/**",
-                                "/api/v1/public/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer(
-                        oauth2 -> oauth2
-                                .jwt(jwt -> jwt
-                                        .decoder(jwtDecoder)
-                                        .jwtAuthenticationConverter(new CustomConverter())
-                                )
-                                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(messageSource))
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation().migrateSession()
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(true)
-                        .sessionRegistry(sessionRegistry())
-                );
-
-        return http.build();
-    }
-
-    @Bean
-    public RegisteredClient webClient() {
+    public RegisteredClient webAppClient() {
         return RegisteredClient
                 .withId(UUID.randomUUID().toString())
+                .clientName("Web && Mobile")
                 .clientId("web-app")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
@@ -253,24 +120,25 @@ public class SecurityConfig {
                 .clientSettings(ClientSettings
                         .builder()
                         .requireProofKey(true)
-                        .requireAuthorizationConsent(true)
+                        .requireAuthorizationConsent(false)
                         .build())
                 .tokenSettings(TokenSettings
                         .builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofMinutes(30))
                         .refreshTokenTimeToLive(Duration.ofDays(7))
-                        .reuseRefreshTokens(true)
+                        .reuseRefreshTokens(false)
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
                         .build())
                 .build();
     }
 
     @Bean
-    public RegisteredClient serviceClient() {
+    public RegisteredClient serviceM2MClient() {
         return RegisteredClient
                 .withId(UUID.randomUUID().toString())
-                .clientId("service-account")
+                .clientName("Machine to Machine")
+                .clientId("m2m")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
@@ -291,12 +159,13 @@ public class SecurityConfig {
     public RegisteredClient microserviceClient() {
         return RegisteredClient
                 .withId(UUID.randomUUID().toString())
+                .clientName("Microservice")
                 .clientId("microservice")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT)
                 .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
                 .scope("api.write")
                 .clientSettings(ClientSettings.builder()
-                        .jwkSetUrl(STR."\{issuerUri}/.well-known/jwks.json")
+                        .jwkSetUrl(issuerUri + "/.well-known/jwks.json")
                         .build())
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -309,6 +178,7 @@ public class SecurityConfig {
     public RegisteredClient deviceClient() {
         return RegisteredClient
                 .withId(UUID.randomUUID().toString())
+                .clientName("IOT Device")
                 .clientId("iot-device")
                 .clientSecret(passwordEncoder().encode("secret"))
                 .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
@@ -360,14 +230,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        var provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("https://127.0.0.1:8443", "http://127.0.0.1:8080", "http://127.0.0.1:3000"));
@@ -382,7 +244,7 @@ public class SecurityConfig {
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        Stream.of(webClient(), serviceClient(), microserviceClient(), deviceClient()).forEach(client -> {
+        Stream.of(webAppClient(), serviceM2MClient(), microserviceClient(), deviceClient()).forEach(client -> {
             if (repository.findByClientId(client.getClientId()) == null) {
                 repository.save(client);
             }
@@ -392,18 +254,40 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+    public OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations, RegisteredClientRepository registeredClientRepository) throws ClassNotFoundException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
+        List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+        objectMapper.registerModules(securityModules);
+        objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+        objectMapper.addMixIn(Class.forName("com.base.core.authentication.user.model.User"), User.class);
+        objectMapper.addMixIn(Class.forName("org.hibernate.collection.spi.PersistentSet"), PersistentSet.class);
+        objectMapper.addMixIn(Class.forName("java.util.HashSet"), HashSet.class);
+        objectMapper.addMixIn(Class.forName("java.util.Collections$UnmodifiableSet"), Collections.class);
 
-    @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
+        JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
+        rowMapper.setObjectMapper(objectMapper);
+        JdbcOAuth2AuthorizationService authorizationService = new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
+        authorizationService.setAuthorizationRowMapper(rowMapper);
+
+        return authorizationService;
     }
 
     @Bean
     public OAuth2AuthorizationConsentService authorizationConsentService(JdbcOperations jdbcOperations, RegisteredClientRepository registeredClientRepository) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository);
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
+        var provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean

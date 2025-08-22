@@ -1,12 +1,12 @@
 /**
  * Copyright 2025 iSLDevs
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,20 +15,17 @@
  */
 package com.base.core.service;
 
+import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.base.core.authentication.user.repository.AuthorityRepository;
+import com.base.core.authentication.user.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author YISivlay
@@ -36,49 +33,89 @@ import java.util.HashSet;
 @Service
 public class DataInitializationService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DataInitializationService.class);
-
+    private final AuthorityRepository authorityRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Autowired
-    public DataInitializationService(PasswordEncoder passwordEncoder) {
+    public DataInitializationService(AuthorityRepository authorityRepository,
+                                     RoleRepository roleRepository,
+                                     UserRepository userRepository,
+                                     PasswordEncoder passwordEncoder) {
+        this.authorityRepository = authorityRepository;
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
-    public void dataInitialization() {
-        var adminRoleList = entityManager.createQuery("SELECT r FROM Role r WHERE r.name = 'ADMIN'", Role.class).getResultList();
-        var adminRole = adminRoleList.isEmpty() ? null : adminRoleList.getFirst();
-        if (adminRole == null) {
-            adminRole = Role.builder().name("ADMIN").build();
-            entityManager.persist(adminRole);
-        }
+    @PostConstruct
+    public void init() {
+        Authority fullAccess = authorityRepository.findByAuthority("FULL_ACCESS")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("FULL_ACCESS").build()));
 
-        var adminFullAccessList = entityManager.createQuery("SELECT a FROM Authority a WHERE a.authority = 'FULL_ACCESS'", Authority.class).getResultList();
-        var adminFullAccess = adminFullAccessList.isEmpty() ? null : adminFullAccessList.getFirst();
-        if (adminFullAccess == null) {
-            adminFullAccess = Authority.builder().role(adminRole).authority("FULL_ACCESS").build();
-            entityManager.persist(adminFullAccess);
-        }
+        Authority readUser = authorityRepository.findByAuthority("READ_USER")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("READ_USER").build()));
 
-        var adminUserList = entityManager.createQuery("SELECT u FROM User u WHERE u.username = 'admin'", User.class).getResultList();
-        var adminUser = adminUserList.isEmpty() ? null : adminUserList.getFirst();
-        if (adminUser == null) {
-            var encodedPassword = passwordEncoder.encode("admin@2025!");
-            adminUser = User.builder()
+        Authority createUser = authorityRepository.findByAuthority("CREATE_USER")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("CREATE_USER").build()));
+
+        Authority updateUser = authorityRepository.findByAuthority("UPDATE_USER")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("UPDATE_USER").build()));
+
+        Authority deleteUser = authorityRepository.findByAuthority("DELETE_USER")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("DELETE_USER").build()));
+
+        Authority readRole = authorityRepository.findByAuthority("READ_ROLE")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("READ_ROLE").build()));
+
+        Authority createRole = authorityRepository.findByAuthority("CREATE_ROLE")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("CREATE_ROLE").build()));
+
+        Authority updateRole = authorityRepository.findByAuthority("UPDATE_ROLE")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("UPDATE_ROLE").build()));
+
+        Authority deleteRole = authorityRepository.findByAuthority("DELETE_ROLE")
+                .orElseGet(() -> authorityRepository.save(Authority.builder().authority("DELETE_ROLE").build()));
+
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseGet(() -> roleRepository.save(Role.builder().name("ROLE_ADMIN").authorities(Set.of(fullAccess)).build()));
+
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .name("ROLE_USER")
+                        .authorities(Set.of(readUser,createUser,updateUser,deleteUser,readRole,createRole,updateRole,deleteRole))
+                        .build()
+                ));
+
+        userRepository.findByUsername("admin").orElseGet(() -> {
+            User admin = User.builder()
+                    .name("Admin")
                     .username("admin")
-                    .password(encodedPassword)
-                    .roles(new HashSet<>(Collections.singletonList(adminRole)))
+                    .email("admin@email.com")
+                    .password(passwordEncoder.encode("admin@2025!"))
+                    .roles(Set.of(adminRole))
                     .enabled(true)
                     .isAccountNonExpired(true)
-                    .isCredentialsNonExpired(true)
                     .isAccountNonLocked(true)
+                    .isCredentialsNonExpired(true)
                     .build();
-            entityManager.persist(adminUser);
-            LOGGER.info("Data initialization insert successfully");
-        }
+            return userRepository.save(admin);
+        });
+
+        userRepository.findByUsername("user").orElseGet(() -> {
+            User user = User.builder()
+                    .name("User")
+                    .username("user")
+                    .email("user@email.com")
+                    .password(passwordEncoder.encode("user@2025!"))
+                    .roles(Set.of(userRole))
+                    .enabled(true)
+                    .isAccountNonExpired(false)
+                    .isAccountNonLocked(false)
+                    .isCredentialsNonExpired(false)
+                    .build();
+            return userRepository.save(user);
+        });
     }
 }
