@@ -71,6 +71,8 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
     private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
         Set<GrantedAuthority> authorities = new HashSet<>();
         extractSimpleAuthorities(jwt, authorities);
+        extractRoles(jwt, authorities);
+        extractScopes(jwt, authorities);
         return authorities;
     }
 

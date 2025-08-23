@@ -16,6 +16,7 @@
 package com.base.config.security.service;
 
 import com.base.core.authentication.user.model.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -40,7 +41,7 @@ public class SecurityContextImpl implements SecurityContext {
             return user;
         } else if (principal instanceof Jwt jwt) {
             User user = new User();
-            user.setUsername(jwt.getClaimAsString("user_id")); // or "username" or whatever claim you use
+            user.setUsername(jwt.getClaimAsString("user_id"));
             return user;
         } else {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unsupported principal type.", null));
@@ -49,12 +50,25 @@ public class SecurityContextImpl implements SecurityContext {
 
     @Override
     public boolean isAdmin() {
-        User user = this.authenticatedUser();
-        if (user == null || user.getAuthorities() == null) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return false;
+            }
+            return authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        } catch (Exception e) {
             return false;
         }
-        return user.getRoles().stream()
-                .anyMatch(a -> "ROLE_ADMIN".equals(a.getName()));
+    }
+
+    public String getCurrentUsername() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            return authentication != null ? authentication.getName() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
