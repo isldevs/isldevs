@@ -16,7 +16,7 @@
 package com.base.config.security;
 
 
-import com.base.config.security.converter.CustomConverter;
+import com.base.config.security.converter.CustomJwtAuthenticationConverter;
 import com.base.config.security.service.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +67,7 @@ public class ResourceServerConfig {
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt
                                         .decoder(jwtDecoder)
-                                        .jwtAuthenticationConverter(new CustomConverter())
+                                        .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())
                                 )
                                 .authenticationEntryPoint(authenticationEntryPoint)
                 )

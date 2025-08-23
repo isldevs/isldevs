@@ -19,16 +19,15 @@ package com.base.config.security.service;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.user.model.User;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -50,20 +49,25 @@ public class CustomTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
                     .claim("issued_at", Instant.now().toString())
                     .claim("grant_type", context.getAuthorizationGrantType().getValue());
 
-            if (principal.getPrincipal() instanceof User user) {
-                List<Map<String, Object>> roles = user.getRoles().stream()
-                        .map(role -> {
-                            Map<String, Object> roleMap = new HashMap<>();
-                            roleMap.put("name", "ROLE_" + role.getName());
-                            roleMap.put("authorities", role.getAuthorities().stream()
-                                    .map(Authority::getAuthority)
-                                    .distinct()
-                                    .toList());
-                            return roleMap;
-                        }).toList();
+            Collection<? extends GrantedAuthority> authorities = principal.getAuthorities();
+            List<String> roles = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(authority -> authority.startsWith("ROLE_"))
+                    .collect(Collectors.toList());
 
-                context.getClaims().claim("roles", roles);
-            }
+            List<String> nonRoleAuthorities = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(authority -> !authority.startsWith("ROLE_"))
+                    .toList();
+
+            context.getClaims().claim("roles", roles);
+            context.getClaims().claim("authorities", nonRoleAuthorities);
+
+            List<String> allAuthorities = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            context.getClaims().claim("all_authorities", allAuthorities);
+
             String clientId = context.getRegisteredClient().getClientId();
             context.getClaims().claim("client_type", clientId);
 

@@ -15,14 +15,20 @@
  */
 package com.base.core.authentication.user.service;
 
+import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author YISivlay
@@ -43,13 +49,33 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+        String[] roles = user.getRoles().stream()
+                .map(role -> role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName())
+                .toArray(String[]::new);
+
+        String[] authorities = user.getRoles().stream()
+                .flatMap(role -> role.getAuthorities().stream())
+                .map(Authority::getAuthority)
+                .toArray(String[]::new);
+
+        List<GrantedAuthority> allAuthorities = new ArrayList<>();
+
+        for (String role : roles) {
+            allAuthorities.add(new SimpleGrantedAuthority(role));
+        }
+
+        for (String authority : authorities) {
+            allAuthorities.add(new SimpleGrantedAuthority(authority));
+        }
+
+        return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRoles().stream()
-                        .map(role -> role.getName().replace("ROLE_", ""))
-                        .toArray(String[]::new))
+                .authorities(allAuthorities)
+                .accountExpired(!user.isAccountNonExpired())
+                .accountLocked(!user.isAccountNonLocked())
+                .credentialsExpired(!user.isCredentialsNonExpired())
+                .disabled(!user.isEnabled())
                 .build();
-        return userDetails;
     }
 }
