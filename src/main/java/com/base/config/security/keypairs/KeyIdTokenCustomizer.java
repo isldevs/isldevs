@@ -16,38 +16,30 @@
 package com.base.config.security.keypairs;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.stereotype.Component;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Comparator;
 
 /**
  * @author YISivlay
  */
 @Component
-public class KeyProvider {
+public class KeyIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
 
     private final RSAKeyPairRepository rsaKeyPairRepository;
 
-    public KeyProvider(RSAKeyPairRepository rsaKeyPairRepository) {
+    @Autowired
+    public KeyIdTokenCustomizer(RSAKeyPairRepository rsaKeyPairRepository) {
         this.rsaKeyPairRepository = rsaKeyPairRepository;
     }
 
-    public RSAPublicKey publicKey() {
-        return rsaKeyPairRepository.findKeyPairs()
-                .stream()
+    @Override
+    public void customize(JwtEncodingContext context) {
+        rsaKeyPairRepository.findKeyPairs().stream()
                 .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+                .ifPresent(keyPair -> context.getJwsHeader().keyId(keyPair.id()));
     }
-
-    public RSAPrivateKey privateKey() {
-        return rsaKeyPairRepository.findKeyPairs()
-                .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
-                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
-    }
-
 }

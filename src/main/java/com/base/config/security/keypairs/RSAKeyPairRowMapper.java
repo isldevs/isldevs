@@ -20,6 +20,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -42,18 +44,17 @@ public class RSAKeyPairRowMapper implements RowMapper<RSAKeyPairRepository.RSAKe
     @Override
     public RSAKeyPairRepository.RSAKeyPair mapRow(ResultSet rs, int rowNum) throws SQLException {
         try {
-            var privateKeyBytes = rs.getString("private_key").getBytes();
-            var privateKey = this.rsaPrivateKeyConverter.deserializeFromByteArray(privateKeyBytes);
-
-            var publicKeyBytes = rs.getString("public_key").getBytes();
-            var publicKey = this.rsaPublicKeyConverter.deserializeFromByteArray(publicKeyBytes);
-
-            var created = rs.getTimestamp("created");
             var id = rs.getString("id");
+            var created = rs.getTimestamp("created");
+            var privateKeyStr = rs.getString("private_key");
+            var publicKeyStr = rs.getString("public_key");
+
+            var privateKey = (RSAPrivateKey) rsaPrivateKeyConverter.convertFromString(privateKeyStr);
+            var publicKey = (RSAPublicKey) rsaPublicKeyConverter.convertFromString(publicKeyStr);
 
             return new RSAKeyPairRepository.RSAKeyPair(id, created, publicKey, privateKey);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to map RSA key pair", e);
         }
     }
 }

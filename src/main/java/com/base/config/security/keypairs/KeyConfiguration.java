@@ -15,27 +15,24 @@
  */
 package com.base.config.security.keypairs;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.token.*;
 
 import java.sql.Timestamp;
-import java.time.Instant;
+import java.util.Comparator;
 import java.util.UUID;
 
 /**
@@ -44,20 +41,7 @@ import java.util.UUID;
 @Configuration
 public class KeyConfiguration {
 
-    @Bean
-    ApplicationListener<ApplicationReadyEvent> applicationReadyListener(ApplicationEventPublisher publisher, RSAKeyPairRepository repository) {
-        return _ -> {
-            if (repository.findKeyPairs().isEmpty())
-                publisher.publishEvent(new RSAKeyPairGenerationRequestEvent(Instant.now()));
-        };
-    }
-
-
-    @Bean
-    ApplicationListener<RSAKeyPairGenerationRequestEvent> keyPairGenerationRequestListener(Keys keys, RSAKeyPairRepository repository) {
-        var keyId = UUID.randomUUID().toString();
-        return _ -> repository.save(keys.generateKeyPair(keyId, new Timestamp(System.currentTimeMillis())));
-    }
+    private final Logger logger = LoggerFactory.getLogger(KeyConfiguration.class);
 
     @Bean
     TextEncryptor textEncryptor(@Value("${jwt.password}") String pw,
@@ -66,8 +50,8 @@ public class KeyConfiguration {
     }
 
     @Bean
-    NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
-        return new NimbusJwtEncoder(jwkSource);
+    NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> customJWKSource) {
+        return new NimbusJwtEncoder(customJWKSource);
     }
 
     @Bean
@@ -77,4 +61,23 @@ public class KeyConfiguration {
         generator.setJwtCustomizer(customTokenCustomizer);
         return new DelegatingOAuth2TokenGenerator(generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
     }
+
+    @Bean
+    ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairRepository repository) {
+        return _ -> {
+            var existingKey = repository.findKeyPairs().stream()
+                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+
+            if (existingKey.isEmpty()) {
+                var keys = new Keys();
+                var keyPair = keys.generateKeyPair(
+                        UUID.randomUUID().toString(),
+                        new Timestamp(System.currentTimeMillis())
+                );
+                repository.save(keyPair);
+                logger.info("Initial RSA Key created at startup");
+            }
+        };
+    }
+
 }

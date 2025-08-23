@@ -21,11 +21,9 @@ import org.springframework.core.serializer.Serializer;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -65,5 +63,10 @@ public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserial
                 Base64.getMimeEncoder().encodeToString(x509EncodedKeySpec.getEncoded()) +
                 "\n-----END PUBLIC KEY-----";
         outputStream.write(this.textEncryptor.encrypt(pem).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public Key convertFromString(String keyStr) throws IOException {
+        var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
+        return deserialize(byteArrayInputStream);
     }
 }

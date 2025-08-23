@@ -36,9 +36,8 @@ import java.util.List;
 /**
  * @author YISivlay
  */
-@Primary
-@Component(value = "jwkSource")
-public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
+@Component(value = "customJWKSource")
+public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext> {
 
     private final RSAKeyPairRepository rsaKeyPairRepository;
 
@@ -52,7 +51,7 @@ public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext>
         return rsaKeyPairRepository.findKeyPairs().stream()
                 .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
                 .map(keyPair -> {
-                    RSAKey rsaKey = new RSAKey.Builder(keyPair.publicKey())
+                    var rsaKey = new RSAKey.Builder(keyPair.publicKey())
                             .privateKey(keyPair.privateKey())
                             .keyID(keyPair.id())
                             .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
@@ -62,10 +61,4 @@ public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext>
                 .orElse(Collections.emptyList());
     }
 
-    @Override
-    public void customize(JwtEncodingContext context) {
-        rsaKeyPairRepository.findKeyPairs().stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .ifPresent(keyPair -> context.getJwsHeader().keyId(keyPair.id()));
-    }
 }

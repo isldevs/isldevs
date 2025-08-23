@@ -23,6 +23,7 @@ import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -61,5 +62,10 @@ public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deseri
         var string = "-----BEGIN PRIVATE KEY-----\n" + Base64.getMimeEncoder().encodeToString(pkcs8EncodedKeySpec.getEncoded())
                 + "\n-----END PRIVATE KEY-----";
         outputStream.write(this.textEncryptor.encrypt(string).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public Key convertFromString(String keyStr) throws IOException {
+        var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
+        return deserialize(byteArrayInputStream);
     }
 }

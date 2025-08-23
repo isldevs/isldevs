@@ -34,7 +34,7 @@ import java.util.UUID;
 @Component("rsaKeyRotator")
 public class ScheduledKeyRotator implements Runnable {
 
-    private final static Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
+    private final Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
 
     private final RSAKeyPairRepository repository;
     private final Keys keys;
@@ -48,23 +48,37 @@ public class ScheduledKeyRotator implements Runnable {
     @Override
     public void run() {
         try {
-            var keyPairs = repository.findKeyPairs();
-            var newestKey = keyPairs.stream()
-                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
-            var shouldRotate = newestKey.isEmpty() ||
-                    newestKey.get().created().toInstant().isBefore(Instant.now().minus(30, ChronoUnit.DAYS));
-
-            if (shouldRotate) {
-                String keyId = UUID.randomUUID().toString();
-                Timestamp created = new Timestamp(System.currentTimeMillis());
-                var newKey = keys.generateKeyPair(keyId, created);
-                repository.save(newKey);
-                logger.info("New rotated RSA key with ID {} on {}", keyId, created);
-            } else {
-                logger.info("RSA key not expired yet.");
-            }
+            ensureAtLeastOneKeyExists();
+            performScheduledRotation();
         } catch (Exception e) {
             logger.error("RSA key rotation failed", e);
         }
+    }
+
+    private void ensureAtLeastOneKeyExists() {
+        if (repository.findKeyPairs().isEmpty()) {
+            generateEmergencyKey();
+        }
+    }
+
+    private void performScheduledRotation() {
+        var existingKey = repository.findKeyPairs().stream().max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+        var shouldRotate = existingKey.isEmpty() || existingKey.get().created().toInstant().isBefore(Instant.now().minus(30, ChronoUnit.DAYS));
+
+        if (shouldRotate) {
+            var keyId = UUID.randomUUID().toString();
+            var created = new Timestamp(System.currentTimeMillis());
+            var newKey = keys.generateKeyPair(keyId, created);
+            repository.save(newKey);
+            logger.info("New rotated RSA key with ID {} on {}", keyId, created);
+        }
+    }
+
+    private void generateEmergencyKey() {
+        var keyId = UUID.randomUUID().toString();
+        var created = new Timestamp(System.currentTimeMillis());
+        var newKey = keys.generateKeyPair(keyId, created);
+        repository.save(newKey);
+        logger.warn("Generated new RSA key due to missing keys");
     }
 }

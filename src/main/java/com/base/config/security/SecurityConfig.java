@@ -165,7 +165,7 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
                 .scope("api.write")
                 .clientSettings(ClientSettings.builder()
-                        .jwkSetUrl(issuerUri + "/.well-known/jwks.json")
+                        .jwkSetUrl(issuerUri + "/oauth2/jwks")
                         .build())
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)

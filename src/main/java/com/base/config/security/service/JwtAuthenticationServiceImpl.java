@@ -15,7 +15,7 @@
  */
 package com.base.config.security.service;
 
-import com.base.config.security.keypairs.KeyProvider;
+import com.base.config.security.keypairs.RSAKeyPairRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -24,8 +24,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,13 +43,13 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
     private static final long EXPIRATION = 1000 * 60 * 15;
 
     private final Clock clock;
-    private final KeyProvider keyProvider;
+    private final RSAKeyPairRepository rsaKeyPairRepository;
 
     @Autowired
     public JwtAuthenticationServiceImpl(final Clock clock,
-                                        final KeyProvider keyProvider) {
+                                        final RSAKeyPairRepository rsaKeyPairRepository) {
         this.clock = clock;
-        this.keyProvider = keyProvider;
+        this.rsaKeyPairRepository = rsaKeyPairRepository;
     }
 
     @Override
@@ -76,6 +79,12 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
+
+        RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs().stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+
         return Jwts
                 .builder()
                 .claims(extraClaims)
@@ -83,7 +92,7 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
                 .issuedAt(Date.from(Instant.now(clock)))
                 .expiration(Date.from(Instant.now(clock).plusSeconds(expiration)))
                 .claim("authorities", authorities)
-                .signWith(keyProvider.privateKey())
+                .signWith(privateKey)
                 .compact();
     }
 
@@ -106,9 +115,14 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
     @Override
     public Claims extractAllClaims(String token) {
         try {
+            RSAPublicKey publicKey = rsaKeyPairRepository.findKeyPairs().stream()
+                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                    .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                    .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+
             return Jwts
                     .parser()
-                    .verifyWith(keyProvider.publicKey())
+                    .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
