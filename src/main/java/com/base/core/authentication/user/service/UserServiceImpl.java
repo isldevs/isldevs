@@ -22,6 +22,7 @@ import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.user.repository.UserRepository;
+import com.base.core.authentication.user.validation.UserDataValidation;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.BadRequestException;
@@ -49,20 +50,25 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserDataValidation validation;
 
     @Autowired
     public UserServiceImpl(final SecurityContext securityContext,
                            final UserRepository userRepository,
                            final RoleRepository roleRepository,
-                           final PasswordEncoder passwordEncoder) {
+                           final PasswordEncoder passwordEncoder,
+                           final UserDataValidation validation) {
         this.securityContext = securityContext;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.validation = validation;
     }
 
     @Override
     public LogData createUser(JsonCommand command) {
+
+        this.validation.create(command.getJson());
 
         final var username = command.extractString(UserConstants.USERNAME);
         final var password = command.extractString(UserConstants.PASSWORD);
@@ -125,6 +131,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public LogData updateUser(Long id, JsonCommand command) {
         var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
+
+        this.validation.update(command.getJson());
+
         final var username = command.extractString(UserConstants.USERNAME);
         if (!user.getUsername().equals(username) && userRepository.existsByUsername(username)) {
             throw new BadRequestException("Username already exists");

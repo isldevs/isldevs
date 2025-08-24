@@ -16,6 +16,10 @@
 package com.base.core.authentication.user.controller;
 
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+
 /**
  * @author YISivlay
  */
@@ -29,5 +33,20 @@ public class UserConstants {
     public static final String NAME = "name";
     public static final String EMAIL = "email";
     public static final String ROLES = "roles";
+    public static final String ENABLED = "enabled";
+    public static final String IS_ACCOUNT_NON_EXPIRED = "isAccountNonExpired";
+    public static final String IS_ACCOUNT_NON_LOCKED = "isAccountNonLocked";
+    public static final String IS_CREDENTIALS_NON_EXPIRED = "isCredentialsNonExpired";
 
+    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(
+            USERNAME,
+            PASSWORD,
+            NAME,
+            EMAIL,
+            ROLES,
+            ENABLED,
+            IS_ACCOUNT_NON_EXPIRED,
+            IS_ACCOUNT_NON_LOCKED,
+            IS_CREDENTIALS_NON_EXPIRED
+    ));
 }

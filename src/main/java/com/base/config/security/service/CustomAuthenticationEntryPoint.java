@@ -52,8 +52,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         ErrorData errorData = ErrorData.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
-                .description(message)
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(message)
                 .build();
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.core.authentication.role.validator;
+package com.base.core.authentication.role.validation;
 
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.exception.ApiDataValidator;

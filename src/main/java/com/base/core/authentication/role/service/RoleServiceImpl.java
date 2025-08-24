@@ -20,12 +20,11 @@ import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.role.data.RoleDTO;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.role.repository.RoleRepository;
-import com.base.core.authentication.role.validator.RoleDataValidator;
+import com.base.core.authentication.role.validation.RoleDataValidator;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
-import com.base.config.security.service.SecurityContext;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,15 +45,12 @@ import java.util.stream.Collectors;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    private final SecurityContext securityContext;
     private final RoleRepository roleRepository;
     private final RoleDataValidator validator;
 
     @Autowired
-    public RoleServiceImpl(final SecurityContext securityContext,
-                           final RoleRepository roleRepository,
+    public RoleServiceImpl(final RoleRepository roleRepository,
                            final RoleDataValidator validator) {
-        this.securityContext = securityContext;
         this.roleRepository = roleRepository;
         this.validator = validator;
     }
@@ -89,6 +85,8 @@ public class RoleServiceImpl implements RoleService {
 
         Role exist = this.roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
+
+        this.validator.update(command.getJson());
 
         var changes = exist.changed(command);
         if (!changes.isEmpty()) {

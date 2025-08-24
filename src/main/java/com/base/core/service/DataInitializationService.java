@@ -111,9 +111,9 @@ public class DataInitializationService {
                     .password(passwordEncoder.encode("user@2025!"))
                     .roles(Set.of(userRole))
                     .enabled(true)
-                    .isAccountNonExpired(false)
-                    .isAccountNonLocked(false)
-                    .isCredentialsNonExpired(false)
+                    .isAccountNonExpired(true)
+                    .isAccountNonLocked(true)
+                    .isCredentialsNonExpired(true)
                     .build();
             return userRepository.save(user);
         });

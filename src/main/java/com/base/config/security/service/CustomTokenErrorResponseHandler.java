@@ -53,8 +53,9 @@ public class CustomTokenErrorResponseHandler implements AuthenticationFailureHan
 
         ErrorData errorData = ErrorData.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
-                .description(message)
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(message)
                 .build();
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

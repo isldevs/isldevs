@@ -106,9 +106,9 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
+                .redirectUri("")
                 .postLogoutRedirectUri("http://127.0.0.1:8080/")
-                .scopes(scopes -> {
+                .scopes(scopes -> {http://127.0.0.1:8080/login/oauth2/code/web-app
                     scopes.add(OidcScopes.OPENID);
                     scopes.add(OidcScopes.EMAIL);
                     scopes.add(OidcScopes.PROFILE);
@@ -264,6 +264,7 @@ public class SecurityConfig {
         objectMapper.addMixIn(Class.forName("org.hibernate.collection.spi.PersistentSet"), PersistentSet.class);
         objectMapper.addMixIn(Class.forName("java.util.HashSet"), HashSet.class);
         objectMapper.addMixIn(Class.forName("java.util.Collections$UnmodifiableSet"), Collections.class);
+        objectMapper.addMixIn(Class.forName("java.util.ImmutableCollections$ListN"), ImmutableCollections.class);
 
         JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
         rowMapper.setObjectMapper(objectMapper);
@@ -308,5 +309,8 @@ public class SecurityConfig {
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
+    }
+
+    abstract static class ImmutableCollections {
     }
 }
