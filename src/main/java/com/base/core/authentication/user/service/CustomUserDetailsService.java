@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -46,27 +48,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        String[] roles = user.getRoles().stream()
+        var roles = user.getRoles().stream()
                 .map(role -> role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName())
                 .toArray(String[]::new);
 
-        String[] authorities = user.getRoles().stream()
+        var authorities = user.getRoles().stream()
                 .flatMap(role -> role.getAuthorities().stream())
                 .map(Authority::getAuthority)
                 .toArray(String[]::new);
 
-        List<GrantedAuthority> allAuthorities = new ArrayList<>();
-
-        for (String role : roles) {
-            allAuthorities.add(new SimpleGrantedAuthority(role));
-        }
-
-        for (String authority : authorities) {
-            allAuthorities.add(new SimpleGrantedAuthority(authority));
-        }
+        var allAuthorities = Arrays.stream(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        Arrays.stream(authorities).map(SimpleGrantedAuthority::new).forEach(allAuthorities::add);
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

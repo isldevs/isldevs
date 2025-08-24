@@ -18,12 +18,10 @@ package com.base.core.authentication.role.validation;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.exception.ApiDataValidator;
 import com.base.config.serialization.JsonHelper;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -44,27 +42,27 @@ public class RoleDataValidator {
 
     public void create(String json) {
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {
         }.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
 
-        final JsonElement jsonElement = this.jsonHelper.parse(json);
+        final var jsonElement = this.jsonHelper.parse(json);
 
-        final String name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
+        final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
         validator.parameter(RoleConstants.NAME, name).isString().notEmpty().maxLength(2);
 
     }
 
     public void update(String json) {
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {
         }.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
 
-        final JsonElement jsonElement = this.jsonHelper.parse(json);
+        final var jsonElement = this.jsonHelper.parse(json);
 
         if (this.jsonHelper.parameterExists(RoleConstants.NAME, jsonElement)) {
-            final String name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
+            final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
             validator.parameter(RoleConstants.NAME, name).isString().notEmpty();
         }
 
