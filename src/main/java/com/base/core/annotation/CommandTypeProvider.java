@@ -54,8 +54,8 @@ public class CommandTypeProvider implements ApplicationContextAware {
             this.applicationContext.getBeansWithAnnotation(CommandType.class)
                     .forEach((_, bean) -> {
                         CommandType commandType = AopUtils.getTargetClass(bean).getAnnotation(CommandType.class);
-                        this.registeredCommandTypes.put(commandType.action() + " | " + commandType.entity(), AopUtils.getTargetClass(bean).getName());
-                        commandTypes.add(commandType.action() + " | " + commandType.entity());
+                        this.registeredCommandTypes.put(commandType.action() + "|" + commandType.entity(), AopUtils.getTargetClass(bean).getName());
+                        commandTypes.add(commandType.action() + "|" + commandType.entity());
                     });
         }
         if (isDevProfileActive()) {
@@ -64,7 +64,7 @@ public class CommandTypeProvider implements ApplicationContextAware {
     }
 
     public CommandHandlerProcessing allHandler(String action, String entity) {
-        final String permission = action + " | " + entity;
+        final String permission = action + "|" + entity;
         if (!this.registeredCommandTypes.containsKey(permission)) {
             throw new BadRequestException("msg.bad.request.description", permission);
         }
