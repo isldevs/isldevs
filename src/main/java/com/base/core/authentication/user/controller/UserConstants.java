@@ -28,12 +28,15 @@ public class UserConstants {
     public static final String PERMISSION = "USER";
     public static final String API_PATH = "/users";
 
+    public static final String ID = "id";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String NAME = "name";
     public static final String EMAIL = "email";
     public static final String ROLES = "roles";
+    public static final String AUTHORITIES = "authorities";
     public static final String ENABLED = "enabled";
+    public static final String AUTHENTICATED = "authenticated";
     public static final String IS_ACCOUNT_NON_EXPIRED = "isAccountNonExpired";
     public static final String IS_ACCOUNT_NON_LOCKED = "isAccountNonLocked";
     public static final String IS_CREDENTIALS_NON_EXPIRED = "isCredentialsNonExpired";
@@ -44,7 +47,9 @@ public class UserConstants {
             NAME,
             EMAIL,
             ROLES,
+            AUTHORITIES,
             ENABLED,
+            AUTHENTICATED,
             IS_ACCOUNT_NON_EXPIRED,
             IS_ACCOUNT_NON_LOCKED,
             IS_CREDENTIALS_NON_EXPIRED

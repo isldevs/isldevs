@@ -15,6 +15,8 @@
  */
 package com.base.core.authentication.user.data;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,6 +30,7 @@ public class UserDTO {
     private final String email;
     private final Set<String> roles;
     private final boolean enabled;
+    private final Map<String, Object> claims;
 
     public UserDTO(Builder builder) {
         this.id = builder.id;
@@ -36,6 +39,7 @@ public class UserDTO {
         this.email = builder.email;
         this.roles = builder.roles;
         this.enabled = builder.enabled;
+        this.claims = builder.claims;
     }
 
     public static Builder builder() {
@@ -50,6 +54,10 @@ public class UserDTO {
         private String email;
         private Set<String> roles;
         private boolean enabled;
+        private final Map<String, Object> claims = new LinkedHashMap();
+
+        public Builder() {
+        }
 
         public UserDTO build() {
             return new UserDTO(this);
@@ -84,6 +92,35 @@ public class UserDTO {
             this.enabled = enabled;
             return this;
         }
+
+        public Builder claim(String name, Object value) {
+            this.claims.put(name, value);
+            return this;
+        }
+
+        public Builder authorities(Set<String> authorities) {
+            this.claims.put("authorities", authorities);
+            return this;
+        }
+    }
+
+    public Map<String, Object> getClaims() {
+        return this.claims;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj != null && this.getClass() == obj.getClass()) {
+            UserDTO that = (UserDTO) obj;
+            return this.getClaims().equals(that.getClaims());
+        } else {
+            return false;
+        }
+    }
+
+    public int hashCode() {
+        return this.getClaims().hashCode();
     }
 
     public Long getId() {
@@ -109,4 +146,5 @@ public class UserDTO {
     public boolean enabled() {
         return enabled;
     }
+
 }

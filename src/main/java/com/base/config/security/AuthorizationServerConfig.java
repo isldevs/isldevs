@@ -23,6 +23,7 @@ import com.base.config.security.filter.JwtAuthenticationFilter;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
 import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
 import com.base.config.security.service.CustomTokenErrorResponseHandler;
+import com.base.config.security.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -33,11 +34,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientCredentialsAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
@@ -51,6 +54,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * @author YISivlay
@@ -67,6 +71,7 @@ public class AuthorizationServerConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final UserInfoService userInfoService;
 
     @Autowired
     public AuthorizationServerConfig(final MessageSource messageSource,
@@ -77,7 +82,8 @@ public class AuthorizationServerConfig {
                                      final HttpAuthenticationFilter httpAuthenticationFilter,
                                      final JwtAuthenticationFilter jwtAuthenticationFilter,
                                      final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
-                                     final CorsConfigurationSource corsConfigurationSource) {
+                                     final CorsConfigurationSource corsConfigurationSource,
+                                     final UserInfoService userInfoService) {
         this.messageSource = messageSource;
         this.authenticationProvider = authenticationProvider;
         this.authorizationService = authorizationService;
@@ -87,12 +93,14 @@ public class AuthorizationServerConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.jwtBearerAuthenticationProvider = jwtBearerAuthenticationProvider;
         this.corsConfigurationSource = corsConfigurationSource;
+        this.userInfoService = userInfoService;
     }
 
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 
+        Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = this.userInfoService::loadUser;
         var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         http
                 .securityMatcher(configurer.getEndpointsMatcher())
@@ -104,7 +112,7 @@ public class AuthorizationServerConfig {
                         "/api/v1/oauth2/token/revoke"
                 ))
                 .with(configurer, (authorizationServer) -> authorizationServer
-                        .oidc(Customizer.withDefaults())
+                        .oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo.userInfoMapper(userInfoMapper)))
                         .tokenEndpoint(tokenEndpoint -> tokenEndpoint
                                 .accessTokenRequestConverter(
                                         new DelegatingAuthenticationConverter(

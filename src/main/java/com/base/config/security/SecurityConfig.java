@@ -19,7 +19,6 @@ import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
 import com.base.config.security.keypairs.RSAKeyPairRepository;
 import com.base.config.security.provider.JwtAuthenticationProvider;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
-import com.base.config.security.service.CustomTokenCustomizer;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.Module;
@@ -59,8 +58,6 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
-import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -70,10 +67,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.sql.DataSource;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -197,11 +191,6 @@ public class SecurityConfig {
                         .refreshTokenTimeToLive(Duration.ofDays(30))
                         .build())
                 .build();
-    }
-
-    @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
-        return new CustomTokenCustomizer();
     }
 
     @Bean
