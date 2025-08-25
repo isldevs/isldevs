@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -233,11 +234,14 @@ public class SecurityConfig {
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        Stream.of(webAppClient(), serviceM2MClient(), microserviceClient(), deviceClient()).forEach(client -> {
-            if (repository.findByClientId(client.getClientId()) == null) {
-                repository.save(client);
-            }
-        });
+        try {
+            Stream.of(webAppClient(), serviceM2MClient(), microserviceClient(), deviceClient()).forEach(client -> {
+                if (repository.findByClientId(client.getClientId()) == null) {
+                    repository.save(client);
+                }
+            });
+        } catch (BadSqlGrammarException ignored) {
+        }
 
         return repository;
     }

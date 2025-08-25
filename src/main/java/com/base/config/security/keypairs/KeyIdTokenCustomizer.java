@@ -17,11 +17,15 @@ package com.base.config.security.keypairs;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author YISivlay
@@ -41,5 +45,24 @@ public class KeyIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCo
         rsaKeyPairRepository.findKeyPairs().stream()
                 .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
                 .ifPresent(keyPair -> context.getJwsHeader().keyId(keyPair.id()));
+
+        if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+            Authentication principal = context.getPrincipal();
+
+            if (principal != null && principal.getAuthorities() != null) {
+                List<String> roles = principal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(f -> f.startsWith("ROLE_"))
+                        .toList();
+
+                List<String> authorities = principal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(f -> !f.startsWith("ROLE_"))
+                        .toList();
+
+                context.getClaims().claim("roles", roles);
+                context.getClaims().claim("authorities", authorities);
+            }
+        }
     }
 }

@@ -29,6 +29,7 @@ import java.util.*;
  */
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -46,12 +47,7 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
         try {
             Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
             String principalName = getPrincipalName(jwt);
-            return new UsernamePasswordAuthenticationToken(
-                    principalName,
-                    "N/A",
-                    authorities
-            );
-
+            return new JwtAuthenticationToken(jwt, authorities, principalName);
         } catch (Exception e) {
             log.error("Failed to convert JWT to Authentication", e);
             return new UsernamePasswordAuthenticationToken(
