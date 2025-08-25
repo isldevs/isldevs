@@ -106,9 +106,9 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("")
+                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
                 .postLogoutRedirectUri("http://127.0.0.1:8080/")
-                .scopes(scopes -> {http://127.0.0.1:8080/login/oauth2/code/web-app
+                .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);
                     scopes.add(OidcScopes.EMAIL);
                     scopes.add(OidcScopes.PROFILE);
