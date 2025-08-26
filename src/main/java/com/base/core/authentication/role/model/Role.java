@@ -15,6 +15,7 @@
  */
 package com.base.core.authentication.role.model;
 
+import com.base.core.auditable.CustomAbstractPersistable;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.command.data.JsonCommand;
@@ -27,12 +28,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "roles")
-public class Role {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @SequenceGenerator(name = "role_id_seq", sequenceName = "role_id_seq", allocationSize = 1)
-    private Long id;
+public class Role extends CustomAbstractPersistable {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -92,14 +88,6 @@ public class Role {
 
         return changes;
 
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Set<Authority> getAuthorities() {

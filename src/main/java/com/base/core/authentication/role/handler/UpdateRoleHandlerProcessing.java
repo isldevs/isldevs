@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 /**
  * @author YISivlay
  */
@@ -42,7 +44,7 @@ public class UpdateRoleHandlerProcessing implements CommandHandlerProcessing {
     }
 
     @Override
-    public LogData process(JsonCommand command) {
+    public Map<String, Object> process(JsonCommand command) {
         return this.service.updateRole(command.getId(), command);
     }
 }

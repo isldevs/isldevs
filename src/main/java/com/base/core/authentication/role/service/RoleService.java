@@ -23,19 +23,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 /**
  * @author YISivlay
  */
 public interface RoleService {
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_ROLE')")
-    LogData createRole(JsonCommand command);
+    Map<String, Object> createRole(JsonCommand command);
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_ROLE')")
-    LogData updateRole(Long id, JsonCommand command);
+    Map<String, Object> updateRole(Long id, JsonCommand command);
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_ROLE')")
-    LogData deleteRole(Long id);
+    Map<String, Object> deleteRole(Long id);
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_ROLE')")

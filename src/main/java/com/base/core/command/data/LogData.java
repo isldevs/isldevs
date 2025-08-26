@@ -15,8 +15,11 @@
  */
 package com.base.core.command.data;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -24,43 +27,54 @@ import java.util.Map;
  */
 public class LogData implements Serializable {
 
-    private final Long id;
-    private final Map<String, Object> changes;
+    private Map<String, Object> claims;
 
-    public LogData(Builder builder) {
-        this.id = builder.id;
-        this.changes = builder.changes;
+    public LogData(final Map<String, Object> claims) {
+        this.claims = claims;
+    }
+
+    public LogData() {
+    }
+
+    public Map<String, Object> claims() {
+        return this.claims;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+    public Long getId() {
+        return (Long) this.claims.get("id");
+    }
+
     public static class Builder {
 
-        private Long id;
-        private Map<String, Object> changes;
+        private Map<String, Object> claims = new LinkedHashMap<>();
+
+        public Builder() {
+        }
+
+        public Builder claim(String name, Object value) {
+            this.claims.put(name, value);
+            return this;
+        }
 
         public LogData build() {
-            return new LogData(this);
+            return new LogData(this.claims);
         }
 
         public Builder id(Long id) {
-            this.id = id;
-            return this;
+            return this.claim("id", id);
         }
 
         public Builder changes(Map<String, Object> changes) {
-            this.changes = changes;
-            return this;
+            return this.claim("changes", changes);
         }
-    }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Map<String, Object> getChanges() {
-        return changes;
+        public Builder success(String msgCde, MessageSource messageSource, Object... args) {
+            String localizedMessage = messageSource.getMessage(msgCde, args, LocaleContextHolder.getLocale());
+            return this.claim("message", localizedMessage);
+        }
     }
 }

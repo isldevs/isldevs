@@ -15,6 +15,7 @@
  */
 package com.base.core.authentication.user.model;
 
+import com.base.core.auditable.CustomAbstractPersistable;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.controller.UserConstants;
 import com.base.core.authentication.role.repository.RoleRepository;
@@ -26,7 +27,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,15 +36,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 @Table(name = "users")
-public class User implements UserDetails, Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 1)
-    private Long id;
+public class User extends CustomAbstractPersistable implements UserDetails, Serializable {
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -62,13 +54,13 @@ public class User implements UserDetails, Serializable {
     private boolean enabled;
 
     @Column(name = "is_account_non_expired", nullable = false)
-    private boolean isAccountNonExpired;
+    private boolean accountNonExpired;
 
     @Column(name = "is_account_non_locked", nullable = false)
-    private boolean isAccountNonLocked;
+    private boolean accountNonLocked;
 
     @Column(name = "is_credentials_non_expired", nullable = false)
-    private boolean isCredentialsNonExpired;
+    private boolean credentialsNonExpired;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -87,9 +79,9 @@ public class User implements UserDetails, Serializable {
         this.name = builder.name;
         this.email = builder.email;
         this.enabled = builder.enabled;
-        this.isAccountNonExpired = builder.isAccountNonExpired;
-        this.isAccountNonLocked = builder.isAccountNonLocked;
-        this.isCredentialsNonExpired = builder.isCredentialsNonExpired;
+        this.accountNonExpired = builder.accountNonExpired;
+        this.accountNonLocked = builder.accountNonLocked;
+        this.credentialsNonExpired = builder.credentialsNonExpired;
         this.roles = builder.roles;
     }
 
@@ -104,9 +96,9 @@ public class User implements UserDetails, Serializable {
         private String name;
         private String email;
         private boolean enabled;
-        private boolean isAccountNonExpired;
-        private boolean isAccountNonLocked;
-        private boolean isCredentialsNonExpired;
+        private boolean accountNonExpired;
+        private boolean accountNonLocked;
+        private boolean credentialsNonExpired;
         private Set<Role> roles;
 
         public User build() {
@@ -138,18 +130,18 @@ public class User implements UserDetails, Serializable {
             return this;
         }
 
-        public Builder isAccountNonExpired(boolean accountNonExpired) {
-            isAccountNonExpired = accountNonExpired;
+        public Builder accountNonExpired(boolean accountNonExpired) {
+            this.accountNonExpired = accountNonExpired;
             return this;
         }
 
-        public Builder isAccountNonLocked(boolean accountNonLocked) {
-            isAccountNonLocked = accountNonLocked;
+        public Builder accountNonLocked(boolean accountNonLocked) {
+            this.accountNonLocked = accountNonLocked;
             return this;
         }
 
-        public Builder isCredentialsNonExpired(boolean credentialsNonExpired) {
-            isCredentialsNonExpired = credentialsNonExpired;
+        public Builder credentialsNonExpired(boolean credentialsNonExpired) {
+            this.credentialsNonExpired = credentialsNonExpired;
             return this;
         }
 
@@ -161,11 +153,11 @@ public class User implements UserDetails, Serializable {
         public Builder authority(Collection<? extends GrantedAuthority> authorities) {
             this.roles = authorities.stream()
                     .map(grantedAuthority -> {
-                        Role role = new Role();
-                        role.setName(grantedAuthority.getAuthority());
+                        Role role = Role.builder().name(grantedAuthority.getAuthority()).build();
                         Set<Authority> authoritySet = new HashSet<>();
-                        Authority authority = new Authority();
-                        authority.setAuthority(grantedAuthority.getAuthority());
+                        Authority authority = Authority.builder()
+                                .authority(grantedAuthority.getAuthority())
+                                .build();
                         authoritySet.add(authority);
                         role.setAuthorities(authoritySet);
                         return role;
@@ -231,17 +223,17 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.isAccountNonExpired;
+        return this.accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.isAccountNonLocked;
+        return this.accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.isCredentialsNonExpired;
+        return this.credentialsNonExpired;
     }
 
     @Override
@@ -253,17 +245,13 @@ public class User implements UserDetails, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
-        User that = (User) o;
-        return id != null && id.equals(that.id);
+        User user = (User) o;
+        return this.getId() != null && this.getId().equals(user.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    public Long getId() {
-        return id;
+        return Objects.hash(this.getId());
     }
 
     public String getName() {
@@ -276,10 +264,6 @@ public class User implements UserDetails, Serializable {
 
     public Set<Role> getRoles() {
         return roles;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void setUsername(String username) {
@@ -302,16 +286,16 @@ public class User implements UserDetails, Serializable {
         this.enabled = enabled;
     }
 
-    public void isAccountNonExpired(boolean accountNonExpired) {
-        isAccountNonExpired = accountNonExpired;
+    public void accountNonExpired(boolean accountNonExpired) {
+        this.accountNonExpired = accountNonExpired;
     }
 
-    public void isAccountNonLocked(boolean accountNonLocked) {
-        isAccountNonLocked = accountNonLocked;
+    public void accountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
     }
 
-    public void isCredentialsNonExpired(boolean credentialsNonExpired) {
-        isCredentialsNonExpired = credentialsNonExpired;
+    public void credentialsNonExpired(boolean credentialsNonExpired) {
+        this.credentialsNonExpired = credentialsNonExpired;
     }
 
     public void setRoles(Set<Role> roles) {

@@ -16,7 +16,7 @@
 package com.base.config.serialization;
 
 
-import com.base.core.exception.BadRequestException;
+import com.base.core.exception.ErrorException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -69,7 +69,7 @@ public class JsonHelper {
                                       final Collection<String> supportedParams) {
         if (StringUtils.isBlank(json)) {
             String message = messageSource.getMessage("validation.json.invalid", null, "Invalid JSON", locale);
-            throw new BadRequestException(message);
+            throw new ErrorException(message);
         }
 
         final Map<String, Object> requestMap = this.gson.fromJson(json, typeOfMap);
@@ -87,7 +87,7 @@ public class JsonHelper {
                     "Unsupported parameters: " + String.join(", ", unsupportedParameterList),
                     locale
             );
-            throw new BadRequestException(message);
+            throw new ErrorException(message);
         }
     }
 
@@ -102,7 +102,7 @@ public class JsonHelper {
         JsonElement valueElement = element.getAsJsonObject().get(fieldName);
 
         if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isString()) {
-            throw new BadRequestException("validation.string", fieldName);
+            throw new ErrorException("validation.string", fieldName);
         }
 
         return valueElement.getAsString();

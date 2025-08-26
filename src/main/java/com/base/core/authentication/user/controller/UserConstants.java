@@ -37,9 +37,9 @@ public class UserConstants {
     public static final String AUTHORITIES = "authorities";
     public static final String ENABLED = "enabled";
     public static final String AUTHENTICATED = "authenticated";
-    public static final String IS_ACCOUNT_NON_EXPIRED = "isAccountNonExpired";
-    public static final String IS_ACCOUNT_NON_LOCKED = "isAccountNonLocked";
-    public static final String IS_CREDENTIALS_NON_EXPIRED = "isCredentialsNonExpired";
+    public static final String IS_ACCOUNT_NON_EXPIRED = "accountNonExpired";
+    public static final String IS_ACCOUNT_NON_LOCKED = "accountNonLocked";
+    public static final String IS_CREDENTIALS_NON_EXPIRED = "credentialsNonExpired";
 
     public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(
             USERNAME,

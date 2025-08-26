@@ -18,22 +18,20 @@ package com.base.core.exception;
 
 import com.base.core.data.ErrorData;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,68 +49,94 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorData> handleIllegalArgumentException(IllegalArgumentException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, message, null);
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, localizedMessage, ex.getMessage(), null);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorData> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.METHOD_NOT_ALLOWED, message, null);
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.METHOD_NOT_ALLOWED, localizedMessage, ex.getMessage(), null);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorData> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message, null);
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.UNSUPPORTED_MEDIA_TYPE, localizedMessage, ex.getMessage(), null);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorData> handleBadRequestException(BadRequestException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, message, ex.getArgs());
+    @ExceptionHandler(ErrorException.class)
+    public ResponseEntity<ErrorData> handleBadRequestException(ErrorException ex, Locale locale) {
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, localizedMessage, ex.getMessage(), ex.getArgs());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorData> handleGenericException(Exception ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, message, null);
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), null);
     }
 
     @ExceptionHandler(value = {AuthorizationDeniedException.class})
     public ResponseEntity<ErrorData> handleAccessDeniedException(AuthorizationDeniedException ex, Locale locale) {
-        var headers = new HttpHeaders();
-
         List<String> args = extract(ex);
-        String message = messageSource.getMessage("msg.access.denied",args.toArray(),ex.getMessage(),locale);
+        String localizedMessage = messageSource.getMessage("msg.access.denied",args.toArray(),ex.getMessage(),locale);
+        return buildResponseEntity(HttpStatus.FORBIDDEN, localizedMessage, ex.getMessage(), args.toArray());
+    }
 
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
+    @ExceptionHandler(value = {DataIntegrityViolationException.class})
+    public ResponseEntity<ErrorData> handleDataIntegrityViolationException(DataIntegrityViolationException ex, Locale locale) {
+        var cause = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
+        String localizedMessage;
+        var args = new Object[1];
+        if (cause.contains("duplicate key")) {
+            args[0] = extractColumnName(cause);
+            localizedMessage = messageSource.getMessage("msg.data.integrity.unique", args, locale);
+        } else if (cause.contains("foreign key")) {
+            args[0] = extractColumnName(cause);
+            localizedMessage = messageSource.getMessage("msg.data.integrity.foreign-key", args, locale);
+        } else if (cause.contains("not-null")) {
+            args[0] = extractColumnName(cause);
+            localizedMessage = messageSource.getMessage("msg.data.integrity.not-null", args, locale);
+        } else if (cause.contains("constraint")) {
+            args[0] = extractColumnName(cause);
+            localizedMessage = messageSource.getMessage("msg.data.integrity.constraint", args, locale);
+        } else {
+            args[0] = extractColumnName(cause);
+            localizedMessage = messageSource.getMessage("msg.data.integrity.default", args, locale);
+        }
 
-        var errorData = ErrorData.builder()
-                .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
-                .description("Access Denied")
-                .message(message)
-                .args(args)
-                .build();
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, localizedMessage, ex.getMessage(), args);
+    }
 
-        return new ResponseEntity<>(errorData, headers, HttpStatus.FORBIDDEN);
+    @ExceptionHandler(value = {UnexpectedRollbackException.class})
+    public ResponseEntity<ErrorData> handleDataIntegrityViolationException(UnexpectedRollbackException ex, Locale locale) {
+        String localizedMessage = messageSource.getMessage("msg.transaction.rollback", null, locale);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, localizedMessage, ex.getMessage(), null);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorData> handleAuthenticationException(AuthenticationException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.UNAUTHORIZED, message, null);
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, localizedMessage, ex.getMessage(), null);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorData> handleNotFoundException(NotFoundException ex, Locale locale) {
-        var message  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.NOT_FOUND, message, ex.getArgs());
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.NOT_FOUND, localizedMessage, ex.getMessage(), ex.getArgs());
     }
 
-    private ResponseEntity<ErrorData> buildResponseEntity(HttpStatus status, String message, Object[] args) {
+    private String extractColumnName(String dbMessage) {
+        var start = dbMessage.indexOf('"') + 1;
+        var end = dbMessage.indexOf('"', start);
+        if (start > 0 && end > start) {
+            return dbMessage.substring(start, end);
+        }
+        return "field";
+    }
+
+    private ResponseEntity<ErrorData> buildResponseEntity(HttpStatus status, String message, String error, Object[] args) {
 
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -120,7 +144,8 @@ public class GlobalExceptionHandler {
 
         var errorData = ErrorData.builder()
                 .status(status.value())
-                .error(status.getReasonPhrase())
+                .error(error)
+                .description(status.getReasonPhrase())
                 .message(message)
                 .args(args)
                 .build();

@@ -17,7 +17,7 @@ package com.base.core.annotation;
 
 
 import com.base.core.command.service.CommandHandlerProcessing;
-import com.base.core.exception.BadRequestException;
+import com.base.core.exception.ErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
@@ -66,13 +66,13 @@ public class CommandTypeProvider implements ApplicationContextAware {
     public CommandHandlerProcessing allHandler(String action, String entity) {
         final String permission = action + "|" + entity;
         if (!this.registeredCommandTypes.containsKey(permission)) {
-            throw new BadRequestException("msg.bad.request.description", permission);
+            throw new ErrorException("msg.bad.request.description", permission);
         }
         try {
             Class<?> clazz = Class.forName(this.registeredCommandTypes.get(permission));
             return (CommandHandlerProcessing) this.applicationContext.getBean(clazz);
         } catch (ClassNotFoundException e) {
-            throw new BadRequestException("msg.bad.request.description", this.registeredCommandTypes.get(permission));
+            throw new ErrorException("msg.bad.request.description", this.registeredCommandTypes.get(permission));
         }
     }
 

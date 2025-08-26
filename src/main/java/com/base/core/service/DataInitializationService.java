@@ -96,11 +96,26 @@ public class DataInitializationService {
                     .password(passwordEncoder.encode("admin@2025!"))
                     .roles(Set.of(adminRole))
                     .enabled(true)
-                    .isAccountNonExpired(true)
-                    .isAccountNonLocked(true)
-                    .isCredentialsNonExpired(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
                     .build();
             return userRepository.save(admin);
+        });
+
+        userRepository.findByUsername("system").orElseGet(() -> {
+            User user = User.builder()
+                    .name("System")
+                    .username("system")
+                    .email("system@email.com")
+                    .password(passwordEncoder.encode("system@2025!"))
+                    .roles(Set.of(adminRole))
+                    .enabled(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
+                    .build();
+            return userRepository.save(user);
         });
 
         userRepository.findByUsername("user").orElseGet(() -> {
@@ -111,9 +126,9 @@ public class DataInitializationService {
                     .password(passwordEncoder.encode("user@2025!"))
                     .roles(Set.of(userRole))
                     .enabled(true)
-                    .isAccountNonExpired(true)
-                    .isAccountNonLocked(true)
-                    .isCredentialsNonExpired(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
                     .build();
             return userRepository.save(user);
         });

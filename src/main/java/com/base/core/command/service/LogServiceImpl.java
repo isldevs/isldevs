@@ -28,13 +28,16 @@ import com.base.config.security.service.SecurityContext;
 import com.google.gson.JsonElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author YISivlay
  */
 @Service
+@Transactional
 public class LogServiceImpl implements LogService {
 
     private final LogRepository logRepository;
@@ -54,8 +57,7 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public LogData log(Command command) {
-
+    public Map<String, Object> log(Command command) {
         CommandHandlerProcessing handler = getHandler(command.getAction(), command.getEntity());
         JsonElement jsonElement = jsonDelegator.parseString(command.getJson());
         JsonCommand jsonCommand = JsonCommand.builder()
@@ -68,10 +70,10 @@ public class LogServiceImpl implements LogService {
                 .jsonDelegator(jsonDelegator)
                 .jsonElement(jsonElement)
                 .build();
-        LogData logData = handler.process(jsonCommand);
+        Map<String, Object> logData = handler.process(jsonCommand);
         User createdBy = this.securityContext.authenticatedUser();
         Logs logs = new Logs(
-                logData.getId(),
+                (Long) logData.get("id"),
                 command.getAction(),
                 command.getEntity(),
                 command.getHref(),

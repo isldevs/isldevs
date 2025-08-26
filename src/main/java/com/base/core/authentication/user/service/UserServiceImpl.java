@@ -25,16 +25,16 @@ import com.base.core.authentication.user.repository.UserRepository;
 import com.base.core.authentication.user.validation.UserDataValidation;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
-import com.base.core.exception.BadRequestException;
+import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
 import com.base.config.security.service.SecurityContext;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
  * @author YISivlay
  */
 @Service
-@Transactional
 public class UserServiceImpl implements UserService {
 
+    private final MessageSource messageSource;
     private final SecurityContext securityContext;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -53,11 +53,13 @@ public class UserServiceImpl implements UserService {
     private final UserDataValidation validation;
 
     @Autowired
-    public UserServiceImpl(final SecurityContext securityContext,
+    public UserServiceImpl(final MessageSource messageSource,
+                           final SecurityContext securityContext,
                            final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final PasswordEncoder passwordEncoder,
                            final UserDataValidation validation) {
+        this.messageSource = messageSource;
         this.securityContext = securityContext;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -66,8 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LogData createUser(JsonCommand command) {
-
+    public Map<String, Object> createUser(JsonCommand command) {
         this.validation.create(command.getJson());
 
         final var username = command.extractString(UserConstants.USERNAME);
@@ -77,16 +78,16 @@ public class UserServiceImpl implements UserService {
         final var roleNames = command.extractArrayAs(UserConstants.ROLES, String.class);
 
         if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new NotFoundException("msg.username.exist", username);
         }
 
         var data = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
                 .enabled(true)
-                .isAccountNonExpired(true)
-                .isAccountNonLocked(true)
-                .isCredentialsNonExpired(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
                 .name(name)
                 .email(email)
                 .roles(resolveRoles(roleNames))
@@ -95,7 +96,9 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.save(data);
         return LogData.builder()
                 .id(user.getId())
-                .build();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -129,14 +132,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LogData updateUser(Long id, JsonCommand command) {
+    public Map<String, Object> updateUser(Long id, JsonCommand command) {
         var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
 
         this.validation.update(command.getJson());
 
         final var username = command.extractString(UserConstants.USERNAME);
         if (!user.getUsername().equals(username) && userRepository.existsByUsername(username)) {
-            throw new BadRequestException("Username already exists");
+            throw new ErrorException("msg.username.exist", username);
         }
         var changes = user.changed(this.passwordEncoder, this.roleRepository, command);
         if (!changes.isEmpty()) {
@@ -145,11 +148,13 @@ public class UserServiceImpl implements UserService {
         return LogData.builder()
                 .id(id)
                 .changes(changes)
-                .build();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
-    public LogData deleteUser(Long id) {
+    public Map<String, Object> deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new NotFoundException("msg.not.found.user", id);
         }
@@ -157,7 +162,9 @@ public class UserServiceImpl implements UserService {
 
         return LogData.builder()
                 .id(id)
-                .build();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     private Set<Role> resolveRoles(Set<String> roleNames) {
@@ -187,6 +194,9 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .roles(roleNames)
                 .enabled(user.isEnabled())
+                .accountNonExpired(user.isAccountNonExpired())
+                .accountNonLocked(user.isAccountNonLocked())
+                .credentialsNonExpired(user.isCredentialsNonExpired())
                 .build();
     }
 }

@@ -20,14 +20,14 @@ JWT tokens, and database-backed client/user storage.
 - Spring Boot 3.5.x
 - Spring Authorization Server 1.5.x
 - PostgreSQL/MySQL (pluggable via JDBC)
-- Tomcat 10.1.x (embedded with Spring Boot 3.5.1)
+- Tomcat 10.1.x (embedded with Spring Boot 3.5.x)
 - Gradle build system
 
 ## Tomcat SSL Config Guide
 ### Overview
 This document explains 
 how to configure SSL/TLS for the embedded Tomcat server 
-in the iSLDevs application using Spring Boot 3.5.1.
+in the iSLDevs application using Spring Boot 3.5.x.
 
 ### Certificate Generation
 For development environments, generate a self-signed certificate:

@@ -17,11 +17,12 @@ package com.base.core.command.service;
 
 
 import com.base.core.command.data.Command;
-import com.base.core.command.data.LogData;
+
+import java.util.Map;
 
 /**
  * @author YISivlay
  */
 public interface LogService {
-    LogData log(Command command);
+    Map<String, Object> log(Command command);
 }

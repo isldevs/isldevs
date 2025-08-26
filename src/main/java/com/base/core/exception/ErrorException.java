@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.core.command.service;
-
-
-import com.base.core.command.data.JsonCommand;
-
-import java.util.Map;
+package com.base.core.exception;
 
 /**
  * @author YISivlay
  */
-public interface CommandHandlerProcessing {
+public class ErrorException extends RuntimeException {
 
-    Map<String, Object> process(JsonCommand command);
+    private final Object[] args;
+
+    public ErrorException(String msgCode, Object... args) {
+        super(msgCode);
+        this.args = args;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
 
 }

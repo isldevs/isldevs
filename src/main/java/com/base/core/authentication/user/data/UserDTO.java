@@ -15,8 +15,6 @@
  */
 package com.base.core.authentication.user.data;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,7 +28,9 @@ public class UserDTO {
     private final String email;
     private final Set<String> roles;
     private final boolean enabled;
-    private final Map<String, Object> claims;
+    private final boolean accountNonExpired;
+    private final boolean accountNonLocked;
+    private final boolean credentialsNonExpired;
 
     public UserDTO(Builder builder) {
         this.id = builder.id;
@@ -39,7 +39,9 @@ public class UserDTO {
         this.email = builder.email;
         this.roles = builder.roles;
         this.enabled = builder.enabled;
-        this.claims = builder.claims;
+        this.accountNonExpired = builder.accountNonExpired;
+        this.accountNonLocked = builder.accountNonLocked;
+        this.credentialsNonExpired = builder.credentialsNonExpired;
     }
 
     public static Builder builder() {
@@ -54,7 +56,9 @@ public class UserDTO {
         private String email;
         private Set<String> roles;
         private boolean enabled;
-        private final Map<String, Object> claims = new LinkedHashMap();
+        private boolean accountNonExpired;
+        private boolean accountNonLocked;
+        private boolean credentialsNonExpired;
 
         public Builder() {
         }
@@ -88,24 +92,30 @@ public class UserDTO {
             return this;
         }
 
+        public Builder authorities(Set<String> authorities) {
+            this.roles = authorities;
+            return this;
+        }
+
         public Builder enabled(boolean enabled) {
             this.enabled = enabled;
             return this;
         }
 
-        public Builder claim(String name, Object value) {
-            this.claims.put(name, value);
+        public Builder accountNonExpired(boolean accountNonExpired) {
+            this.accountNonExpired = accountNonExpired;
             return this;
         }
 
-        public Builder authorities(Set<String> authorities) {
-            this.claims.put("authorities", authorities);
+        public Builder accountNonLocked(boolean accountNonLocked) {
+            this.accountNonLocked = accountNonLocked;
             return this;
         }
-    }
 
-    public Map<String, Object> getClaims() {
-        return this.claims;
+        public Builder credentialsNonExpired(boolean credentialsNonExpired) {
+            this.credentialsNonExpired = credentialsNonExpired;
+            return this;
+        }
     }
 
     public boolean equals(Object obj) {
@@ -113,14 +123,14 @@ public class UserDTO {
             return true;
         } else if (obj != null && this.getClass() == obj.getClass()) {
             UserDTO that = (UserDTO) obj;
-            return this.getClaims().equals(that.getClaims());
+            return this.getId().equals(that.getId());
         } else {
             return false;
         }
     }
 
     public int hashCode() {
-        return this.getClaims().hashCode();
+        return this.getId().hashCode();
     }
 
     public Long getId() {
@@ -143,8 +153,19 @@ public class UserDTO {
         return roles;
     }
 
-    public boolean enabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
 }

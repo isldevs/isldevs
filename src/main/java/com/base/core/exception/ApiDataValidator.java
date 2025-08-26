@@ -45,7 +45,7 @@ public class ApiDataValidator {
          */
         public Validator isString() {
             if (value != null && !(value instanceof String)) {
-                throw new BadRequestException("validation.string", param);
+                throw new ErrorException("validation.string", param);
             }
             return this;
         }
@@ -55,7 +55,7 @@ public class ApiDataValidator {
          */
         public Validator isBoolean() {
             if (value != null && !(value instanceof Boolean)) {
-                throw new BadRequestException("validation.boolean", param);
+                throw new ErrorException("validation.boolean", param);
             }
             return this;
         }
@@ -65,7 +65,7 @@ public class ApiDataValidator {
          */
         public Validator notEmpty() {
             if (value == null || value.toString().trim().isEmpty()) {
-                throw new BadRequestException("validation.not.empty", param);
+                throw new ErrorException("validation.not.empty", param);
             }
             return this;
         }
@@ -75,7 +75,7 @@ public class ApiDataValidator {
          */
         public Validator maxLength(int max) {
             if (value != null && value.toString().length() > max) {
-                throw new BadRequestException("validation.max.length", param, max);
+                throw new ErrorException("validation.max.length", param, max);
             }
             return this;
         }
@@ -85,7 +85,7 @@ public class ApiDataValidator {
          */
         public Validator isNumber() {
             if (value != null && !(value instanceof Number)) {
-                throw new BadRequestException("validation.number", param);
+                throw new ErrorException("validation.number", param);
             }
             return this;
         }
@@ -97,7 +97,7 @@ public class ApiDataValidator {
             if (value instanceof Number num) {
                 double v = num.doubleValue();
                 if (v < min.doubleValue() || v > max.doubleValue()) {
-                    throw new BadRequestException("validation.range", param,
+                    throw new ErrorException("validation.range", param,
                             NumberFormat.getNumberInstance().format(min),
                             NumberFormat.getNumberInstance().format(max));
                 }
@@ -110,7 +110,7 @@ public class ApiDataValidator {
          */
         public Validator notEmptyCollection() {
             if (value == null || (value instanceof Collection<?> col && col.isEmpty())) {
-                throw new BadRequestException("validation.not.empty.collection", param);
+                throw new ErrorException("validation.not.empty.collection", param);
             }
             return this;
         }

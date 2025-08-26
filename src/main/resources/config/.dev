@@ -1,4 +1,4 @@
-DB_URL=jdbc:postgresql://localhost:5432/isldevs_db
+DB_URL=jdbc:postgresql://172.28.15.165:5432/isldevs_db
 DB_USERNAME=postgres
 DB_PASSWORD=password
 DB_DRIVER_CLASS=org.postgresql.Driver

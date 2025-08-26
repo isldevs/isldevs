@@ -40,9 +40,10 @@ public class SecurityContextImpl implements SecurityContext {
         if (principal instanceof User user) {
             return user;
         } else if (principal instanceof Jwt jwt) {
-            User user = new User();
-            user.setUsername(jwt.getClaimAsString("user_id"));
-            return user;
+            return User.builder()
+                    .username(jwt.getClaimAsString("sub"))
+                    .name(jwt.getClaimAsString("sub"))
+                    .build();
         } else {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unsupported principal type.", null));
         }

@@ -27,6 +27,7 @@ import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,9 +35,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,18 +44,21 @@ import java.util.stream.Collectors;
 @Service
 public class RoleServiceImpl implements RoleService {
 
+    private final MessageSource messageSource;
     private final RoleRepository roleRepository;
     private final RoleDataValidator validator;
 
     @Autowired
-    public RoleServiceImpl(final RoleRepository roleRepository,
+    public RoleServiceImpl(final MessageSource messageSource,
+                           final RoleRepository roleRepository,
                            final RoleDataValidator validator) {
+        this.messageSource = messageSource;
         this.roleRepository = roleRepository;
         this.validator = validator;
     }
 
     @Override
-    public LogData createRole(JsonCommand command) {
+    public Map<String, Object> createRole(JsonCommand command) {
 
         this.validator.create(command.getJson());
 
@@ -77,11 +79,13 @@ public class RoleServiceImpl implements RoleService {
 
         return LogData.builder()
                 .id(role.getId())
-                .build();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
-    public LogData updateRole(Long id, JsonCommand command) {
+    public Map<String, Object> updateRole(Long id, JsonCommand command) {
 
         Role exist = this.roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
@@ -96,17 +100,23 @@ public class RoleServiceImpl implements RoleService {
         return LogData.builder()
                 .id(id)
                 .changes(changes)
-                .build();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
-    public LogData deleteRole(Long id) {
+    public Map<String, Object> deleteRole(Long id) {
 
         final var role = this.roleRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
         this.roleRepository.delete(role);
         this.roleRepository.flush();
 
-        return LogData.builder().id(id).build();
+        return LogData.builder()
+                .id(id)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override

@@ -15,6 +15,7 @@
  */
 package com.base.core.authentication.user.model;
 
+import com.base.core.auditable.CustomAbstractPersistable;
 import jakarta.persistence.*;
 
 /**
@@ -22,12 +23,7 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "authorities")
-public class Authority {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @SequenceGenerator(name = "authority_id_seq", sequenceName = "authority_id_seq", allocationSize = 1)
-    private Long id;
+public class Authority extends CustomAbstractPersistable {
 
     @Column(nullable = false)
     private String authority;
@@ -57,16 +53,8 @@ public class Authority {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getAuthority() {
         return authority;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public void setAuthority(String authority) {

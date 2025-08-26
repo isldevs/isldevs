@@ -13,18 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.core.command.service;
+package com.base.core.auditable;
 
-
-import com.base.core.command.data.JsonCommand;
-
-import java.util.Map;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import org.springframework.data.domain.Persistable;
 
 /**
  * @author YISivlay
  */
-public interface CommandHandlerProcessing {
+@MappedSuperclass
+public abstract class CustomAbstractPersistable implements Persistable<Long> {
 
-    Map<String, Object> process(JsonCommand command);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Override
+    public Long getId() {
+        return this.id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return this.getId() == null;
+    }
 }

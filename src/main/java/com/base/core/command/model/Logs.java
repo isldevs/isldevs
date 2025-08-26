@@ -16,8 +16,8 @@
 package com.base.core.command.model;
 
 
+import com.base.core.auditable.CustomAbstractPersistable;
 import jakarta.persistence.*;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import java.util.Date;
 
@@ -26,12 +26,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "logs")
-public class Logs {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @SequenceGenerator(name = "logs_id_seq", sequenceName = "logs_id_seq", allocationSize = 1)
-    private Long id;
+public class Logs extends CustomAbstractPersistable {
 
     @Column(name = "entity_id", nullable = false)
     private Long entityId;

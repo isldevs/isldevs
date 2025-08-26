@@ -18,10 +18,11 @@ package com.base.core.authentication.user.service;
 
 import com.base.core.authentication.user.data.UserDTO;
 import com.base.core.command.data.JsonCommand;
-import com.base.core.command.data.LogData;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 /**
  * @author YISivlay
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserService {
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_USER')")
-    LogData createUser(JsonCommand command);
+    Map<String, Object> createUser(JsonCommand command);
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_USER')")
@@ -40,9 +41,9 @@ public interface UserService {
     Page<UserDTO> listUsers(Integer page, Integer size, String search);
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_USER')")
-    LogData updateUser(Long id, JsonCommand command);
+    Map<String, Object> updateUser(Long id, JsonCommand command);
 
     @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_USER')")
-    LogData deleteUser(Long id);
+    Map<String, Object> deleteUser(Long id);
 
 }

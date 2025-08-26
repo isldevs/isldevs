@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.core.exception;
+package com.base.config;
+
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
  * @author YISivlay
  */
-public class BadRequestException extends RuntimeException {
-
-    private final Object[] args;
-
-    public BadRequestException(String msgCode, Object... args) {
-        super(msgCode);
-        this.args = args;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
+@Configuration
+@EnableJpaAuditing(auditorAwareRef = "auditorProvider")
+public class JpaConfig {
 }
