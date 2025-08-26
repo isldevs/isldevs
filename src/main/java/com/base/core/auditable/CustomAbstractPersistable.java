@@ -21,11 +21,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import org.springframework.data.domain.Persistable;
 
+import java.io.Serializable;
+import java.util.Objects;
+
+
 /**
  * @author YISivlay
  */
 @MappedSuperclass
-public abstract class CustomAbstractPersistable implements Persistable<Long> {
+public abstract class CustomAbstractPersistable implements Persistable<Long>, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +43,18 @@ public abstract class CustomAbstractPersistable implements Persistable<Long> {
     @Override
     public boolean isNew() {
         return this.getId() == null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomAbstractPersistable that = (CustomAbstractPersistable) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

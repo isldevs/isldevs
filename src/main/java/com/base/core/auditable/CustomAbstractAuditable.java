@@ -16,15 +16,14 @@
 package com.base.core.auditable;
 
 
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Auditable;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.lang.Nullable;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -34,22 +33,30 @@ import java.util.Optional;
  * @author YISivlay
  */
 @MappedSuperclass
-public abstract class CustomAbstractAuditable<U, PK extends Serializable> extends AbstractPersistable<PK> implements Auditable<U, PK, LocalDateTime> {
+public abstract class CustomAbstractAuditable<U> extends CustomAbstractPersistable implements Auditable<U, Long, LocalDateTime> {
 
     @ManyToOne
     @Nullable
+    @CreatedBy
+    @JoinColumn(name = "created_by")
     private U createdBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
+    @CreatedDate
+    @Column(name = "created_date")
     private Date createdDate;
 
     @ManyToOne
     @Nullable
+    @LastModifiedBy
+    @JoinColumn(name = "last_modified_by")
     private U lastModifiedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
+    @LastModifiedDate
+    @Column(name = "last_modified_date")
     private Date lastModifiedDate;
 
     public CustomAbstractAuditable() {
@@ -86,5 +93,4 @@ public abstract class CustomAbstractAuditable<U, PK extends Serializable> extend
     public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
         this.lastModifiedDate = Date.from(lastModifiedDate.atZone(ZoneId.systemDefault()).toInstant());
     }
-
 }
