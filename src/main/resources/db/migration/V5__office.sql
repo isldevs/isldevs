@@ -6,9 +6,9 @@ CREATE TABLE office
     name_en            VARCHAR(100) NOT NULL UNIQUE,
     name_km            VARCHAR(150) UNIQUE,
     name_zh            VARCHAR(100) UNIQUE,
-    created_by         BIGINT       REFERENCES users (id) ON DELETE SET NULL,
+    created_by         VARCHAR(100),
     created_date       TIMESTAMP(0),
-    last_modified_by   BIGINT       REFERENCES users (id) ON DELETE SET NULL,
+    last_modified_by   VARCHAR(100),
     last_modified_date TIMESTAMP(0)
 );
 

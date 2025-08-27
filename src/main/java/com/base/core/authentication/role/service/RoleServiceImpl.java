@@ -17,7 +17,7 @@ package com.base.core.authentication.role.service;
 
 
 import com.base.core.authentication.role.controller.RoleConstants;
-import com.base.core.authentication.role.data.RoleDTO;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.role.validation.RoleDataValidator;
@@ -64,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
 
         final var name = command.extractString(RoleConstants.NAME);
         final var authorities = command.extractArrayAs(RoleConstants.AUTHORITIES, String.class);
-        Set<Authority> allAuthorities = authorities.stream()
+        var allAuthorities = authorities.stream()
                 .map(auth -> {
                     Authority authority = new Authority();
                     authority.setAuthority(auth);
@@ -87,7 +87,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Map<String, Object> updateRole(Long id, JsonCommand command) {
 
-        Role exist = this.roleRepository.findById(id)
+        var exist = this.roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
 
         this.validator.update(command.getJson());
@@ -134,7 +134,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<RoleDTO> listRoles(Integer page, Integer size, String search) {
-        Specification<Role> specification = (root, query, sp) -> {
+        Specification<Role> specification = (root, _, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
                 predicates.add(sp.like(root.get("name"), "%" + search.toLowerCase() + "%"));

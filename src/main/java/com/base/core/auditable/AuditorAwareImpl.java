@@ -17,8 +17,6 @@ package com.base.core.auditable;
 
 
 import com.base.config.security.service.SecurityContextImpl;
-import com.base.core.authentication.user.model.User;
-import com.base.core.authentication.user.repository.UserRepository;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 
@@ -28,19 +26,20 @@ import java.util.Optional;
  * @author YISivlay
  */
 @Component(value = "auditorProvider")
-public class AuditorAwareImpl implements AuditorAware<User> {
+public class AuditorAwareImpl implements AuditorAware<String> {
 
     private final SecurityContextImpl securityContext;
-    private final UserRepository userRepository;
 
-    public AuditorAwareImpl(SecurityContextImpl securityContext, UserRepository userRepository) {
+    public AuditorAwareImpl(SecurityContextImpl securityContext) {
         this.securityContext = securityContext;
-        this.userRepository = userRepository;
     }
 
     @Override
-    public Optional<User> getCurrentAuditor() {
-        var user = securityContext.authenticatedUser();
-        return user != null ? Optional.of(user) : userRepository.findByUsername("system");
+    public Optional<String> getCurrentAuditor() {
+        try {
+            return Optional.of(securityContext.getCurrentUsername());
+        } catch (Exception ex) {
+            return Optional.of("system");
+        }
     }
 }

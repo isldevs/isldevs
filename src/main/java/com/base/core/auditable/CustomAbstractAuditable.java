@@ -22,6 +22,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Auditable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -33,13 +34,13 @@ import java.util.Optional;
  * @author YISivlay
  */
 @MappedSuperclass
-public abstract class CustomAbstractAuditable<U> extends CustomAbstractPersistable implements Auditable<U, Long, LocalDateTime> {
+@EntityListeners(AuditingEntityListener.class)
+public abstract class CustomAbstractAuditable extends CustomAbstractPersistable {
 
-    @ManyToOne
     @Nullable
     @CreatedBy
-    @JoinColumn(name = "created_by")
-    private U createdBy;
+    @Column(name = "created_by")
+    private String createdBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
@@ -47,11 +48,10 @@ public abstract class CustomAbstractAuditable<U> extends CustomAbstractPersistab
     @Column(name = "created_date")
     private Date createdDate;
 
-    @ManyToOne
     @Nullable
     @LastModifiedBy
-    @JoinColumn(name = "last_modified_by")
-    private U lastModifiedBy;
+    @Column(name = "last_modified_by")
+    private String lastModifiedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
@@ -62,12 +62,8 @@ public abstract class CustomAbstractAuditable<U> extends CustomAbstractPersistab
     public CustomAbstractAuditable() {
     }
 
-    public Optional<U> getCreatedBy() {
-        return Optional.ofNullable(this.createdBy);
-    }
-
-    public void setCreatedBy(U createdBy) {
-        this.createdBy = createdBy;
+    public String getCreatedBy() {
+        return this.createdBy;
     }
 
     public Optional<LocalDateTime> getCreatedDate() {
@@ -78,12 +74,8 @@ public abstract class CustomAbstractAuditable<U> extends CustomAbstractPersistab
         this.createdDate = Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    public Optional<U> getLastModifiedBy() {
-        return Optional.ofNullable(this.lastModifiedBy);
-    }
-
-    public void setLastModifiedBy(U lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
+    public String getLastModifiedBy() {
+        return this.lastModifiedBy;
     }
 
     public Optional<LocalDateTime> getLastModifiedDate() {

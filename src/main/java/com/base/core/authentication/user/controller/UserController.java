@@ -15,7 +15,7 @@
  */
 package com.base.core.authentication.user.controller;
 
-import com.base.core.authentication.user.data.UserDTO;
+import com.base.core.authentication.user.dto.UserDTO;
 import com.base.core.authentication.user.handler.UserCommandBuilder;
 import com.base.core.authentication.user.service.UserService;
 import com.base.core.command.service.LogService;

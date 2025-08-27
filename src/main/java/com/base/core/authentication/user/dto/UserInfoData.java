@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.core.authentication.user.data;
+package com.base.core.authentication.user.dto;
 
 import com.base.core.authentication.user.controller.UserConstants;
 import org.springframework.security.oauth2.core.oidc.StandardClaimAccessor;

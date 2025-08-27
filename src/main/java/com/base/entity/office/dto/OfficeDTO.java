@@ -1,17 +1,150 @@
+/*
+ * Copyright 2025 iSLDevs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.base.entity.office.dto;
 
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author YISivlay
  */
-public record OfficeDTO(Long id,
-                        OfficeDTO parent,
-                        List<OfficeDTO> children,
-                        String hierarchy,
-                        String decorated,
-                        String nameEn,
-                        String nameKm,
-                        String nameZh) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class OfficeDTO {
+
+    private final Long id;
+    private final OfficeDTO parent;
+    private final String decorated;
+    private final String nameEn;
+    private final String nameKm;
+    private final String nameZh;
+    private final String hierarchyEn;
+    private final String hierarchyKm;
+    private final String hierarchyZh;
+
+    public OfficeDTO(Builder builder) {
+        this.id = builder.id;
+        this.parent = builder.parent;
+        this.decorated = builder.decorated;
+        this.nameEn = builder.nameEn;
+        this.nameKm = builder.nameKm;
+        this.nameZh = builder.nameZh;
+        this.hierarchyEn = builder.hierarchyEn;
+        this.hierarchyKm = builder.hierarchyKm;
+        this.hierarchyZh = builder.hierarchyZh;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Long id;
+        private OfficeDTO parent;
+        private String decorated;
+        private String nameEn;
+        private String nameKm;
+        private String nameZh;
+        private String hierarchyEn;
+        private String hierarchyKm;
+        private String hierarchyZh;
+
+        public OfficeDTO build() {
+            return new OfficeDTO(this);
+        }
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder parent(OfficeDTO parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public Builder decorated(String decorated) {
+            this.decorated = decorated;
+            return this;
+        }
+
+        public Builder nameEn(String nameEn) {
+            this.nameEn = nameEn;
+            return this;
+        }
+
+        public Builder nameKm(String nameKm) {
+            this.nameKm = nameKm;
+            return this;
+        }
+
+        public Builder nameZh(String nameZh) {
+            this.nameZh = nameZh;
+            return this;
+        }
+
+        public Builder hierarchyEn(String hierarchyEn) {
+            this.hierarchyEn = hierarchyEn;
+            return this;
+        }
+
+        public Builder hierarchyKm(String hierarchyKm) {
+            this.hierarchyKm = hierarchyKm;
+            return this;
+        }
+
+        public Builder hierarchyZh(String hierarchyZh) {
+            this.hierarchyZh = hierarchyZh;
+            return this;
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public OfficeDTO getParent() {
+        return parent;
+    }
+
+    public String getDecorated() {
+        return decorated;
+    }
+
+    public String getNameEn() {
+        return nameEn;
+    }
+
+    public String getNameKm() {
+        return nameKm;
+    }
+
+    public String getNameZh() {
+        return nameZh;
+    }
+
+    public String getHierarchyEn() {
+        return hierarchyEn;
+    }
+
+    public String getHierarchyKm() {
+        return hierarchyKm;
+    }
+
+    public String getHierarchyZh() {
+        return hierarchyZh;
+    }
 }

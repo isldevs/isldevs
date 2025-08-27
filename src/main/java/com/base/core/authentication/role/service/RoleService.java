@@ -16,9 +16,8 @@
 package com.base.core.authentication.role.service;
 
 
-import com.base.core.authentication.role.data.RoleDTO;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.command.data.JsonCommand;
-import com.base.core.command.data.LogData;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;

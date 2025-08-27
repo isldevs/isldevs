@@ -17,7 +17,7 @@ package com.base.core.authentication.user.service;
 
 
 import com.base.core.authentication.user.controller.UserConstants;
-import com.base.core.authentication.user.data.UserDTO;
+import com.base.core.authentication.user.dto.UserDTO;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.role.repository.RoleRepository;

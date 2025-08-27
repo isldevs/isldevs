@@ -16,7 +16,7 @@
 package com.base.core.authentication.role.controller;
 
 
-import com.base.core.authentication.role.data.RoleDTO;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.role.handler.RoleCommandHandler;
 import com.base.core.authentication.role.service.RoleService;
 import com.base.core.command.service.LogService;

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025 iSLDevs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.base.entity.office.service;
 
 
@@ -9,11 +24,15 @@ import com.base.entity.office.dto.OfficeDTO;
 import com.base.entity.office.model.Office;
 import com.base.entity.office.repository.OfficeRepository;
 import com.base.entity.office.validation.OfficeDataValidation;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,7 +59,7 @@ public class OfficeServiceImpl implements OfficeService {
         this.validator.create(command.getJson());
 
         final var parentId = command.extractLong(OfficeConstants.PARENT_ID);
-        final Office parent = parentId != null ? this.repository.findById(parentId)
+        final var parent = parentId != null ? this.repository.findById(parentId)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", parentId)) : null;
 
         final var nameEn = command.extractString(OfficeConstants.NAME_EN);
@@ -67,7 +86,7 @@ public class OfficeServiceImpl implements OfficeService {
 
     @Override
     public Map<String, Object> updateOffice(Long id, JsonCommand command) {
-        Office exist = this.repository.findById(id)
+        var exist = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
         this.validator.update(command.getJson());
@@ -93,16 +112,98 @@ public class OfficeServiceImpl implements OfficeService {
 
     @Override
     public Map<String, Object> deleteOffice(Long id) {
-        return Map.of();
+
+        var exist = this.repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
+
+        this.repository.delete(exist);
+        this.repository.flush();
+
+        return LogData.builder()
+                .id(id)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     public OfficeDTO getOfficeById(Long id) {
-        return null;
+
+        var office = this.repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
+
+        var parent = office.getParent();
+        return OfficeDTO.builder()
+                .id(office.getId())
+                .parent(parent != null ? OfficeDTO.builder()
+                        .id(parent.getId())
+                        .nameEn(parent.getNameEn())
+                        .nameKm(parent.getNameKm())
+                        .nameZh(parent.getNameZh())
+                        .decorated(decorate(parent.getHierarchy(), parent.getNameEn()))
+                        .build()
+                        : null)
+                .nameEn(office.getNameEn())
+                .nameKm(office.getNameKm())
+                .nameZh(office.getNameZh())
+                .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
+                .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
+                .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
+                .build();
     }
 
     @Override
     public Page<OfficeDTO> listOffices(Integer page, Integer size, String search) {
-        return null;
+        Specification<Office> specification = (root, _, sp) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (search != null && !search.isEmpty()) {
+                var likeSearch = "%" + search.toLowerCase() + "%";
+                predicates.add(sp.or(
+                        sp.like(sp.lower(root.get("nameEn")), likeSearch),
+                        sp.like(sp.lower(root.get("nameKm")), likeSearch),
+                        sp.like(sp.lower(root.get("nameZh")), likeSearch)
+                ));
+            }
+            return sp.and(predicates.toArray(new Predicate[0]));
+        };
+        var sort = Sort.by("hierarchy").ascending();
+        if (page == null || size == null) {
+            var allOffices = repository.findAll(specification, sort);
+            return new PageImpl<>(allOffices.stream().map(this::convertToDTO).toList());
+        }
+
+        var pageable = PageRequest.of(page, size, sort);
+        var officesPage = repository.findAll(specification, pageable);
+        return officesPage.map(this::convertToDTO);
     }
+
+    private OfficeDTO convertToDTO(Office office) {
+        var parent = office.getParent();
+        return OfficeDTO.builder()
+                .id(office.getId())
+                .parent(parent != null ? OfficeDTO.builder()
+                        .id(parent.getId())
+                        .nameEn(parent.getNameEn())
+                        .nameKm(parent.getNameKm())
+                        .nameZh(parent.getNameZh())
+                        .decorated(decorate(parent.getHierarchy(), parent.getNameEn()))
+                        .build()
+                        : null)
+                .nameEn(office.getNameEn())
+                .nameKm(office.getNameKm())
+                .nameZh(office.getNameZh())
+                .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
+                .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
+                .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
+                .build();
+    }
+
+    private String decorate(String hierarchy, String name) {
+        if (hierarchy == null || hierarchy.isEmpty() || name == null) return name;
+        var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
+        if (level <= 0) return name;
+        return ".".repeat(level * 4) + name;
+    }
+
+
 }

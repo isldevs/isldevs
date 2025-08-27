@@ -16,6 +16,7 @@
 package com.base.core.exception;
 
 
+import com.base.config.security.service.SecurityContext;
 import com.base.core.data.ErrorData;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,9 +43,12 @@ import java.util.regex.Pattern;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
+    private final SecurityContext securityContext;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
+    public GlobalExceptionHandler(MessageSource messageSource,
+                                  SecurityContext securityContext) {
         this.messageSource = messageSource;
+        this.securityContext = securityContext;
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -80,8 +84,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {AuthorizationDeniedException.class})
     public ResponseEntity<ErrorData> handleAccessDeniedException(AuthorizationDeniedException ex, Locale locale) {
         List<String> args = extract(ex);
-        String localizedMessage = messageSource.getMessage("msg.access.denied",args.toArray(),ex.getMessage(),locale);
-        return buildResponseEntity(HttpStatus.FORBIDDEN, localizedMessage, ex.getMessage(), args.toArray());
+        String localizedMessage = messageSource.getMessage("msg.access.denied",args != null ? args.toArray() : null,ex.getMessage(),locale);
+        return buildResponseEntity(HttpStatus.FORBIDDEN, localizedMessage, ex.getMessage(), args != null ? args.toArray() : null);
     }
 
     @ExceptionHandler(value = {DataIntegrityViolationException.class})
@@ -90,7 +94,10 @@ public class GlobalExceptionHandler {
         String localizedMessage;
         var args = new Object[1];
         if (cause.contains("duplicate key")) {
-            args[0] = extractColumnName(cause);
+            var duplicateArgs = new Object[2];
+            var result = extractDuplicateKeyAndValue(cause);
+            duplicateArgs[1] = result[1];
+            args = extractDuplicateArgs(duplicateArgs);
             localizedMessage = messageSource.getMessage("msg.data.integrity.unique", args, locale);
         } else if (cause.contains("foreign key")) {
             args[0] = extractColumnName(cause);
@@ -127,6 +134,24 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.NOT_FOUND, localizedMessage, ex.getMessage(), ex.getArgs());
     }
 
+    private Object[] extractDuplicateArgs(Object[] args) {
+        if (args == null) {
+            return Collections.emptyList().toArray();
+        }
+        return Arrays.stream(args)
+                .filter(Objects::nonNull)
+                .toList().toArray();
+    }
+
+    private String[] extractDuplicateKeyAndValue(String cause) {
+        final Pattern DUPLICATE_KEY_PATTERN = Pattern.compile("Key \\(([^)]+)\\)=\\(([^)]+)\\)");
+        Matcher matcher = DUPLICATE_KEY_PATTERN.matcher(cause);
+        if (matcher.find()) {
+            return new String[]{matcher.group(1), matcher.group(2)};
+        }
+        return new String[]{"", ""};
+    }
+
     private String extractColumnName(String dbMessage) {
         var start = dbMessage.indexOf('"') + 1;
         var end = dbMessage.indexOf('"', start);
@@ -153,24 +178,55 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorData, headers, status);
     }
 
+    private List<String> extractAuthoritiesFromExpression(String expr) {
+        if (expr == null) return null;
+        List<String> result = new ArrayList<>();
+
+        Pattern rolePattern = Pattern.compile("hasRole\\('([^']+)'\\)");
+        Matcher roleMatcher = rolePattern.matcher(expr);
+        while (roleMatcher.find()) {
+            result.add(roleMatcher.group(1)); // just "ADMIN"
+        }
+
+        Pattern authPattern = Pattern.compile("hasAuthority\\('([^']+)'\\)|hasAnyAuthority\\(([^)]+)\\)");
+        Matcher authMatcher = authPattern.matcher(expr);
+        while (authMatcher.find()) {
+            if (authMatcher.group(1) != null) { // single authority
+                result.add(authMatcher.group(1));
+            } else if (authMatcher.group(2) != null) { // multiple authorities
+                String[] authorities = authMatcher.group(2).replaceAll("'", "").split(",");
+                result.addAll(Arrays.stream(authorities).map(String::trim).toList());
+            }
+        }
+
+        return result.isEmpty() ? null : result;
+    }
+
+
     private List<String> extract(AuthorizationDeniedException ex) {
-        String msg = ex.getMessage();
+        String msg = ex.getAuthorizationResult().toString();
         if (msg == null) return null;
 
         List<String> result = new ArrayList<>();
-        Pattern singlePattern = Pattern.compile("has(Role|Authority)\\('([^']+)'\\)");
-        Matcher singleMatcher = singlePattern.matcher(ex.getAuthorizationResult().toString());
-        while (singleMatcher.find()) {
-            result.add(singleMatcher.group(2));
+
+        var singlePattern = Pattern.compile("hasRole\\('([^']+)'\\)");
+        var roleMatcher = singlePattern.matcher(ex.getAuthorizationResult().toString());
+        while (roleMatcher.find()) {
+            result.add(roleMatcher.group(1));
         }
 
-        Pattern multiplePattern = Pattern.compile("hasAny(Role|Authority)\\('([^']+)'(?:,'([^']+)')*\\)");
-        Matcher multipleMatcher = multiplePattern.matcher(ex.getAuthorizationResult().toString());
-        while (multipleMatcher.find()) {
-            String group2 = multipleMatcher.group(2);
-            if (group2 != null) result.add(group2);
-            String group3 = multipleMatcher.group(3);
-            if (group3 != null) result.add(group3);
+        var multiplePattern = Pattern.compile("hasAuthority\\('([^']+)'\\)|hasAnyAuthority\\(([^)]+)\\)");
+        var authorityMatcher = multiplePattern.matcher(ex.getAuthorizationResult().toString());
+        while (authorityMatcher.find()) {
+            if (authorityMatcher.group(1) != null) {
+                result.add(authorityMatcher.group(1));
+            } else if (authorityMatcher.group(2) != null) {
+                String[] authorities = authorityMatcher.group(2).replaceAll("'", "").split(",");
+                result.addAll(Arrays.stream(authorities).map(String::trim).toList());
+            }
+        }
+        if (!this.securityContext.isAdmin() && !result.isEmpty()) {
+            result.remove("FULL_ACCESS");
         }
 
         return result.isEmpty() ? null : result;

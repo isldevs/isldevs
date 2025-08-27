@@ -17,7 +17,7 @@ package com.base.config.security.service;
 
 
 import com.base.core.authentication.role.model.Role;
-import com.base.core.authentication.user.data.UserInfoData;
+import com.base.core.authentication.user.dto.UserInfoData;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

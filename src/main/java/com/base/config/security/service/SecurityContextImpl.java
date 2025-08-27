@@ -16,6 +16,8 @@
 package com.base.config.security.service;
 
 import com.base.core.authentication.user.model.User;
+import com.base.core.authentication.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -30,6 +32,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SecurityContextImpl implements SecurityContext {
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public User authenticatedUser() {
         org.springframework.security.core.context.SecurityContext context = SecurityContextHolder.getContext();
@@ -40,10 +45,11 @@ public class SecurityContextImpl implements SecurityContext {
         if (principal instanceof User user) {
             return user;
         } else if (principal instanceof Jwt jwt) {
-            return User.builder()
-                    .username(jwt.getClaimAsString("sub"))
-                    .name(jwt.getClaimAsString("sub"))
-                    .build();
+            String username = jwt.getClaimAsString("sub");
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new OAuth2AuthenticationException(
+                            new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "User not found: " + username, null)
+                    ));
         } else {
             throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unsupported principal type.", null));
         }
@@ -64,12 +70,11 @@ public class SecurityContextImpl implements SecurityContext {
     }
 
     public String getCurrentUsername() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            return authentication != null ? authentication.getName() : null;
-        } catch (Exception e) {
-            return null;
+        var context = SecurityContextHolder.getContext();
+        if (context == null || context.getAuthentication() == null) {
+            return "system";
         }
+        return context.getAuthentication().getName();
     }
 
     @Override

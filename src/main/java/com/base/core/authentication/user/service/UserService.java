@@ -16,7 +16,7 @@
 package com.base.core.authentication.user.service;
 
 
-import com.base.core.authentication.user.data.UserDTO;
+import com.base.core.authentication.user.dto.UserDTO;
 import com.base.core.command.data.JsonCommand;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
