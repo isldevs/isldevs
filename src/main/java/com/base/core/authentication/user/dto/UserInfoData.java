@@ -34,7 +34,7 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
 
     @Serial
     private static final long serialVersionUID = 620L;
-    private final Map claims;
+    private final Map<String, Object> claims;
 
     public UserInfoData(Map<String, Object> claims) {
         Assert.notEmpty(claims, "claims cannot be empty");

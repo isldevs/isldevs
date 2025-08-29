@@ -17,7 +17,6 @@ package com.base.entity.office.validation;
 
 
 import com.base.config.serialization.JsonHelper;
-import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.exception.ApiDataValidator;
 import com.base.entity.office.controller.OfficeConstants;
 import com.google.gson.reflect.TypeToken;

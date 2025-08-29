@@ -29,6 +29,7 @@ public class FileDTO {
     private final String mimeType;
     private final String location;
     private final Integer storageType;
+    private final String url;
 
     public FileDTO(Builder builder) {
         this.id = builder.id;
@@ -39,6 +40,7 @@ public class FileDTO {
         this.mimeType = builder.mimeType;
         this.location = builder.location;
         this.storageType = builder.storageType;
+        this.url = builder.url;
     }
 
     public static Builder builder() {
@@ -55,6 +57,7 @@ public class FileDTO {
         private String mimeType;
         private String location;
         private Integer storageType;
+        private String url;
 
         public FileDTO build() {
             return new FileDTO(this);
@@ -64,39 +67,36 @@ public class FileDTO {
             this.id = id;
             return this;
         }
-
         public Builder entity(String entity) {
             this.entity = entity;
             return this;
         }
-
         public Builder entityId(Long entityId) {
             this.entityId = entityId;
             return this;
         }
-
         public Builder name(String name) {
             this.name = name;
             return this;
         }
-
         public Builder size(Long size) {
             this.size = size;
             return this;
         }
-
         public Builder mimeType(String mimeType) {
             this.mimeType = mimeType;
             return this;
         }
-
         public Builder location(String location) {
             this.location = location;
             return this;
         }
-
         public Builder storageType(Integer storageType) {
             this.storageType = storageType;
+            return this;
+        }
+        public Builder url(String url) {
+            this.url = url;
             return this;
         }
     }
@@ -127,6 +127,10 @@ public class FileDTO {
 
     public String getLocation() {
         return location;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public Integer getStorageType() {

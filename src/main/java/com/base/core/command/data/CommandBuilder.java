@@ -16,42 +16,56 @@
 package com.base.core.command.data;
 
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * @author YISivlay
  */
 public class CommandBuilder {
 
-    private Long id;
-    private String action;
-    private String entity;
-    private String href;
-    private String json;
+    private final Command.Builder delegate = Command.builder();
 
     public Command build() {
-        return new Command(id, action, entity, href, json);
+        return delegate.build();
     }
 
     public CommandBuilder id(Long id) {
-        this.id = id;
+        delegate.id(id);
         return this;
     }
 
     public CommandBuilder action(String action) {
-        this.action = action;
+        delegate.action(action);
         return this;
     }
 
     public CommandBuilder entity(String entity) {
-        this.entity = entity;
+        delegate.entity(entity);
+        return this;
+    }
+
+    public CommandBuilder entityType(String entityType) {
+        delegate.entityType(entityType);
+        return this;
+    }
+
+    public CommandBuilder entityId(Long entityId) {
+        delegate.entityId(entityId);
         return this;
     }
 
     public CommandBuilder href(String href) {
-        this.href = href;
+        delegate.href(href);
         return this;
     }
+
     public CommandBuilder json(String json) {
-        this.json = json;
+        delegate.json(json);
+        return this;
+    }
+
+    public CommandBuilder file(MultipartFile file) {
+        delegate.file(file);
         return this;
     }
 }

@@ -34,12 +34,10 @@ import java.util.*;
 @Component
 public class JsonHelper {
 
-    private final Locale locale;
     private final Gson gson;
     private final MessageSource messageSource;
 
     public JsonHelper(MessageSource messageSource) {
-        this.locale = LocaleContextHolder.getLocale();
         this.gson = new Gson();
         this.messageSource = messageSource;
     }
@@ -67,6 +65,7 @@ public class JsonHelper {
     public void unsupportedParameters(final Type typeOfMap,
                                       final String json,
                                       final Collection<String> supportedParams) {
+        Locale locale = LocaleContextHolder.getLocale();
         if (StringUtils.isBlank(json)) {
             String message = messageSource.getMessage("validation.json.invalid", null, "Invalid JSON", locale);
             throw new ErrorException(message);
@@ -106,6 +105,48 @@ public class JsonHelper {
         }
 
         return valueElement.getAsString();
+    }
+
+    /**
+     * Extract a Long value by field name from JsonElement
+     */
+    public Long extractLong(final String fieldName, final JsonElement element) {
+        if (element == null || element.getAsJsonObject().get(fieldName) == null || element.getAsJsonObject().get(fieldName).isJsonNull()) {
+            return null;
+        }
+
+        JsonElement valueElement = element.getAsJsonObject().get(fieldName);
+
+        if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isNumber()) {
+            throw new ErrorException("validation.number", fieldName);
+        }
+
+        try {
+            return valueElement.getAsLong();
+        } catch (NumberFormatException ex) {
+            throw new ErrorException("validation.number", fieldName);
+        }
+    }
+
+    /**
+     * Extract an Integer value by field name from JsonElement
+     */
+    public Integer extractInteger(final String fieldName, final JsonElement element) {
+        if (element == null || element.getAsJsonObject().get(fieldName) == null || element.getAsJsonObject().get(fieldName).isJsonNull()) {
+            return null;
+        }
+
+        JsonElement valueElement = element.getAsJsonObject().get(fieldName);
+
+        if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isNumber()) {
+            throw new ErrorException("validation.number", fieldName);
+        }
+
+        try {
+            return valueElement.getAsInt();
+        } catch (NumberFormatException ex) {
+            throw new ErrorException("validation.number", fieldName);
+        }
     }
 
     /**

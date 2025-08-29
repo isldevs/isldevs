@@ -19,6 +19,7 @@ import com.base.core.serializer.JsonDelegator;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -34,8 +35,11 @@ public final class JsonCommand {
     private final Long id;
     private final String action;
     private final String entity;
+    private final String entityType;
+    private final Long entityId;
     private final String permission;
     private final String href;
+    private final MultipartFile file;
     private final String json;
     private final JsonElement jsonElement;
     private final JsonDelegator jsonDelegator;
@@ -45,8 +49,11 @@ public final class JsonCommand {
         private Long id;
         private String action;
         private String entity;
+        private String entityType;
+        private Long entityId;
         private String permission;
         private String href;
+        private MultipartFile file;
         private String json;
         private JsonElement jsonElement;
         private JsonDelegator jsonDelegator;
@@ -68,12 +75,27 @@ public final class JsonCommand {
             this.permission = action + "_" + entity;
             return this;
         }
+
+        public Builder entityType(String entityType) {
+            this.entityType = entityType;
+            return this;
+        }
+
+        public Builder entityId(Long entityId) {
+            this.entityId = entityId;
+            return this;
+        }
+
         public Builder permission(String permission) {
             this.permission = permission;
             return this;
         }
         public Builder href(String href) {
             this.href = href;
+            return this;
+        }
+        public Builder file(MultipartFile file) {
+            this.file = file;
             return this;
         }
         public Builder json(String json) {
@@ -98,8 +120,11 @@ public final class JsonCommand {
         this.id = builder.id;
         this.action = builder.action;
         this.entity = builder.entity;
+        this.entityType = builder.entityType;
+        this.entityId = builder.entityId;
         this.permission = builder.permission;
         this.href = builder.href;
+        this.file = builder.file;
         this.json = builder.json;
         this.jsonElement = builder.jsonElement;
         this.jsonDelegator = builder.jsonDelegator;
@@ -263,6 +288,10 @@ public final class JsonCommand {
         return json;
     }
 
+    public MultipartFile getFile() {
+        return file;
+    }
+
     public String getHref() {
         return href;
     }
@@ -287,4 +316,11 @@ public final class JsonCommand {
         return jsonElement;
     }
 
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public Long getEntityId() {
+        return entityId;
+    }
 }

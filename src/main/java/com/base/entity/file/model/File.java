@@ -146,4 +146,32 @@ public class File extends CustomAbstractAuditable {
     public Integer getStorageType() {
         return storageType;
     }
+
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setStorageType(Integer storageType) {
+        this.storageType = storageType;
+    }
 }

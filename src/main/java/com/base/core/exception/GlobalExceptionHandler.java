@@ -18,6 +18,7 @@ package com.base.core.exception;
 
 import com.base.config.security.service.SecurityContext;
 import com.base.core.data.ErrorData;
+import com.base.entity.file.controller.FileConstants;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -132,6 +134,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorData> handleNotFoundException(NotFoundException ex, Locale locale) {
         var localizedMessage  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
         return buildResponseEntity(HttpStatus.NOT_FOUND, localizedMessage, ex.getMessage(), ex.getArgs());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorData> handleNotFoundException(MaxUploadSizeExceededException ex, Locale locale) {
+        Object[] maxSizeMB = new Object[]{FileConstants.MAX_SIZE_IN_MB};
+        var localizedMessage  = messageSource.getMessage("validation.file.size", maxSizeMB, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.PAYLOAD_TOO_LARGE, localizedMessage, ex.getMessage(), maxSizeMB);
     }
 
     private Object[] extractDuplicateArgs(Object[] args) {

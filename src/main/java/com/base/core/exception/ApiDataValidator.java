@@ -64,8 +64,31 @@ public class ApiDataValidator {
          * Check if String is not empty
          */
         public Validator notEmpty() {
-            if (value == null || value.toString().trim().isEmpty()) {
-                throw new ErrorException("validation.not.empty", param);
+            if (value.toString().trim().isEmpty()) {
+                throw new ErrorException("validation.not-empty", param);
+            }
+            return this;
+        }
+
+        /**
+         * Check if String is not empty
+         */
+        public Validator notNull() {
+            if (value == null) {
+                throw new ErrorException("validation.not-null", param);
+            }
+            return this;
+        }
+
+        /**
+         * Check if String is not empty and null
+         */
+        public Validator notNullAndNotEmpty() {
+            if (value == null) {
+                throw new ErrorException("validation.not-null", param);
+            }
+            if (value.toString().trim().isEmpty()) {
+                throw new ErrorException("validation.not-empty", param);
             }
             return this;
         }
@@ -97,7 +120,7 @@ public class ApiDataValidator {
             if (value instanceof Number num) {
                 double v = num.doubleValue();
                 if (v < min.doubleValue() || v > max.doubleValue()) {
-                    throw new ErrorException("validation.range", param,
+                    throw new ErrorException("validation.between.range", param,
                             NumberFormat.getNumberInstance().format(min),
                             NumberFormat.getNumberInstance().format(max));
                 }
@@ -110,7 +133,7 @@ public class ApiDataValidator {
          */
         public Validator notEmptyCollection() {
             if (value == null || (value instanceof Collection<?> col && col.isEmpty())) {
-                throw new ErrorException("validation.not.empty.collection", param);
+                throw new ErrorException("validation.not-empty", param);
             }
             return this;
         }
