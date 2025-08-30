@@ -15,9 +15,9 @@
  */
 package com.base.core.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.text.NumberFormat;
 import java.util.Collection;
 
 /**
@@ -45,7 +45,7 @@ public class ApiDataValidator {
          */
         public Validator isString() {
             if (value != null && !(value instanceof String)) {
-                throw new ErrorException("validation.string", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be string", param);
             }
             return this;
         }
@@ -55,7 +55,7 @@ public class ApiDataValidator {
          */
         public Validator isBoolean() {
             if (value != null && !(value instanceof Boolean)) {
-                throw new ErrorException("validation.boolean", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be boolean", param);
             }
             return this;
         }
@@ -65,7 +65,7 @@ public class ApiDataValidator {
          */
         public Validator notEmpty() {
             if (value.toString().trim().isEmpty()) {
-                throw new ErrorException("validation.not-empty", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be empty", param);
             }
             return this;
         }
@@ -75,7 +75,7 @@ public class ApiDataValidator {
          */
         public Validator notNull() {
             if (value == null) {
-                throw new ErrorException("validation.not-null", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be null", param);
             }
             return this;
         }
@@ -85,10 +85,10 @@ public class ApiDataValidator {
          */
         public Validator notNullAndNotEmpty() {
             if (value == null) {
-                throw new ErrorException("validation.not-null", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be null", param);
             }
             if (value.toString().trim().isEmpty()) {
-                throw new ErrorException("validation.not-empty", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be empty", param);
             }
             return this;
         }
@@ -98,7 +98,7 @@ public class ApiDataValidator {
          */
         public Validator maxLength(int max) {
             if (value != null && value.toString().length() > max) {
-                throw new ErrorException("validation.max.length", param, max);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be exceed " + max + " characters", param);
             }
             return this;
         }
@@ -108,7 +108,23 @@ public class ApiDataValidator {
          */
         public Validator isNumber() {
             if (value != null && !(value instanceof Number)) {
-                throw new ErrorException("validation.number", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be number", param);
+            }
+            return this;
+        }
+
+        /**
+         * Check if value is a positive Number
+         */
+        public Validator isPositive() {
+            if (value != null) {
+                if (value instanceof Number num) {
+                    if (num.doubleValue() <= 0) {
+                        throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be positive", param);
+                    }
+                } else {
+                    throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be positive", param);
+                }
             }
             return this;
         }
@@ -120,9 +136,7 @@ public class ApiDataValidator {
             if (value instanceof Number num) {
                 double v = num.doubleValue();
                 if (v < min.doubleValue() || v > max.doubleValue()) {
-                    throw new ErrorException("validation.between.range", param,
-                            NumberFormat.getNumberInstance().format(min),
-                            NumberFormat.getNumberInstance().format(max));
+                    throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be between " + min + " and " + max, param);
                 }
             }
             return this;
@@ -133,7 +147,7 @@ public class ApiDataValidator {
          */
         public Validator notEmptyCollection() {
             if (value == null || (value instanceof Collection<?> col && col.isEmpty())) {
-                throw new ErrorException("validation.not-empty", param);
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must not be empty", param);
             }
             return this;
         }

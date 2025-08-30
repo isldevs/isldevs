@@ -76,7 +76,7 @@ public class LogServiceImpl implements LogService {
         Map<String, Object> logData = handler.process(jsonCommand);
         User createdBy = this.securityContext.authenticatedUser();
         Logs logs = new Logs(
-                (Long) logData.get("id"),
+                logData.get("id") != null ? (Long) logData.get("id") : command.getEntityId(),
                 command.getAction(),
                 command.getEntity(),
                 command.getHref(),

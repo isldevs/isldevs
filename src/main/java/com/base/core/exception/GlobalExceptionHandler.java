@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,11 +75,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ErrorException.class)
     public ResponseEntity<ErrorData> handleBadRequestException(ErrorException ex, Locale locale) {
         var localizedMessage  = messageSource.getMessage(ex.getMessage(), ex.getArgs(), ex.getMessage(), locale);
-        return buildResponseEntity(HttpStatus.BAD_REQUEST, localizedMessage, ex.getMessage(), ex.getArgs());
+
+        var headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
+
+        var errorData = ErrorData.builder()
+                .status(ex.getStatus().value())
+                .error(ex.getMessage())
+                .description(ex.getDescription() != null ? ex.getDescription() : ex.getStatus().getReasonPhrase())
+                .message(localizedMessage)
+                .args(ex.getArgs())
+                .build();
+
+        return new ResponseEntity<>(errorData, headers, ex.getStatus());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorData> handleGenericException(Exception ex, Locale locale) {
+        var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ErrorData> handleGenericException(IOException ex, Locale locale) {
         var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), null);
     }
@@ -138,7 +158,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorData> handleNotFoundException(MaxUploadSizeExceededException ex, Locale locale) {
-        Object[] maxSizeMB = new Object[]{FileConstants.MAX_SIZE_IN_MB};
+        Object[] maxSizeMB = new Object[]{FileConstants.MAX_FILE_SIZE};
         var localizedMessage  = messageSource.getMessage("validation.file.size", maxSizeMB, ex.getMessage(), locale);
         return buildResponseEntity(HttpStatus.PAYLOAD_TOO_LARGE, localizedMessage, ex.getMessage(), maxSizeMB);
     }

@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -101,7 +102,7 @@ public class JsonHelper {
         JsonElement valueElement = element.getAsJsonObject().get(fieldName);
 
         if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isString()) {
-            throw new ErrorException("validation.string", fieldName);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be string", fieldName);
         }
 
         return valueElement.getAsString();
@@ -118,13 +119,13 @@ public class JsonHelper {
         JsonElement valueElement = element.getAsJsonObject().get(fieldName);
 
         if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isNumber()) {
-            throw new ErrorException("validation.number", fieldName);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be number", fieldName);
         }
 
         try {
             return valueElement.getAsLong();
         } catch (NumberFormatException ex) {
-            throw new ErrorException("validation.number", fieldName);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be number", fieldName);
         }
     }
 
@@ -139,13 +140,13 @@ public class JsonHelper {
         JsonElement valueElement = element.getAsJsonObject().get(fieldName);
 
         if (!valueElement.isJsonPrimitive() || !valueElement.getAsJsonPrimitive().isNumber()) {
-            throw new ErrorException("validation.number", fieldName);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be number", fieldName);
         }
 
         try {
             return valueElement.getAsInt();
         } catch (NumberFormatException ex) {
-            throw new ErrorException("validation.number", fieldName);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be number", fieldName);
         }
     }
 

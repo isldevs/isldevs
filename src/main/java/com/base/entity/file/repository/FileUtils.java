@@ -1,8 +1,24 @@
+/*
+ * Copyright 2025 iSLDevs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.base.entity.file.repository;
 
 
 import com.base.core.exception.ErrorException;
 import org.apache.commons.lang3.Strings;
+import org.springframework.http.HttpStatus;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,88 +38,53 @@ public class FileUtils {
                 return;
             }
         }
-        throw new ErrorException("msg.internal.error");
-    }
-
-    static void write(InputStream is, String filePath) {
-        File file = new File(filePath);
-        file.getParentFile().mkdirs();
-
-        OutputStream os = null;
-        try {
-            os = new FileOutputStream(file);
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            os.flush();
-        } catch (IOException e) {
-            throw new ErrorException("validation.file.content.error");
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
+        throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Entity type is unsupported", entity);
     }
 
     static InputStream resize(String extension, InputStream is) {
-        InputStream inputStream = null;
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            int bytesRead;
-            byte[] buffer = new byte[8192];
-            while ((bytesRead = is.read(buffer)) != -1) {
-                bos.write(buffer, 0, bytesRead);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); InputStream input = is) {
+            BufferedImage src = ImageIO.read(input);
+            if (src == null) {
+                throw new ErrorException("msg.internal.error");
             }
-            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-            BufferedImage src = ImageIO.read(bis);
 
-            int width = (src.getWidth() * 50) / 100;
-            int height = (src.getHeight() * 50) / 100;
+            int width = src.getWidth() / 2;
+            int height = src.getHeight() / 2;
 
-            src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            BufferedImage bf;
-            if (extension.equals(FILE_EXTENSION.PNG.getValueWithoutDot())) {
-                bf = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage resized;
+            if ("png".equalsIgnoreCase(extension)) {
+                resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             } else {
-                bf = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             }
 
-            final Graphics2D graphics2D = bf.createGraphics();
-            graphics2D.setComposite(AlphaComposite.Src);
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics2D.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-            graphics2D.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            Graphics2D g2d = resized.createGraphics();
+            g2d.setComposite(AlphaComposite.Src);
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            graphics2D.drawImage(src, 0, 0, width, height, null);
-            graphics2D.dispose();
+            g2d.drawImage(src, 0, 0, width, height, null);
+            g2d.dispose();
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(bf, extension, out);
+            ImageIO.write(resized, extension, bos);
+            return new ByteArrayInputStream(bos.toByteArray());
 
-            inputStream = new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            e.getMessage();
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", e.getMessage());
         }
-
-        return inputStream;
     }
+
 
     public static void isValidateMimeType(final String mimeType) {
         if (mimeType == null || mimeType.isBlank()) {
-            throw new IllegalArgumentException("MIME type cannot be null or empty");
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "MIME type cannot be null or empty", mimeType);
         }
 
         boolean isValid = Arrays.stream(MIME_TYPE.values()).anyMatch(type -> type.getValue().equalsIgnoreCase(mimeType));
 
         if (!isValid) {
-            throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Unsupported MIME type", mimeType);
         }
     }
 
@@ -140,7 +121,12 @@ public class FileUtils {
                 case PDF -> MIME_TYPE.PDF;
                 case XLSX -> MIME_TYPE.XLSX;
                 case DOCX -> MIME_TYPE.DOCX;
-                default -> throw new ErrorException("validation.file.error.extension", fileExtension);
+                default -> throw new ErrorException(
+                        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                        "msg.internal.error",
+                        "Unsupported Media Type",
+                        fileExtension
+                );
             };
         }
 
@@ -179,7 +165,11 @@ public class FileUtils {
                 case PDF -> FILE_EXTENSION.PDF;
                 case XLSX -> FILE_EXTENSION.XLSX;
                 case DOCX -> FILE_EXTENSION.DOCX;
-                default -> throw new ErrorException("validation.file.error.extension");
+                default -> throw new ErrorException(
+                        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                        "msg.internal.error",
+                        "Unsupported Media Type"
+                );
             };
         }
     }
@@ -215,14 +205,14 @@ public class FileUtils {
 
     public static byte[] byteArray(File file) throws IOException {
         if (file == null || !file.exists() || !file.isFile()) {
-            throw new IllegalArgumentException("Invalid file provided");
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,"msg.internal.error", "Invalid file provided");
         }
         byte[] fileBytes = new byte[(int) file.length()];
         try (FileInputStream fis = new FileInputStream(file)) {
             int bytesRead = fis.read(fileBytes);
 
             if (bytesRead != fileBytes.length) {
-                throw new IOException("File read length mismatch");
+                throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,"msg.internal.error", "File read length mismatch");
             }
         }
 

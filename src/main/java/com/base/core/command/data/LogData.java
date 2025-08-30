@@ -68,6 +68,10 @@ public class LogData implements Serializable {
             return this.claim("id", id);
         }
 
+        public Builder file(Object  file) {
+            return this.claim("file", file);
+        }
+
         public Builder changes(Map<String, Object> changes) {
             return this.claim("changes", changes);
         }
