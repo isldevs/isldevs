@@ -50,6 +50,8 @@ import org.springframework.security.web.authentication.DelegatingAuthenticationC
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -113,6 +115,7 @@ public class AuthorizationServerConfig {
                 ))
                 .with(configurer, (authorizationServer) -> authorizationServer
                         .oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo.userInfoMapper(userInfoMapper)))
+                        .clientAuthentication(Customizer.withDefaults())
                         .tokenEndpoint(tokenEndpoint -> tokenEndpoint
                                 .accessTokenRequestConverter(
                                         new DelegatingAuthenticationConverter(
@@ -154,7 +157,7 @@ public class AuthorizationServerConfig {
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(
-                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new LoginUrlAuthenticationEntryPoint("/api/v1/login"),
                         new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
                 )
                 .headers(headers -> headers

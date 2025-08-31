@@ -19,6 +19,7 @@ import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
 import com.base.config.security.keypairs.RSAKeyPairRepository;
 import com.base.config.security.provider.JwtAuthenticationProvider;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
+import com.base.config.security.service.JdbcClientRegistrationRepository;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.Module;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,6 +44,10 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -193,6 +199,39 @@ public class SecurityConfig {
                         .build())
                 .build();
     }
+
+    @Bean
+    public ClientRegistration githubClientRegistration() {
+        return ClientRegistration.withRegistrationId("github")
+                .clientId("Ov23liYm672QW0MYCqP8")
+                .clientSecret("9944ce707dd2e9c37b6e30e6aabaf7d30a493851")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                .scope("read:user", "user:email")
+                .authorizationUri("https://github.com/login/oauth/authorize")
+                .tokenUri("https://github.com/login/oauth/access_token")
+                .userInfoUri("https://api.github.com/user")
+                .userNameAttributeName("id")
+                .clientName("GitHub")
+                .build();
+    }
+
+    @Bean
+    @Primary
+    public ClientRegistrationRepository clientRegistrationRepository(JdbcClientRegistrationRepository clientRegistrationRepository) {
+        if (clientRegistrationRepository.findByRegistrationId("github") == null) {
+            clientRegistrationRepository.save(githubClientRegistration());
+        }
+        return clientRegistrationRepository;
+    }
+
+    @Bean
+    public OAuth2AuthorizedClientService authorizedClientService(JdbcTemplate jdbcTemplate,
+                                                                 ClientRegistrationRepository clientRegistrationRepository) {
+        return new JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository);
+    }
+
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
