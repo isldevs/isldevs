@@ -27,8 +27,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 /**
  * @author YISivlay
@@ -39,14 +43,20 @@ public class ResourceServerConfig {
     private final JwtDecoder jwtDecoder;
     private final SessionRegistry sessionRegistry;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
 
     @Autowired
     public ResourceServerConfig(final JwtDecoder jwtDecoder,
                                 final SessionRegistry sessionRegistry,
-                                final CustomAuthenticationEntryPoint authenticationEntryPoint) {
+                                final CustomAuthenticationEntryPoint authenticationEntryPoint,
+                                final ClientRegistrationRepository clientRegistrationRepository,
+                                final OAuth2AuthorizedClientService oauth2AuthorizedClientService) {
         this.jwtDecoder = jwtDecoder;
         this.sessionRegistry = sessionRegistry;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.clientRegistrationRepository = clientRegistrationRepository;
+        this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
     }
 
     @Bean
@@ -62,14 +72,20 @@ public class ResourceServerConfig {
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login").permitAll())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt
                                         .decoder(jwtDecoder)
                                         .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())
                                 )
                                 .authenticationEntryPoint(authenticationEntryPoint)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .clientRegistrationRepository(clientRegistrationRepository)
+                        .authorizedClientService(oauth2AuthorizedClientService)
+                        .loginPage("/login").permitAll()
+                        .defaultSuccessUrl("/home", true)
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
