@@ -16,6 +16,8 @@
 package com.base.entity.office.dto;
 
 
+import com.base.entity.file.repository.FileUtils;
+import com.base.entity.file.service.FileService;
 import com.base.entity.office.model.Office;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -53,7 +55,7 @@ public class OfficeDTO {
         return new Builder();
     }
 
-    public static OfficeDTO toDTO(Office office, String profile) {
+    public static OfficeDTO toDTO(Office office, FileService fileService) {
         var parent = office.getParent();
         return OfficeDTO.builder()
                 .id(office.getId())
@@ -71,8 +73,17 @@ public class OfficeDTO {
                 .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
                 .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
                 .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
-                .profile(profile)
+                .profile(profile(fileService, office.getId()))
                 .build();
+    }
+
+    private static String profile(FileService fileService, Long id) {
+        if (fileService == null) {
+            return null;
+        }
+        return fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file") != null
+                ? fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file").toString()
+                : null;
     }
 
     public static String decorate(String hierarchy, String name) {

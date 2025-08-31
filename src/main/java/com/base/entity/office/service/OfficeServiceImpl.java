@@ -136,9 +136,7 @@ public class OfficeServiceImpl implements OfficeService {
 
         var office = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
-
-        String profile = this.fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file").toString();
-        return OfficeDTO.toDTO(office, profile);
+        return OfficeDTO.toDTO(office, fileService);
     }
 
     @Override

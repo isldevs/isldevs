@@ -17,6 +17,8 @@ package com.base.core.authentication.user.dto;
 
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
+import com.base.entity.file.repository.FileUtils;
+import com.base.entity.file.service.FileService;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,7 +56,7 @@ public class UserDTO {
         return new Builder();
     }
 
-    public static UserDTO toDTO(User user, String profile) {
+    public static UserDTO toDTO(User user, FileService fileService) {
         var roleNames = user.getRoles().stream()
                 .map(Role::getName)
                 .collect(Collectors.toSet());
@@ -69,8 +71,17 @@ public class UserDTO {
                 .accountNonExpired(user.isAccountNonExpired())
                 .accountNonLocked(user.isAccountNonLocked())
                 .credentialsNonExpired(user.isCredentialsNonExpired())
-                .profile(profile)
+                .profile(profile(fileService, user.getId()))
                 .build();
+    }
+
+    private static String profile(FileService fileService, Long id) {
+        if (fileService == null) {
+            return null;
+        }
+        return fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file") != null
+                ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).toString()
+                : null;
     }
 
     public static class Builder {

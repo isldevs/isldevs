@@ -94,9 +94,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO getUserById(Long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
-
-        var profile = this.fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file").toString();
-        return UserDTO.toDTO(user, profile);
+        return UserDTO.toDTO(user, fileService);
     }
 
     @Override
