@@ -19,6 +19,8 @@ package com.base.entity.office.service;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
+import com.base.entity.file.repository.FileUtils;
+import com.base.entity.file.service.FileService;
 import com.base.entity.office.controller.OfficeConstants;
 import com.base.entity.office.dto.OfficeDTO;
 import com.base.entity.office.model.Office;
@@ -44,14 +46,17 @@ public class OfficeServiceImpl implements OfficeService {
     private final MessageSource messageSource;
     private final OfficeRepository repository;
     private final OfficeDataValidation validator;
+    private final FileService fileService;
 
     @Autowired
     public OfficeServiceImpl(final MessageSource messageSource,
                              final OfficeRepository repository,
-                             final OfficeDataValidation validator) {
+                             final OfficeDataValidation validator,
+                             final FileService fileService) {
         this.messageSource = messageSource;
         this.repository = repository;
         this.validator = validator;
+        this.fileService = fileService;
     }
 
     @Override
@@ -132,24 +137,8 @@ public class OfficeServiceImpl implements OfficeService {
         var office = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
-        var parent = office.getParent();
-        return OfficeDTO.builder()
-                .id(office.getId())
-                .parent(parent != null ? OfficeDTO.builder()
-                        .id(parent.getId())
-                        .nameEn(parent.getNameEn())
-                        .nameKm(parent.getNameKm())
-                        .nameZh(parent.getNameZh())
-                        .decorated(decorate(parent.getHierarchy(), parent.getNameEn()))
-                        .build()
-                        : null)
-                .nameEn(office.getNameEn())
-                .nameKm(office.getNameKm())
-                .nameZh(office.getNameZh())
-                .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
-                .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
-                .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
-                .build();
+        String profile = this.fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file").toString();
+        return OfficeDTO.toDTO(office, profile);
     }
 
     @Override
@@ -169,41 +158,12 @@ public class OfficeServiceImpl implements OfficeService {
         var sort = Sort.by("hierarchy").ascending();
         if (page == null || size == null) {
             var allOffices = repository.findAll(specification, sort);
-            return new PageImpl<>(allOffices.stream().map(this::convertToDTO).toList());
+            return new PageImpl<>(allOffices.stream().map(office -> OfficeDTO.toDTO(office, null)).toList());
         }
 
         var pageable = PageRequest.of(page, size, sort);
         var officesPage = repository.findAll(specification, pageable);
-        return officesPage.map(this::convertToDTO);
+        return officesPage.map(office -> OfficeDTO.toDTO(office, null));
     }
-
-    private OfficeDTO convertToDTO(Office office) {
-        var parent = office.getParent();
-        return OfficeDTO.builder()
-                .id(office.getId())
-                .parent(parent != null ? OfficeDTO.builder()
-                        .id(parent.getId())
-                        .nameEn(parent.getNameEn())
-                        .nameKm(parent.getNameKm())
-                        .nameZh(parent.getNameZh())
-                        .decorated(decorate(parent.getHierarchy(), parent.getNameEn()))
-                        .build()
-                        : null)
-                .nameEn(office.getNameEn())
-                .nameKm(office.getNameKm())
-                .nameZh(office.getNameZh())
-                .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
-                .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
-                .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
-                .build();
-    }
-
-    private String decorate(String hierarchy, String name) {
-        if (hierarchy == null || hierarchy.isEmpty() || name == null) return name;
-        var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
-        if (level <= 0) return name;
-        return ".".repeat(level * 4) + name;
-    }
-
 
 }

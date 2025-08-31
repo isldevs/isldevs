@@ -16,6 +16,7 @@
 package com.base.entity.office.dto;
 
 
+import com.base.entity.office.model.Office;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
@@ -33,6 +34,7 @@ public class OfficeDTO {
     private final String hierarchyEn;
     private final String hierarchyKm;
     private final String hierarchyZh;
+    private final String profile;
 
     public OfficeDTO(Builder builder) {
         this.id = builder.id;
@@ -44,10 +46,40 @@ public class OfficeDTO {
         this.hierarchyEn = builder.hierarchyEn;
         this.hierarchyKm = builder.hierarchyKm;
         this.hierarchyZh = builder.hierarchyZh;
+        this.profile = builder.profile;
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static OfficeDTO toDTO(Office office, String profile) {
+        var parent = office.getParent();
+        return OfficeDTO.builder()
+                .id(office.getId())
+                .parent(parent != null ? OfficeDTO.builder()
+                        .id(parent.getId())
+                        .nameEn(parent.getNameEn())
+                        .nameKm(parent.getNameKm())
+                        .nameZh(parent.getNameZh())
+                        .decorated(decorate(parent.getHierarchy(), parent.getNameEn()))
+                        .build()
+                        : null)
+                .nameEn(office.getNameEn())
+                .nameKm(office.getNameKm())
+                .nameZh(office.getNameZh())
+                .hierarchyEn(decorate(office.getHierarchy(), office.getNameEn()))
+                .hierarchyKm(decorate(office.getHierarchy(), office.getNameKm()))
+                .hierarchyZh(decorate(office.getHierarchy(), office.getNameZh()))
+                .profile(profile)
+                .build();
+    }
+
+    public static String decorate(String hierarchy, String name) {
+        if (hierarchy == null || hierarchy.isEmpty() || name == null) return name;
+        var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
+        if (level <= 0) return name;
+        return ".".repeat(level * 4) + name;
     }
 
     public static class Builder {
@@ -61,6 +93,7 @@ public class OfficeDTO {
         private String hierarchyEn;
         private String hierarchyKm;
         private String hierarchyZh;
+        private String profile;
 
         public OfficeDTO build() {
             return new OfficeDTO(this);
@@ -110,6 +143,11 @@ public class OfficeDTO {
             this.hierarchyZh = hierarchyZh;
             return this;
         }
+
+        public Builder profile(String profile) {
+            this.profile = profile;
+            return this;
+        }
     }
 
     public Long getId() {
@@ -146,5 +184,9 @@ public class OfficeDTO {
 
     public String getHierarchyZh() {
         return hierarchyZh;
+    }
+
+    public String getProfile() {
+        return profile;
     }
 }

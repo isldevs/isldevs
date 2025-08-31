@@ -18,7 +18,6 @@ package com.base.core.authentication.user.service;
 
 import com.base.core.authentication.user.controller.UserConstants;
 import com.base.core.authentication.user.dto.UserDTO;
-import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.user.repository.UserRepository;
@@ -28,6 +27,8 @@ import com.base.core.command.data.LogData;
 import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
 import com.base.config.security.service.SecurityContext;
+import com.base.entity.file.repository.FileUtils;
+import com.base.entity.file.service.FileService;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -37,7 +38,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDataValidation validation;
+    private final FileService fileService;
 
     @Autowired
     public UserServiceImpl(final MessageSource messageSource,
@@ -58,13 +59,15 @@ public class UserServiceImpl implements UserService {
                            final UserRepository userRepository,
                            final RoleRepository roleRepository,
                            final PasswordEncoder passwordEncoder,
-                           final UserDataValidation validation) {
+                           final UserDataValidation validation,
+                           final FileService fileService) {
         this.messageSource = messageSource;
         this.securityContext = securityContext;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.validation = validation;
+        this.fileService = fileService;
     }
 
     @Override
@@ -72,26 +75,12 @@ public class UserServiceImpl implements UserService {
         this.validation.create(command.getJson());
 
         final var username = command.extractString(UserConstants.USERNAME);
-        final var password = command.extractString(UserConstants.PASSWORD);
-        final var name = command.extractString(UserConstants.NAME);
-        final var email = command.extractString(UserConstants.EMAIL);
-        final var roleNames = command.extractArrayAs(UserConstants.ROLES, String.class);
 
         if (userRepository.existsByUsername(username)) {
             throw new NotFoundException("msg.username.exist", username);
         }
 
-        var data = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .enabled(true)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
-                .name(name)
-                .email(email)
-                .roles(resolveRoles(roleNames))
-                .build();
+        var data = User.from(command, username, passwordEncoder, roleRepository);
 
         var user = userRepository.save(data);
         return LogData.builder()
@@ -105,7 +94,9 @@ public class UserServiceImpl implements UserService {
     public UserDTO getUserById(Long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
-        return convertToDto(user);
+
+        var profile = this.fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file").toString();
+        return UserDTO.toDTO(user, profile);
     }
 
     @Override
@@ -123,12 +114,12 @@ public class UserServiceImpl implements UserService {
 
         if (page == null || size == null) {
             var users = userRepository.findAll(specification, Sort.by("username").ascending());
-            return new PageImpl<>(users.stream().map(this::convertToDto).toList());
+            return new PageImpl<>(users.stream().map(user -> UserDTO.toDTO(user, null)).toList());
         }
 
         var pageable = PageRequest.of(page, size, Sort.by("username").ascending());
         var usersPage = userRepository.findAll(specification, pageable);
-        return usersPage.map(this::convertToDto);
+        return usersPage.map(user -> UserDTO.toDTO(user, null));
     }
 
     @Override
@@ -165,38 +156,5 @@ public class UserServiceImpl implements UserService {
                 .success("msg.success", messageSource)
                 .build()
                 .claims();
-    }
-
-    private Set<Role> resolveRoles(Set<String> roleNames) {
-        if (roleNames == null || roleNames.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        Set<Role> roles = new HashSet<>();
-        for (var roleName : roleNames) {
-            var role = roleRepository.findByName("ROLE_" + roleName)
-                    .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName));
-            roles.add(role);
-        }
-        return roles;
-    }
-
-    private UserDTO convertToDto(User user) {
-
-        var roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-
-        return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roles(roleNames)
-                .enabled(user.isEnabled())
-                .accountNonExpired(user.isAccountNonExpired())
-                .accountNonLocked(user.isAccountNonLocked())
-                .credentialsNonExpired(user.isCredentialsNonExpired())
-                .build();
     }
 }

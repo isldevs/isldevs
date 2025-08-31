@@ -15,7 +15,11 @@
  */
 package com.base.core.authentication.user.dto;
 
+import com.base.core.authentication.role.model.Role;
+import com.base.core.authentication.user.model.User;
+
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -31,6 +35,7 @@ public class UserDTO {
     private final boolean accountNonExpired;
     private final boolean accountNonLocked;
     private final boolean credentialsNonExpired;
+    private final String profile;
 
     public UserDTO(Builder builder) {
         this.id = builder.id;
@@ -42,10 +47,30 @@ public class UserDTO {
         this.accountNonExpired = builder.accountNonExpired;
         this.accountNonLocked = builder.accountNonLocked;
         this.credentialsNonExpired = builder.credentialsNonExpired;
+        this.profile = builder.profile;
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static UserDTO toDTO(User user, String profile) {
+        var roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
+        return UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .email(user.getEmail())
+                .roles(roleNames)
+                .enabled(user.isEnabled())
+                .accountNonExpired(user.isAccountNonExpired())
+                .accountNonLocked(user.isAccountNonLocked())
+                .credentialsNonExpired(user.isCredentialsNonExpired())
+                .profile(profile)
+                .build();
     }
 
     public static class Builder {
@@ -59,6 +84,7 @@ public class UserDTO {
         private boolean accountNonExpired;
         private boolean accountNonLocked;
         private boolean credentialsNonExpired;
+        private String profile;
 
         public Builder() {
         }
@@ -116,6 +142,11 @@ public class UserDTO {
             this.credentialsNonExpired = credentialsNonExpired;
             return this;
         }
+
+        public Builder profile(String profile) {
+            this.profile = profile;
+            return this;
+        }
     }
 
     public boolean equals(Object obj) {
@@ -167,5 +198,9 @@ public class UserDTO {
 
     public boolean isCredentialsNonExpired() {
         return credentialsNonExpired;
+    }
+
+    public String getProfile() {
+        return profile;
     }
 }

@@ -89,6 +89,40 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         return new Builder();
     }
 
+    public static User from(JsonCommand command, String username, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+
+        final var password = command.extractString(UserConstants.PASSWORD);
+        final var name = command.extractString(UserConstants.NAME);
+        final var email = command.extractString(UserConstants.EMAIL);
+        final var roleNames = command.extractArrayAs(UserConstants.ROLES, String.class);
+
+        return User.builder()
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .enabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .name(name)
+                .email(email)
+                .roles(resolveRoles(roleNames, roleRepository))
+                .build();
+    }
+
+    public static Set<Role> resolveRoles(Set<String> roleNames, RoleRepository roleRepository) {
+        if (roleNames == null || roleNames.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<Role> roles = new HashSet<>();
+        for (var roleName : roleNames) {
+            var role = roleRepository.findByName("ROLE_" + roleName)
+                    .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName));
+            roles.add(role);
+        }
+        return roles;
+    }
+
     public static class Builder {
 
         private String username;

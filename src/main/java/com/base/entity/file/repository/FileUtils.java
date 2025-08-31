@@ -268,7 +268,8 @@ public class FileUtils {
     }
 
     public enum ENTITY {
-        USER;
+        USER,
+        OFFICE;
 
         @Override
         public String toString() {

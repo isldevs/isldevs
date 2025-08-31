@@ -163,6 +163,12 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.PAYLOAD_TOO_LARGE, localizedMessage, ex.getMessage(), maxSizeMB);
     }
 
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorData> handleNotFoundException(NullPointerException ex, Locale locale) {
+        var localizedMessage  = messageSource.getMessage("msg.internal.error", ex.getSuppressed(), locale);
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), ex.getSuppressed());
+    }
+
     private Object[] extractDuplicateArgs(Object[] args) {
         if (args == null) {
             return Collections.emptyList().toArray();
@@ -206,31 +212,6 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorData, headers, status);
     }
-
-    private List<String> extractAuthoritiesFromExpression(String expr) {
-        if (expr == null) return null;
-        List<String> result = new ArrayList<>();
-
-        Pattern rolePattern = Pattern.compile("hasRole\\('([^']+)'\\)");
-        Matcher roleMatcher = rolePattern.matcher(expr);
-        while (roleMatcher.find()) {
-            result.add(roleMatcher.group(1)); // just "ADMIN"
-        }
-
-        Pattern authPattern = Pattern.compile("hasAuthority\\('([^']+)'\\)|hasAnyAuthority\\(([^)]+)\\)");
-        Matcher authMatcher = authPattern.matcher(expr);
-        while (authMatcher.find()) {
-            if (authMatcher.group(1) != null) { // single authority
-                result.add(authMatcher.group(1));
-            } else if (authMatcher.group(2) != null) { // multiple authorities
-                String[] authorities = authMatcher.group(2).replaceAll("'", "").split(",");
-                result.addAll(Arrays.stream(authorities).map(String::trim).toList());
-            }
-        }
-
-        return result.isEmpty() ? null : result;
-    }
-
 
     private List<String> extract(AuthorizationDeniedException ex) {
         String msg = ex.getAuthorizationResult().toString();
