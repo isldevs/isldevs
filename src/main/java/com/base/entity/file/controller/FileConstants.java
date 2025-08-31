@@ -25,6 +25,7 @@ import java.util.HashSet;
  */
 public class FileConstants {
     public static final String PERMISSION = "FILE";
+    public static final String API_PATH = "/files";
 
     public static final Integer MAX_FILE_SIZE = 10;
     public static final Integer MAX_REQUEST_SIZE = 20;

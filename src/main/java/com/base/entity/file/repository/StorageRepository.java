@@ -97,12 +97,12 @@ public class StorageRepository implements StorageUtils {
     }
 
     @Override
-    public InputStreamResource readInputStream(Path path) {
+    public InputStream readInputStream(Path path) {
         try {
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
                 throw new ErrorException(HttpStatus.NOT_FOUND, "msg.not.found", path);
             }
-            return new InputStreamResource(Files.newInputStream(path, StandardOpenOption.READ));
+            return Files.newInputStream(path, StandardOpenOption.READ);
         } catch (IOException e) {
             throw new ErrorException(
                     HttpStatus.INTERNAL_SERVER_ERROR,

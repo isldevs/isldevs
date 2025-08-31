@@ -34,7 +34,7 @@ import java.util.Map;
  * @author YISivlay
  */
 @RestController
-@RequestMapping("/files")
+@RequestMapping(FileConstants.API_PATH)
 @Scope("singleton")
 public class FileController {
 

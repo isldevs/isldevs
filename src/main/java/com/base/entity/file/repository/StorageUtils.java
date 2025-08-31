@@ -38,7 +38,7 @@ public interface StorageUtils {
 
     String readBase64(Path path);
 
-    InputStreamResource readInputStream(Path path);
+    InputStream readInputStream(Path path);
 
     byte[] readByte(Path path);
 

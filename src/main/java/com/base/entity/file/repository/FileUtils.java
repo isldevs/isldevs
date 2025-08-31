@@ -45,7 +45,11 @@ public class FileUtils {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); InputStream input = is) {
             BufferedImage src = ImageIO.read(input);
             if (src == null) {
-                throw new ErrorException("msg.internal.error");
+                throw new ErrorException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "msg.internal.error",
+                        "Can not read file content"
+                );
             }
 
             int width = src.getWidth() / 2;
@@ -71,7 +75,7 @@ public class FileUtils {
             return new ByteArrayInputStream(bos.toByteArray());
 
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", e.getMessage());
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Resizing failed", e.getMessage());
         }
     }
 

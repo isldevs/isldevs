@@ -129,9 +129,9 @@ public class FileServiceImpl implements FileService {
             throw new NotFoundException("msg.not.found", entity, entityId);
 
         var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
-        StorageUtils storageUtils = this.storage.repository(file.getStorageType());
+        var storageUtils = this.storage.repository(file.getStorageType());
 
-        String url = storageUtils.readUrl(dir);
+        var url = storageUtils.readUrl(dir);
         return LogData.builder()
                 .file(url)
                 .success("msg.success", messageSource)
@@ -146,9 +146,9 @@ public class FileServiceImpl implements FileService {
             throw new NotFoundException("msg.not.found", entity, entityId);
 
         var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
-        StorageUtils storageUtils = this.storage.repository(file.getStorageType());
+        var storageUtils = this.storage.repository(file.getStorageType());
 
-        String base64 = storageUtils.readBase64(dir);
+        var base64 = storageUtils.readBase64(dir);
         return LogData.builder()
                 .file(base64)
                 .success("msg.success", messageSource)
@@ -163,9 +163,9 @@ public class FileServiceImpl implements FileService {
             throw new NotFoundException("msg.not.found", entity, entityId);
 
         var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
-        StorageUtils storageUtils = this.storage.repository(file.getStorageType());
+        var storageUtils = this.storage.repository(file.getStorageType());
 
-        byte[] bytes = storageUtils.readByte(dir);
+        var bytes = storageUtils.readByte(dir);
         return LogData.builder()
                 .file(bytes)
                 .success("msg.success", messageSource)
@@ -180,9 +180,9 @@ public class FileServiceImpl implements FileService {
             throw new NotFoundException("msg.not.found", entity, entityId);
 
         var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
-        StorageUtils storageUtils = this.storage.repository(file.getStorageType());
+        var storageUtils = this.storage.repository(file.getStorageType());
 
-        InputStreamResource inputStream = storageUtils.readInputStream(dir);
+        var inputStream = storageUtils.readInputStream(dir);
         return LogData.builder()
                 .file(inputStream)
                 .success("msg.success", messageSource)
