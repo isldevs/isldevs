@@ -72,9 +72,13 @@
     <h1>Login</h1>
 
     <!-- Internal Form Login -->
-    <form action="/login" method="post">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+    <form action="/api/v1/login" method="post">
+        <label>
+            <input type="text" name="username" placeholder="Username" required>
+        </label>
+        <label>
+            <input type="password" name="password" placeholder="Password" required>
+        </label>
         <button type="submit">Login</button>
     </form>
 
@@ -82,8 +86,9 @@
 
     <!-- External OAuth2 Login -->
     <div class="oauth-buttons">
-        <a href="/oauth2/authorization/github" class="github">Login with GitHub</a>
-        <a href="/oauth2/authorization/google" class="google">Login with Google</a>
+        <a href="/api/v1/oauth2/authorization/github" class="github">Login with GitHub</a>
+        <a href="/api/v1/oauth2/authorization/google" class="google">Login with Google</a>
+
     </div>
 </div>
 </body>

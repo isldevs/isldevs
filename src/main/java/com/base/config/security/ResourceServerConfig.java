@@ -72,8 +72,8 @@ public class ResourceServerConfig {
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login").permitAll())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt
                                         .decoder(jwtDecoder)
@@ -81,12 +81,12 @@ public class ResourceServerConfig {
                                 )
                                 .authenticationEntryPoint(authenticationEntryPoint)
                 )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .clientRegistrationRepository(clientRegistrationRepository)
-//                        .authorizedClientService(oauth2AuthorizedClientService)
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/web/home", true)
-//                )
+                .oauth2Login(oauth2 -> oauth2
+                        .clientRegistrationRepository(clientRegistrationRepository)
+                        .authorizedClientService(oauth2AuthorizedClientService)
+                        .loginPage("/login").permitAll()
+                        .defaultSuccessUrl("/home", true)
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation().migrateSession()

@@ -153,11 +153,11 @@ public class AuthorizationServerConfig {
                                 "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login").permitAll())
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(
-                        new LoginUrlAuthenticationEntryPoint("/api/v1/login"),
+                        new LoginUrlAuthenticationEntryPoint("/login"),
                         new MediaTypeRequestMatcher(MediaType.TEXT_HTML))
                 )
                 .headers(headers -> headers
