@@ -22,6 +22,7 @@ import com.base.core.exception.NotFoundException;
 import com.base.entity.file.controller.FileConstants;
 import com.base.entity.file.model.File;
 import com.base.entity.file.repository.FileRepository;
+import com.base.entity.file.repository.FileUtils;
 import com.base.entity.file.repository.Storage;
 import com.base.entity.file.repository.StorageUtils;
 import com.base.entity.file.validation.FileDataValidation;
@@ -149,6 +150,7 @@ public class FileServiceImpl implements FileService {
         var storageUtils = this.storage.repository(file.getStorageType());
 
         var base64 = storageUtils.readBase64(dir);
+        base64 = FileUtils.suffix(file.getName()) + base64;
         return LogData.builder()
                 .file(base64)
                 .success("msg.success", messageSource)
