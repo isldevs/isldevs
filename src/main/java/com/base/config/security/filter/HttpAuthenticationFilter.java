@@ -18,6 +18,7 @@ package com.base.config.security.filter;
 import com.base.config.data.RequestLog;
 import com.base.config.serialization.ToApiJsonSerializer;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -149,6 +150,8 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (OAuth2AuthenticationException ex) {
             SecurityContextHolder.clearContext();
+            clearCookies(response);
+            noCacheHeaders(response);
             response.addHeader("WWW-Authenticate", "Basic realm=\"" + EXPECTED_TENANT + "\"");
 
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -177,6 +180,19 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
                     .build();
             LOGGER.info(this.toApiJsonSerializer.serialize(log));
         }
+    }
+
+    private void clearCookies(HttpServletResponse response) {
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    private void noCacheHeaders(HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
     }
 
     private Map<String, String[]> parameters(HttpServletRequest request) {

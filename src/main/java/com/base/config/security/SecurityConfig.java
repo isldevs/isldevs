@@ -48,8 +48,11 @@ import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientServ
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -70,6 +73,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.sql.DataSource;
 import java.time.Clock;
@@ -87,6 +91,18 @@ public class SecurityConfig {
 
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
+
+    @Value("${github.client.id}")
+    private String GITHUB_CLIENT_ID;
+
+    @Value("${github.client.secret}")
+    private String GITHUB_CLIENT_SECRET;
+
+    @Value("${google.client.id}")
+    private String GOOGLE_CLIENT_ID;
+
+    @Value("${google.client.secret}")
+    private String GOOGLE_CLIENT_SECRET;
 
     private final CustomUserDetailsService userDetailsService;
 
@@ -203,8 +219,8 @@ public class SecurityConfig {
     @Bean
     public ClientRegistration githubClientRegistration() {
         return ClientRegistration.withRegistrationId("github")
-                .clientId("Ov23liYm672QW0MYCqP8")
-                .clientSecret("9944ce707dd2e9c37b6e30e6aabaf7d30a493851")
+                .clientId(GITHUB_CLIENT_ID)
+                .clientSecret(GITHUB_CLIENT_SECRET)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
@@ -218,10 +234,31 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ClientRegistration googleClientRegistration() {
+        return ClientRegistration.withRegistrationId("google")
+                .clientId(GOOGLE_CLIENT_ID)
+                .clientSecret(GOOGLE_CLIENT_SECRET)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                .scope("openid", "profile", "email")
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                .tokenUri("https://oauth2.googleapis.com/token")
+                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+                .userNameAttributeName(IdTokenClaimNames.SUB)
+                .clientName("Google")
+                .build();
+    }
+
+    @Bean
     @Primary
     public ClientRegistrationRepository clientRegistrationRepository(JdbcClientRegistrationRepository clientRegistrationRepository) {
         if (clientRegistrationRepository.findByRegistrationId("github") == null) {
             clientRegistrationRepository.save(githubClientRegistration());
+        }
+        if (clientRegistrationRepository.findByRegistrationId("google") == null) {
+            clientRegistrationRepository.save(googleClientRegistration());
         }
         return clientRegistrationRepository;
     }
@@ -341,6 +378,12 @@ public class SecurityConfig {
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
+    }
+
+    @Bean
+    public WebClient rest(ClientRegistrationRepository clients, OAuth2AuthorizedClientRepository auth) {
+        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServletOAuth2AuthorizedClientExchangeFilterFunction(clients, auth);
+        return WebClient.builder().filter(oauth2).build();
     }
 
     abstract static class ImmutableCollections {

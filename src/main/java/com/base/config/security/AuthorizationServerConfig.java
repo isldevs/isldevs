@@ -50,8 +50,6 @@ import org.springframework.security.web.authentication.DelegatingAuthenticationC
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -150,6 +148,10 @@ public class AuthorizationServerConfig {
                                 "/.well-known/openid-configuration",
                                 "/jwks",
                                 "/api/v1/device/**",
+                                "/css/**",
+                                "/js/**",
+                                "/api/v1/login/**",
+                                "/api/v1/error/**",
                                 "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())

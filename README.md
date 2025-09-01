@@ -335,6 +335,13 @@ Here are the Postman endpoints for each client ID flow:
       * **Body (x-www-form-urlencoded):**
          * `grant_type`: `refresh_token`
          * `refresh_token`: `{refresh_token}` (Obtained from the initial token response)
+#### 5. Login via GitHub, Google
+```
+export GITHUB_CLIENT_ID="your_github_client_id"
+export GITHUB_CLIENT_SECRET="your_github_client_secret"
+export GOOGLE_CLIENT_ID="your_google_client_id"
+export GOOGLE_CLIENT_SECRET="your_google_client_secret"
+```
 
 ## Important Notes
 

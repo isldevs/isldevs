@@ -41,7 +41,7 @@ public class JdbcClientRegistrationRepository implements ClientRegistrationRepos
     public ClientRegistration findByRegistrationId(String registrationId) {
         List<ClientRegistration> list = jdbcTemplate.query(
                 "SELECT * FROM oauth2_client_registration WHERE registration_id = ?",
-                (rs, rowNum) -> ClientRegistration.withRegistrationId(rs.getString("registration_id"))
+                (rs, _) -> ClientRegistration.withRegistrationId(rs.getString("registration_id"))
                         .clientId(rs.getString("client_id"))
                         .clientSecret(rs.getString("client_secret"))
                         .clientAuthenticationMethod(ClientAuthenticationMethod.valueOf(rs.getString("client_auth_method")))
@@ -51,6 +51,7 @@ public class JdbcClientRegistrationRepository implements ClientRegistrationRepos
                         .authorizationUri(rs.getString("authorization_uri"))
                         .tokenUri(rs.getString("token_uri"))
                         .userInfoUri(rs.getString("user_info_uri"))
+                        .jwkSetUri(rs.getString("jwk_set_uri"))
                         .userNameAttributeName(rs.getString("user_name_attribute"))
                         .clientName(rs.getString("client_name"))
                         .build(),
@@ -64,8 +65,9 @@ public class JdbcClientRegistrationRepository implements ClientRegistrationRepos
     public void save(ClientRegistration client) {
         jdbcTemplate.update(
                 "INSERT INTO oauth2_client_registration " +
-                        "(registration_id, client_id, client_secret, client_auth_method, authorization_grant_type, redirect_uri, scope, authorization_uri, token_uri, user_info_uri, user_name_attribute, client_name) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "(registration_id, client_id, client_secret, client_auth_method, authorization_grant_type, " +
+                        "redirect_uri, scope, authorization_uri, token_uri, user_info_uri, user_name_attribute, client_name, jwk_set_uri) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 client.getRegistrationId(),
                 client.getClientId(),
                 client.getClientSecret(),
@@ -77,7 +79,8 @@ public class JdbcClientRegistrationRepository implements ClientRegistrationRepos
                 client.getProviderDetails().getTokenUri(),
                 client.getProviderDetails().getUserInfoEndpoint().getUri(),
                 client.getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName(),
-                client.getClientName()
+                client.getClientName(),
+                client.getProviderDetails().getJwkSetUri()
         );
     }
 }

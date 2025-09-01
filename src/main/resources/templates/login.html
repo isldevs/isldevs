@@ -1,95 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login Page</title>
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 80px;
-            background-color: #f5f5f5;
-        }
-        .container {
+        .login-container {
             max-width: 400px;
-            margin: auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
+            margin: 0 auto;
         }
-        h1 {
-            margin-bottom: 20px;
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 8px 0;
-            display: inline-block;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 10px 0;
-            background-color: #4CAF50;
+        .btn-google {
+            background-color: #DB4437;
+            border-color: #DB4437;
             color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
         }
-        button:hover {
-            background-color: #45a049;
-        }
-        .oauth-buttons a {
-            display: block;
-            padding: 12px 0;
-            margin: 8px 0;
-            border-radius: 6px;
+        .btn-google:hover {
+            background-color: #c23321;
+            border-color: #c23321;
             color: white;
-            text-decoration: none;
-            font-weight: bold;
         }
-        .github { background-color: #333; }
-        .google { background-color: #DB4437; }
+        .btn-github {
+            background-color: #24292e;
+            border-color: #24292e;
+            color: white;
+        }
+        .btn-github:hover {
+            background-color: #1b1f23;
+            border-color: #1b1f23;
+            color: white;
+        }
         .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
             margin: 20px 0;
-            border-bottom: 1px solid #ccc;
-            line-height: 0.1em;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
         }
         .divider span {
-            background:#fff;
-            padding:0 10px;
-            color: #555;
+            padding: 0 10px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .provider-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
         }
     </style>
 </head>
-<body>
-<div class="container">
-    <h1>Login</h1>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-white text-center py-4">
+                    <h2 class="mb-0">Welcome</h2>
+                    <p class="text-muted mb-0">Sign in to your account</p>
+                </div>
+                <div class="card-body p-5">
 
-    <!-- Internal Form Login -->
-    <form action="/api/v1/login" method="post">
-        <label>
-            <input type="text" name="username" placeholder="Username" required>
-        </label>
-        <label>
-            <input type="password" name="password" placeholder="Password" required>
-        </label>
-        <button type="submit">Login</button>
-    </form>
+                    <!-- Success Messages -->
+                    <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span th:text="${successMessage}"></span>
+                    </div>
 
-    <div class="divider"><span>OR</span></div>
+                    <!-- Error Messages -->
+                    <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Login Failed</strong>
+                        <p class="mb-1" th:text="${errorMessage}"></p>
+                    </div>
 
-    <!-- External OAuth2 Login -->
-    <div class="oauth-buttons">
-        <a href="/api/v1/oauth2/authorization/github" class="github">Login with GitHub</a>
-        <a href="/api/v1/oauth2/authorization/google" class="google">Login with Google</a>
+                    <!-- Username/Password Login Form -->
+                    <form th:action="@{/login}" method="post" class="mb-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Username" required>
+                            <label for="username">Username</label>
+                        </div>
 
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Password" required>
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+                            <label class="form-check-label" for="remember-me">Remember me</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Sign In
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        <span>Or continue with</span>
+                    </div>
+
+                    <!-- OAuth2 Login Options -->
+                    <div class="login-options mt-4">
+                        <a class="btn btn-google" th:href="@{/oauth2/authorization/google}">
+                            <svg class="provider-icon" viewBox="0 0 24 24" fill="white">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Sign in with Google
+                        </a>
+
+                        <a class="btn btn-github" th:href="@{/oauth2/authorization/github}">
+                            <svg class="provider-icon" viewBox="0 0 24 24" fill="white">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            Sign in with GitHub
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer bg-light text-center py-3">
+                    <small class="text-muted">
+                        Demo accounts: <strong>user/password</strong> or <strong>admin/admin</strong>
+                    </small>
+                </div>
+            </div>
+
+            <!-- Additional Links -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    Don't have an account? <a href="#" class="text-decoration-none">Sign up</a> •
+                    <a href="#" class="text-decoration-none">Forgot password?</a>
+                </small>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<!-- CSRF Token (Spring Security adds this automatically for form login) -->
+<script>
+    // Spring Security automatically includes CSRF token in forms
+    // This is just for demonstration
+    console.log("CSRF protection is enabled for form login");
+</script>
 </body>
 </html>

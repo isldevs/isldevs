@@ -18,10 +18,11 @@ package com.base.config.security.filter;
 import com.base.core.authentication.user.service.CustomUserDetailsService;
 import com.base.config.security.service.JwtAuthenticationService;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -50,15 +51,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        var authHeader = request.getHeader("Authorization");
-        String jwt = null;
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-        }
+                                    FilterChain filterChain) throws IOException {
+        try {
+            var authHeader = request.getHeader("Authorization");
+            String jwt = null;
+            if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+            }
 
-        if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
+            if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var username = jwtAuthenticationService.extractUsername(jwt);
                 if (username != null) {
                     var userDetails = userDetailsService.loadUserByUsername(username);
@@ -68,9 +69,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
-            } catch (Exception e) {
             }
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+            clearCookies(response);
+            noCacheHeaders(response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write("{\"error\":\"Unauthorized\",\"error_description\":\"" + e.getMessage() + "\"}");
         }
-        filterChain.doFilter(request, response);
+    }
+
+    private void clearCookies(HttpServletResponse response) {
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    private void noCacheHeaders(HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
     }
 }
