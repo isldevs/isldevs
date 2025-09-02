@@ -62,6 +62,15 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
     @Column(name = "is_credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired;
 
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "provider_avatar_url")
+    private String providerAvatarUrl;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -82,6 +91,9 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         this.accountNonExpired = builder.accountNonExpired;
         this.accountNonLocked = builder.accountNonLocked;
         this.credentialsNonExpired = builder.credentialsNonExpired;
+        this.providerId = builder.providerId;
+        this.provider = builder.provider;
+        this.providerAvatarUrl = builder.providerAvatarUrl;
         this.roles = builder.roles;
     }
 
@@ -133,6 +145,9 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         private boolean accountNonExpired;
         private boolean accountNonLocked;
         private boolean credentialsNonExpired;
+        private String providerId;
+        private String provider;
+        private String providerAvatarUrl;
         private Set<Role> roles;
 
         public User build() {
@@ -176,6 +191,21 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
 
         public Builder credentialsNonExpired(boolean credentialsNonExpired) {
             this.credentialsNonExpired = credentialsNonExpired;
+            return this;
+        }
+
+        public Builder providerId(String providerId) {
+            this.providerId = providerId;
+            return this;
+        }
+
+        public Builder provider(String provider) {
+            this.provider = provider;
+            return this;
+        }
+
+        public Builder providerAvatarUrl(String providerAvatarUrl) {
+            this.providerAvatarUrl = providerAvatarUrl;
             return this;
         }
 
@@ -334,5 +364,29 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderAvatarUrl() {
+        return providerAvatarUrl;
+    }
+
+    public void setProviderAvatarUrl(String providerAvatarUrl) {
+        this.providerAvatarUrl = providerAvatarUrl;
     }
 }

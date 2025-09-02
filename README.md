@@ -15,6 +15,13 @@ JWT tokens, and database-backed client/user storage.
 - Token customization (JWT with claims)
 - Postman-ready endpoints for testing
 
+## 🌐 OAuth2 Client (Social Login)
+- Login with GitHub
+- Login with Google
+- Login with Facebook
+- Centralized user principal mapping (convert external providers to internal user model)
+- Automatic token exchange and persistence with Spring Security
+
 ### ⚙️ Requirement
 - Java 17+
 - Spring Boot 3.5.x
