@@ -337,10 +337,8 @@ Here are the Postman endpoints for each client ID flow:
          * `refresh_token`: `{refresh_token}` (Obtained from the initial token response)
 #### 5. Login via GitHub, Google
 ```
-export GITHUB_CLIENT_ID="your_github_client_id"
-export GITHUB_CLIENT_SECRET="your_github_client_secret"
-export GOOGLE_CLIENT_ID="your_google_client_id"
-export GOOGLE_CLIENT_SECRET="your_google_client_secret"
+Noted:
+Client secret and id handle value in table, go to config value of CLIENT_ID and CLIENT_SECRET in table config. Then restart your service.
 ```
 
 ## Important Notes

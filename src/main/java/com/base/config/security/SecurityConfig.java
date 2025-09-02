@@ -15,6 +15,7 @@
  */
 package com.base.config.security;
 
+import com.base.config.GlobalConfig;
 import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
 import com.base.config.security.keypairs.RSAKeyPairRepository;
 import com.base.config.security.provider.JwtAuthenticationProvider;
@@ -92,22 +93,13 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.issuer-uri}")
     private String issuerUri;
 
-    @Value("${github.client.id}")
-    private String GITHUB_CLIENT_ID;
-
-    @Value("${github.client.secret}")
-    private String GITHUB_CLIENT_SECRET;
-
-    @Value("${google.client.id}")
-    private String GOOGLE_CLIENT_ID;
-
-    @Value("${google.client.secret}")
-    private String GOOGLE_CLIENT_SECRET;
-
+    private final GlobalConfig config;
     private final CustomUserDetailsService userDetailsService;
 
     @Autowired
-    public SecurityConfig(final CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(final GlobalConfig config,
+                          final CustomUserDetailsService userDetailsService) {
+        this.config = config;
         this.userDetailsService = userDetailsService;
     }
 
@@ -218,47 +210,57 @@ public class SecurityConfig {
 
     @Bean
     public ClientRegistration githubClientRegistration() {
-        return ClientRegistration.withRegistrationId("github")
-                .clientId(GITHUB_CLIENT_ID)
-                .clientSecret(GITHUB_CLIENT_SECRET)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                .scope("read:user", "user:email")
-                .authorizationUri("https://github.com/login/oauth/authorize")
-                .tokenUri("https://github.com/login/oauth/access_token")
-                .userInfoUri("https://api.github.com/user")
-                .userNameAttributeName("id")
-                .clientName("GitHub")
-                .build();
+        if (config.getConfigValue("GITHUB_CLIENT_ID") != null && config.getConfigValue("GITHUB_CLIENT_SECRET") != null) {
+            return ClientRegistration.withRegistrationId("github")
+                    .clientId(config.getConfigValue("GITHUB_CLIENT_ID"))
+                    .clientSecret(config.getConfigValue("GITHUB_CLIENT_SECRET"))
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .scope("read:user", "user:email")
+                    .authorizationUri("https://github.com/login/oauth/authorize")
+                    .tokenUri("https://github.com/login/oauth/access_token")
+                    .userInfoUri("https://api.github.com/user")
+                    .userNameAttributeName("id")
+                    .clientName("GitHub")
+                    .build();
+        }
+        return null;
     }
 
     @Bean
     public ClientRegistration googleClientRegistration() {
-        return ClientRegistration.withRegistrationId("google")
-                .clientId(GOOGLE_CLIENT_ID)
-                .clientSecret(GOOGLE_CLIENT_SECRET)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                .scope("openid", "profile", "email")
-                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-                .tokenUri("https://oauth2.googleapis.com/token")
-                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
-                .userNameAttributeName(IdTokenClaimNames.SUB)
-                .clientName("Google")
-                .build();
+        if (config.getConfigValue("GOOGLE_CLIENT_ID") != null && config.getConfigValue("GOOGLE_CLIENT_SECRET") != null) {
+            return ClientRegistration.withRegistrationId("google")
+                    .clientId(config.getConfigValue("GOOGLE_CLIENT_ID"))
+                    .clientSecret(config.getConfigValue("GOOGLE_CLIENT_SECRET"))
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .scope("openid", "profile", "email")
+                    .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                    .tokenUri("https://oauth2.googleapis.com/token")
+                    .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                    .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+                    .userNameAttributeName(IdTokenClaimNames.SUB)
+                    .clientName("Google")
+                    .build();
+        }
+        return null;
     }
 
     @Bean
     @Primary
     public ClientRegistrationRepository clientRegistrationRepository(JdbcClientRegistrationRepository clientRegistrationRepository) {
         if (clientRegistrationRepository.findByRegistrationId("github") == null) {
-            clientRegistrationRepository.save(githubClientRegistration());
+            if (githubClientRegistration() != null) {
+                clientRegistrationRepository.save(githubClientRegistration());
+            }
         }
         if (clientRegistrationRepository.findByRegistrationId("google") == null) {
-            clientRegistrationRepository.save(googleClientRegistration());
+            if (googleClientRegistration() != null) {
+                clientRegistrationRepository.save(googleClientRegistration());
+            }
         }
         return clientRegistrationRepository;
     }

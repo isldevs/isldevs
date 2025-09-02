@@ -15,10 +15,12 @@
  */
 package com.base.config.security.keypairs;
 
+import com.base.config.GlobalConfig;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
@@ -43,10 +45,16 @@ public class KeyConfiguration {
 
     private final Logger logger = LoggerFactory.getLogger(KeyConfiguration.class);
 
+    private final GlobalConfig config;
+
+    @Autowired
+    public KeyConfiguration(final GlobalConfig config) {
+        this.config = config;
+    }
+
     @Bean
-    TextEncryptor textEncryptor(@Value("${jwt.password}") String pw,
-                                @Value("${jwt.salt}") String salt) {
-        return Encryptors.text(pw, salt);
+    TextEncryptor textEncryptor() {
+        return Encryptors.text(config.getJwtPassword(), config.getJwtSalt());
     }
 
     @Bean
