@@ -107,6 +107,23 @@
                         </p>
                     </div>
 
+                    <!-- Facebook OAuth2 User -->
+                    <div th:if="${authType == 'oauth2' and provider == 'facebook'}">
+                        <div class="text-center mb-3">
+                            <img th:if="${userPicture}" th:src="${userPicture}"
+                                 class="rounded-circle" width="80" height="80" alt="Profile">
+                            <i th:unless="${userPicture}" class="bi bi-facebook"
+                               style="font-size: 3rem; color: #3b5998;"></i>
+                        </div>
+                        <p><strong>Name:</strong> <span th:text="${userName}">N/A</span></p>
+                        <p th:if="${userEmail}"><strong>Email:</strong> <span th:text="${userEmail}">N/A</span></p>
+                        <p th:if="${userId}"><strong>User ID:</strong> <span th:text="${userId}">N/A</span></p>
+                        <p><strong>Provider:</strong>
+                            <span class="badge bg-primary provider-badge">
+                            <i class="bi bi-facebook me-1"></i>Facebook</span>
+                        </p>
+                    </div>
+
                     <!-- Unknown Provider -->
                     <div th:if="${authType == 'oauth2' and provider == 'unknown'}">
                         <div class="text-center mb-3">

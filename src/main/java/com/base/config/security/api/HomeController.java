@@ -41,6 +41,11 @@ public class HomeController {
                 registrationId = "github";
                 model.addAttribute("userName", oauth2User.getAttribute("name"));
                 model.addAttribute("userLogin", oauth2User.getAttribute("login"));
+            } else if (oauth2User.getAttribute("id") != null) {
+                registrationId = "facebook";
+                model.addAttribute("userName", oauth2User.getAttribute("name"));
+                model.addAttribute("userEmail", oauth2User.getAttribute("email"));
+                model.addAttribute("userPicture", oauth2User.getAttribute("picture"));
             }
             model.addAttribute("provider", registrationId);
             model.addAttribute("authType", "oauth2");

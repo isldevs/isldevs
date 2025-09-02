@@ -17,6 +17,7 @@ package com.base.config.security.service;
 
 
 import com.base.core.exception.ErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -30,9 +31,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
+    private final FacebookOAuth2UserService facebookOAuth2UserService;
+
+    @Autowired
+    public OAuth2UserService(FacebookOAuth2UserService facebookOAuth2UserService) {
+        this.facebookOAuth2UserService = facebookOAuth2UserService;
+    }
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         try {
+            String registrationId = userRequest.getClientRegistration().getRegistrationId();
+            if ("facebook".equals(registrationId)) {
+                return facebookOAuth2UserService.loadUser(userRequest);
+            }
             return super.loadUser(userRequest);
         } catch (Exception e) {
             throw new ErrorException(HttpStatus.FORBIDDEN, "msg.internal.error", "OAuth2 user loading fails", e.getMessage());

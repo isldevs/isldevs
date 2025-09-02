@@ -250,6 +250,26 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ClientRegistration facebookClientRegistration() {
+        if (config.getConfigValue("FACEBOOK_CLIENT_ID") != null && config.getConfigValue("FACEBOOK_CLIENT_SECRET") != null) {
+            return ClientRegistration.withRegistrationId("facebook")
+                    .clientId(config.getConfigValue("FACEBOOK_CLIENT_ID"))
+                    .clientSecret(config.getConfigValue("FACEBOOK_CLIENT_SECRET"))
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .scope("public_profile", "email")
+                    .authorizationUri("https://www.facebook.com/v23.0/dialog/oauth")
+                    .tokenUri("https://graph.facebook.com/v23.0/oauth/access_token")
+                    .userInfoUri("https://graph.facebook.com/me?fields=id,name,email,picture")
+                    .userNameAttributeName("id")
+                    .clientName("Facebook")
+                    .build();
+        }
+        return null;
+    }
+
+    @Bean
     @Primary
     public ClientRegistrationRepository clientRegistrationRepository(JdbcClientRegistrationRepository clientRegistrationRepository) {
         if (clientRegistrationRepository.findByRegistrationId("github") == null) {
@@ -262,10 +282,16 @@ public class SecurityConfig {
                 clientRegistrationRepository.save(googleClientRegistration());
             }
         }
+        if (clientRegistrationRepository.findByRegistrationId("facebook") == null) {
+            if (googleClientRegistration() != null) {
+                clientRegistrationRepository.save(facebookClientRegistration());
+            }
+        }
         return clientRegistrationRepository;
     }
 
     @Bean
+    @Primary
     public OAuth2AuthorizedClientService authorizedClientService(JdbcTemplate jdbcTemplate,
                                                                  ClientRegistrationRepository clientRegistrationRepository) {
         return new JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository);
