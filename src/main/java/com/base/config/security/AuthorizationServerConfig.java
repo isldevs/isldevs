@@ -22,6 +22,7 @@ import com.base.config.security.filter.HttpAuthenticationFilter;
 import com.base.config.security.filter.JwtAuthenticationFilter;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
 import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
+import com.base.config.security.service.AuthenticationSuccessHandlerImpl;
 import com.base.config.security.service.CustomTokenErrorResponseHandler;
 import com.base.config.security.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,8 @@ public class AuthorizationServerConfig {
     private final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider;
     private final CorsConfigurationSource corsConfigurationSource;
     private final UserInfoService userInfoService;
+    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
+
 
     @Autowired
     public AuthorizationServerConfig(final MessageSource messageSource,
@@ -83,7 +86,8 @@ public class AuthorizationServerConfig {
                                      final JwtAuthenticationFilter jwtAuthenticationFilter,
                                      final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
                                      final CorsConfigurationSource corsConfigurationSource,
-                                     final UserInfoService userInfoService) {
+                                     final UserInfoService userInfoService,
+                                     final AuthenticationSuccessHandlerImpl authenticationSuccessHandler) {
         this.messageSource = messageSource;
         this.authenticationProvider = authenticationProvider;
         this.authorizationService = authorizationService;
@@ -94,6 +98,7 @@ public class AuthorizationServerConfig {
         this.jwtBearerAuthenticationProvider = jwtBearerAuthenticationProvider;
         this.corsConfigurationSource = corsConfigurationSource;
         this.userInfoService = userInfoService;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 
     @Bean
@@ -155,7 +160,10 @@ public class AuthorizationServerConfig {
                                 "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.loginPage("/login").permitAll())
+                .formLogin(form -> form.loginPage("/login")
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll()
+                )
                 .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
                 .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(

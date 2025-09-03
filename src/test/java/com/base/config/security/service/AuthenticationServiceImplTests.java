@@ -3,7 +3,7 @@ package com.base.config.security.service;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class OAuth2UserServiceTests {
+class AuthenticationServiceImplTests {
 
     @Test
     void contextLoads() {

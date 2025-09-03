@@ -26,7 +26,7 @@ import java.util.function.Function;
 /**
  * @author YISivlay
  */
-public interface JwtAuthenticationService {
+public interface AuthenticationService {
 
     String extractUsername(String token);
 

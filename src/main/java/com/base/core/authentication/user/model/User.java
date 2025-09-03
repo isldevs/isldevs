@@ -141,10 +141,10 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         private String password;
         private String name;
         private String email;
-        private boolean enabled;
-        private boolean accountNonExpired;
-        private boolean accountNonLocked;
-        private boolean credentialsNonExpired;
+        private boolean enabled = true;
+        private boolean accountNonExpired = true;
+        private boolean accountNonLocked = true;
+        private boolean credentialsNonExpired = true;
         private String providerId;
         private String provider;
         private String providerAvatarUrl;

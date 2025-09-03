@@ -17,9 +17,7 @@ package com.base.config.security;
 
 
 import com.base.config.security.converter.CustomJwtAuthenticationConverter;
-import com.base.config.security.service.CustomAuthenticationEntryPoint;
-import com.base.config.security.service.CustomOAuth2AccessTokenResponseClient;
-import com.base.config.security.service.OAuth2UserService;
+import com.base.config.security.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +45,9 @@ public class ResourceServerConfig {
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
     private final CustomOAuth2AccessTokenResponseClient accessTokenResponseClient;
-    private final OAuth2UserService oauth2UserService;
+    private final OAuth2UserServiceImpl oauth2UserServiceImpl;
+    private final OidcUserServiceImpl oidcUserService;
+    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
 
     @Autowired
     public ResourceServerConfig(final JwtDecoder jwtDecoder,
@@ -56,14 +56,18 @@ public class ResourceServerConfig {
                                 final ClientRegistrationRepository clientRegistrationRepository,
                                 final OAuth2AuthorizedClientService oauth2AuthorizedClientService,
                                 final CustomOAuth2AccessTokenResponseClient accessTokenResponseClient,
-                                final OAuth2UserService oauth2UserService) {
+                                final OAuth2UserServiceImpl oauth2UserServiceImpl,
+                                final OidcUserServiceImpl oidcUserService,
+                                final AuthenticationSuccessHandlerImpl authenticationSuccessHandler) {
         this.jwtDecoder = jwtDecoder;
         this.sessionRegistry = sessionRegistry;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
         this.accessTokenResponseClient = accessTokenResponseClient;
-        this.oauth2UserService = oauth2UserService;
+        this.oauth2UserServiceImpl = oauth2UserServiceImpl;
+        this.oidcUserService = oidcUserService;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 
     @Bean
@@ -84,7 +88,10 @@ public class ResourceServerConfig {
                 )
                 .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.loginPage("/login").permitAll())
+                .formLogin(form -> form.loginPage("/login")
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll()
+                )
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt
                                         .decoder(jwtDecoder)
@@ -96,8 +103,11 @@ public class ResourceServerConfig {
                         .clientRegistrationRepository(clientRegistrationRepository)
                         .authorizedClientService(oauth2AuthorizedClientService)
                         .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenResponseClient(accessTokenResponseClient))
-                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService))
-                        .loginPage("/login/**").permitAll()
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oauth2UserServiceImpl)
+                                .oidcUserService(oidcUserService))
+                        .successHandler(authenticationSuccessHandler)
+                        .loginPage("/login").permitAll()
                         .defaultSuccessUrl("/home", true)
                         .failureUrl("/login?error=true")
                 )

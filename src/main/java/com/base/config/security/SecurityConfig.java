@@ -23,11 +23,15 @@ import com.base.config.security.provider.JwtBearerAuthenticationProvider;
 import com.base.config.security.service.JdbcClientRegistrationRepository;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hibernate.collection.spi.PersistentSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -71,10 +75,17 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
 
 import javax.sql.DataSource;
 import java.time.Clock;
@@ -94,12 +105,15 @@ public class SecurityConfig {
     private String issuerUri;
 
     private final GlobalConfig config;
+    private final MessageSource messageSource;
     private final CustomUserDetailsService userDetailsService;
 
     @Autowired
     public SecurityConfig(final GlobalConfig config,
+                          final MessageSource messageSource,
                           final CustomUserDetailsService userDetailsService) {
         this.config = config;
+        this.messageSource = messageSource;
         this.userDetailsService = userDetailsService;
     }
 
@@ -283,7 +297,7 @@ public class SecurityConfig {
             }
         }
         if (clientRegistrationRepository.findByRegistrationId("facebook") == null) {
-            if (googleClientRegistration() != null) {
+            if (facebookClientRegistration() != null) {
                 clientRegistrationRepository.save(facebookClientRegistration());
             }
         }
@@ -412,6 +426,37 @@ public class SecurityConfig {
     public WebClient rest(ClientRegistrationRepository clients, OAuth2AuthorizedClientRepository auth) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServletOAuth2AuthorizedClientExchangeFilterFunction(clients, auth);
         return WebClient.builder().filter(oauth2).build();
+    }
+
+    @Bean
+    public ViewResolver viewResolver() {
+        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+        resolver.setPrefix("/WEB-INF/views/");
+        resolver.setSuffix(".jsp");
+        resolver.setViewClass(JstlView.class);
+        return resolver;
+    }
+
+    @Bean
+    public Validator validator() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setValidationMessageSource(messageSource);
+        return validator;
+    }
+
+    @Bean
+    @Primary
+    public ObjectMapper objectMapper() {
+        return JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .addModule(new Jdk8Module())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+                .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+                .enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+                .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .build();
     }
 
     abstract static class ImmutableCollections {

@@ -38,7 +38,7 @@ import java.util.function.Function;
  * @author YISivlay
  */
 @Service
-public final class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
+public final class AuthenticationServiceImpl implements AuthenticationService {
 
     private static final long EXPIRATION = 1000 * 60 * 15;
 
@@ -46,8 +46,8 @@ public final class JwtAuthenticationServiceImpl implements JwtAuthenticationServ
     private final RSAKeyPairRepository rsaKeyPairRepository;
 
     @Autowired
-    public JwtAuthenticationServiceImpl(final Clock clock,
-                                        final RSAKeyPairRepository rsaKeyPairRepository) {
+    public AuthenticationServiceImpl(final Clock clock,
+                                     final RSAKeyPairRepository rsaKeyPairRepository) {
         this.clock = clock;
         this.rsaKeyPairRepository = rsaKeyPairRepository;
     }
