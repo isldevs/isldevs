@@ -17,6 +17,7 @@ package com.base.core.authentication.user.dto;
 
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
+import com.base.core.exception.NotFoundException;
 import com.base.entity.file.repository.FileUtils;
 import com.base.entity.file.service.FileService;
 
@@ -79,9 +80,13 @@ public class UserDTO {
         if (fileService == null) {
             return null;
         }
-        return fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file") != null
-                ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).toString()
-                : null;
+        String profile = null;
+        try {
+            profile = fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file") != null
+                    ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).toString()
+                    : null;
+        } catch (NotFoundException ignored) {}
+        return profile;
     }
 
     public static class Builder {

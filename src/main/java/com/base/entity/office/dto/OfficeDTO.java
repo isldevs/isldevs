@@ -16,6 +16,7 @@
 package com.base.entity.office.dto;
 
 
+import com.base.core.exception.NotFoundException;
 import com.base.entity.file.repository.FileUtils;
 import com.base.entity.file.service.FileService;
 import com.base.entity.office.model.Office;
@@ -81,9 +82,13 @@ public class OfficeDTO {
         if (fileService == null) {
             return null;
         }
-        return fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file") != null
-                ? fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file").toString()
-                : null;
+        String profile = null;
+        try {
+            profile = fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file") != null
+                    ? fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), id).get("file").toString()
+                    : null;
+        } catch (NotFoundException ignored) {}
+        return profile;
     }
 
     public static String decorate(String hierarchy, String name) {
