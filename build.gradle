@@ -60,6 +60,16 @@ dependencyUpdates {
     reportfileName = "report"
 }
 
+compileJava {
+    def isDev = activeProfile in 'dev'
+    options.compilerArgs += [
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true',
+            '-Amapstruct.defaultComponentModel=spring',
+            '-Amapstruct.verbose=' + (isDev)
+    ]
+}
+
 static boolean isNonStable(String version) {
     def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
     def regex = /^[0-9,.v-]+(-r)?$/
