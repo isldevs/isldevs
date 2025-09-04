@@ -15,69 +15,20 @@
  */
 package com.base.core.authentication.role.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Set;
 
 /**
  * @author YISivlay
  */
+@Getter
+@Builder
 public class RoleDTO {
 
     private final Long id;
-
-    @NotBlank(message = "{role.name.required}")
-    @Size(min = 3, max = 50, message = "{role.name.size}")
     private final String name;
-
     private final Set<String> authorities;
 
-    public RoleDTO(Builder builder) {
-        this.id = builder.id;
-        this.name = builder.name;
-        this.authorities = builder.authorities;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private Long id;
-        private String name;
-        private Set<String> authorities;
-
-        public RoleDTO build() {
-            return new RoleDTO(this);
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder authorities(Set<String> authorities) {
-            this.authorities = authorities;
-            return this;
-        }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Set<String> getAuthorities() {
-        return authorities;
-    }
 }

@@ -18,6 +18,7 @@ package com.base.core.authentication.role.service;
 
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.role.dto.RoleDTO;
+import com.base.core.authentication.role.mapper.RoleMapper;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.role.validation.RoleDataValidator;
@@ -47,14 +48,17 @@ public class RoleServiceImpl implements RoleService {
     private final MessageSource messageSource;
     private final RoleRepository roleRepository;
     private final RoleDataValidator validator;
+    private final RoleMapper roleMapper;
 
     @Autowired
     public RoleServiceImpl(final MessageSource messageSource,
                            final RoleRepository roleRepository,
-                           final RoleDataValidator validator) {
+                           final RoleDataValidator validator,
+                           final RoleMapper roleMapper) {
         this.messageSource = messageSource;
         this.roleRepository = roleRepository;
         this.validator = validator;
+        this.roleMapper = roleMapper;
     }
 
     @Override
@@ -125,11 +129,7 @@ public class RoleServiceImpl implements RoleService {
         var role = this.roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
 
-        return RoleDTO.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .authorities(role.getAuthorities().stream().map(Authority::getAuthority).collect(Collectors.toSet()))
-                .build();
+        return roleMapper.toDTO(role);
     }
 
     @Override
@@ -146,8 +146,8 @@ public class RoleServiceImpl implements RoleService {
             return new PageImpl<>(allRoles.stream().map(this::convertToDTO).toList());
         }
         var pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-        var rolesPage = this.roleRepository.findAll(specification, pageable);
-        return rolesPage.map(this::convertToDTO);
+        var roles = this.roleRepository.findAll(specification, pageable);
+        return roleMapper.toDTOPage(roles);
     }
 
     private RoleDTO convertToDTO(Role role) {
