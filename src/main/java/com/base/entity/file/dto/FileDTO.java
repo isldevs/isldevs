@@ -16,124 +16,20 @@
 package com.base.entity.file.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
+
 /**
  * @author YISivlay
  */
-public class FileDTO {
-
-    private final Long id;
-    private final String entity;
-    private final Long entityId;
-    private final String name;
-    private final Long size;
-    private final String mimeType;
-    private final String location;
-    private final Integer storageType;
-    private final String url;
-
-    public FileDTO(Builder builder) {
-        this.id = builder.id;
-        this.entity = builder.entity;
-        this.entityId = builder.entityId;
-        this.name = builder.name;
-        this.size = builder.size;
-        this.mimeType = builder.mimeType;
-        this.location = builder.location;
-        this.storageType = builder.storageType;
-        this.url = builder.url;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private Long id;
-        private String entity;
-        private Long entityId;
-        private String name;
-        private Long size;
-        private String mimeType;
-        private String location;
-        private Integer storageType;
-        private String url;
-
-        public FileDTO build() {
-            return new FileDTO(this);
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-        public Builder entity(String entity) {
-            this.entity = entity;
-            return this;
-        }
-        public Builder entityId(Long entityId) {
-            this.entityId = entityId;
-            return this;
-        }
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-        public Builder size(Long size) {
-            this.size = size;
-            return this;
-        }
-        public Builder mimeType(String mimeType) {
-            this.mimeType = mimeType;
-            return this;
-        }
-        public Builder location(String location) {
-            this.location = location;
-            return this;
-        }
-        public Builder storageType(Integer storageType) {
-            this.storageType = storageType;
-            return this;
-        }
-        public Builder url(String url) {
-            this.url = url;
-            return this;
-        }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getEntity() {
-        return entity;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getSize() {
-        return size;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public Integer getStorageType() {
-        return storageType;
-    }
-}
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
+public record FileDTO(Long id,
+                      String entity,
+                      Long entityId,
+                      String name,
+                      Long size,
+                      String mimeType,
+                      String location,
+                      Integer storageType,
+                      String url) {}

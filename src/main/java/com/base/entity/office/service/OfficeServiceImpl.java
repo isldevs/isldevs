@@ -19,10 +19,9 @@ package com.base.entity.office.service;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
-import com.base.entity.file.repository.FileUtils;
-import com.base.entity.file.service.FileService;
 import com.base.entity.office.controller.OfficeConstants;
 import com.base.entity.office.dto.OfficeDTO;
+import com.base.entity.office.mapper.OfficeMapper;
 import com.base.entity.office.model.Office;
 import com.base.entity.office.repository.OfficeRepository;
 import com.base.entity.office.validation.OfficeDataValidation;
@@ -46,17 +45,17 @@ public class OfficeServiceImpl implements OfficeService {
     private final MessageSource messageSource;
     private final OfficeRepository repository;
     private final OfficeDataValidation validator;
-    private final FileService fileService;
+    private final OfficeMapper officeMapper;
 
     @Autowired
     public OfficeServiceImpl(final MessageSource messageSource,
                              final OfficeRepository repository,
                              final OfficeDataValidation validator,
-                             final FileService fileService) {
+                             final OfficeMapper officeMapper) {
         this.messageSource = messageSource;
         this.repository = repository;
         this.validator = validator;
-        this.fileService = fileService;
+        this.officeMapper = officeMapper;
     }
 
     @Override
@@ -136,7 +135,7 @@ public class OfficeServiceImpl implements OfficeService {
 
         var office = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
-        return OfficeDTO.toDTO(office, fileService);
+        return officeMapper.toDTOWithProfile(office);
     }
 
     @Override
@@ -156,12 +155,13 @@ public class OfficeServiceImpl implements OfficeService {
         var sort = Sort.by("hierarchy").ascending();
         if (page == null || size == null) {
             var allOffices = repository.findAll(specification, sort);
-            return new PageImpl<>(allOffices.stream().map(office -> OfficeDTO.toDTO(office, null)).toList());
+            List<OfficeDTO> dto = officeMapper.toDTOList(allOffices);
+            return new PageImpl<>(dto, Pageable.unpaged(), allOffices.size());
         }
 
         var pageable = PageRequest.of(page, size, sort);
         var officesPage = repository.findAll(specification, pageable);
-        return officesPage.map(office -> OfficeDTO.toDTO(office, null));
+        return officeMapper.toDTOPage(officesPage);
     }
 
 }
