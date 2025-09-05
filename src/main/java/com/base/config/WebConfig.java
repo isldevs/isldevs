@@ -216,27 +216,17 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Uploaded files
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:/opt/app/uploads/")
                 .setCachePeriod(3600)
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
-
-        // WebJars for frontend libraries
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")
                 .setCachePeriod(3600);
-
-        // Static resources
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(3600);
-
-        // Favicon
-        registry.addResourceHandler("/favicon.ico")
-                .addResourceLocations("classpath:/static/favicon.ico")
-                .setCachePeriod(86400); // 24 hours
     }
 
     /**
