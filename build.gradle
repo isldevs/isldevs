@@ -20,6 +20,30 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+graalvmNative {
+    binaries {
+        main {
+            imageName = "${project.name}"
+            mainClass = "com.base.ISLDevsApplication"
+            buildArgs.addAll([
+                    '--verbose',
+                    '--no-fallback',
+                    '--enable-url-protocols=http,https',
+                    '--initialize-at-build-time=org.springframework.util.unit.DataSize',
+                    '--report-unsupported-elements-at-runtime',
+                    '--allow-incomplete-classpath',
+                    '-H:+ReportExceptionStackTraces',
+                    '-H:+AddAllCharsets',
+                    '-H:EnableURLProtocols=http,https',
+                    '-H:NativeLinkerOption=-z',
+                    '-H:NativeLinkerOption=stack-size=2097152'
+            ])
+        }
+    }
+
+    toolchainDetection = false
+}
+
 repositories {
     mavenCentral()
     maven { url = 'https://repo.spring.io/milestone' }

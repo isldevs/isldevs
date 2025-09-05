@@ -3,6 +3,9 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         maven { url = 'https://repo.spring.io/milestone' }
+        maven {
+            url = uri("https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots")
+        }
     }
 
     plugins {
