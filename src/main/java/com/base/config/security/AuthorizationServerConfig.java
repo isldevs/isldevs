@@ -108,14 +108,6 @@ public class AuthorizationServerConfig {
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = this.userInfoService::loadUser;
         var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
         http
-                .securityMatcher(configurer.getEndpointsMatcher())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                .csrf(csrf -> csrf.ignoringRequestMatchers(
-                        "/api/v1/oauth2/token",
-                        "/api/v1/oauth2/device_authorization",
-                        "/api/v1/oauth2/token/introspect",
-                        "/api/v1/oauth2/token/revoke"
-                ))
                 .with(configurer, (authorizationServer) -> authorizationServer
                         .oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo.userInfoMapper(userInfoMapper)))
                         .clientAuthentication(Customizer.withDefaults())
@@ -142,7 +134,16 @@ public class AuthorizationServerConfig {
                                     providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService, tokenGenerator));
                                     providers.add(new OAuth2ClientCredentialsAuthenticationProvider(authorizationService, tokenGenerator));
                                 })
-                        ))
+                        ));
+
+        http.securityMatcher(configurer.getEndpointsMatcher())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(csrf -> csrf.ignoringRequestMatchers(
+                        "/api/v1/oauth2/token",
+                        "/api/v1/oauth2/device_authorization",
+                        "/api/v1/oauth2/token/introspect",
+                        "/api/v1/oauth2/token/revoke"
+                ))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/v1/oauth2/token",
@@ -190,9 +191,8 @@ public class AuthorizationServerConfig {
                         .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'"))
                         .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 )
-                .requiresChannel(channel -> channel
+                .redirectToHttps(redirectToHttp -> redirectToHttp
                         .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                        .requiresSecure()
                 );
 
         return http.build();

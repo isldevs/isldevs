@@ -140,7 +140,7 @@ public class OfficeServiceImpl implements OfficeService {
 
     @Override
     public Page<OfficeDTO> listOffices(Integer page, Integer size, String search) {
-        Specification<Office> specification = (root, _, sp) -> {
+        Specification<Office> specification = (root, query, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
                 var likeSearch = "%" + search.toLowerCase() + "%";

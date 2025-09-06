@@ -17,12 +17,15 @@ package com.base.config.security.service;
 
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -32,16 +35,18 @@ import java.util.List;
 public class JdbcClientRegistrationRepository implements ClientRegistrationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final RowMapper rowMapper;
 
-    public JdbcClientRegistrationRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcClientRegistrationRepository(JdbcTemplate jdbcTemplate, RowMapper rowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.rowMapper = rowMapper;
     }
 
     @Override
     public ClientRegistration findByRegistrationId(String registrationId) {
         List<ClientRegistration> list = jdbcTemplate.query(
                 "SELECT * FROM oauth2_client_registration WHERE registration_id = ?",
-                (rs, _) -> ClientRegistration.withRegistrationId(rs.getString("registration_id"))
+                (rs, rowMapper) -> ClientRegistration.withRegistrationId(rs.getString("registration_id"))
                         .clientId(rs.getString("client_id"))
                         .clientSecret(rs.getString("client_secret"))
                         .clientAuthenticationMethod(ClientAuthenticationMethod.valueOf(rs.getString("client_auth_method")))

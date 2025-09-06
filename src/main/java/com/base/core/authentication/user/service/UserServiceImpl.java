@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserDTO> listUsers(Integer page, Integer size, String search) {
-        Specification<User> specification = (root, _, sp) -> {
+        Specification<User> specification = (root, query, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isBlank()) {
                 predicates.add(sp.like(sp.lower(root.get("username")), "%" + search.toLowerCase() + "%"));

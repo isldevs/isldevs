@@ -44,7 +44,6 @@ public class ResourceServerConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
-    private final CustomOAuth2AccessTokenResponseClient accessTokenResponseClient;
     private final OAuth2UserServiceImpl oauth2UserService;
     private final OidcUserServiceImpl oidcUserService;
     private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
@@ -55,7 +54,6 @@ public class ResourceServerConfig {
                                 final CustomAuthenticationEntryPoint authenticationEntryPoint,
                                 final ClientRegistrationRepository clientRegistrationRepository,
                                 final OAuth2AuthorizedClientService oauth2AuthorizedClientService,
-                                final CustomOAuth2AccessTokenResponseClient accessTokenResponseClient,
                                 final OAuth2UserServiceImpl oauth2UserService,
                                 final OidcUserServiceImpl oidcUserService,
                                 final AuthenticationSuccessHandlerImpl authenticationSuccessHandler) {
@@ -64,7 +62,6 @@ public class ResourceServerConfig {
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
-        this.accessTokenResponseClient = accessTokenResponseClient;
         this.oauth2UserService = oauth2UserService;
         this.oidcUserService = oidcUserService;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
@@ -102,7 +99,6 @@ public class ResourceServerConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .clientRegistrationRepository(clientRegistrationRepository)
                         .authorizedClientService(oauth2AuthorizedClientService)
-                        .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenResponseClient(accessTokenResponseClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oauth2UserService)
                                 .oidcUserService(oidcUserService))

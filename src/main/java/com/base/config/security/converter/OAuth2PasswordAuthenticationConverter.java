@@ -35,7 +35,7 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
     @Override
     public Authentication convert(HttpServletRequest request) {
         var grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
-        if (!AuthorizationGrantType.PASSWORD.getValue().equals(grantType)) {
+        if (!new AuthorizationGrantType("password").getValue().equals(grantType)) {
             return null;
         }
 

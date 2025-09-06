@@ -38,7 +38,7 @@ public class DataInitializationConfig {
 
     @Bean
     public CommandLineRunner dataInitialization() {
-        return _ -> dataInitializationService.init();
+        return args -> dataInitializationService.init();
     }
 
 }

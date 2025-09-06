@@ -155,9 +155,12 @@ tasks.withType(JavaCompile).configureEach {
     options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US'])
     options.compilerArgs += [
             '-parameters',
-            '-Xlint:-unchecked',
-            '-Xlint:-deprecation',
-            '--enable-preview'
+            '-Xlint:unchecked',
+            '-Xlint:deprecation',
+            '-Xlint:preview',
+            '--enable-preview',
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.verbose=false'
     ]
 }
 

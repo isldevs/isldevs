@@ -101,10 +101,7 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer
-                .setPatternParser(new PathPatternParser())
-                .setUseTrailingSlashMatch(false)
-                .setUseRegisteredSuffixPatternMatch(true);
+        configurer.setPatternParser(new PathPatternParser());
     }
 
     /**

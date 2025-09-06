@@ -72,7 +72,7 @@ public class KeyConfiguration {
 
     @Bean
     ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairRepository repository) {
-        return _ -> {
+        return event -> {
             var existingKey = repository.findKeyPairs().stream()
                     .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
 

@@ -52,7 +52,7 @@ public class CommandTypeProvider implements ApplicationContextAware {
         if (registeredCommandTypes == null) {
             this.registeredCommandTypes = new HashMap<>();
             this.applicationContext.getBeansWithAnnotation(CommandType.class)
-                    .forEach((_, bean) -> {
+                    .forEach((context, bean) -> {
                         CommandType commandType = AopUtils.getTargetClass(bean).getAnnotation(CommandType.class);
                         this.registeredCommandTypes.put(commandType.action() + "|" + commandType.entity(), AopUtils.getTargetClass(bean).getName());
                         commandTypes.add(commandType.action() + "|" + commandType.entity());

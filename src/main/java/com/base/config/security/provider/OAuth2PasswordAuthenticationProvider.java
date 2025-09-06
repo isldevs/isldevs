@@ -75,7 +75,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         }
         var authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
                 .principalName(userAuthentication.getName())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .attribute(Principal.class.getName(), userAuthentication);
 
         Set<String> authorizedScopes = authRequest.getScopes();
@@ -89,7 +89,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                 .principal(userAuthentication)
                 .authorizedScopes(authorizedScopes)
                 .authorization(authorizationBuilder.build())
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .authorizationGrant(authRequest)
                 .tokenType(OAuth2TokenType.ACCESS_TOKEN)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
@@ -107,7 +107,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
                     .registeredClient(registeredClient)
                     .principal(userAuthentication)
                     .authorization(authorizationBuilder.build())
-                    .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                    .authorizationGrantType(new AuthorizationGrantType("password"))
                     .authorizationGrant(authRequest)
                     .tokenType(OAuth2TokenType.REFRESH_TOKEN)
                     .build();
