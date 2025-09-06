@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * @author YISivlay
@@ -47,6 +48,8 @@ public class ResourceServerConfig {
     private final OAuth2UserServiceImpl oauth2UserService;
     private final OidcUserServiceImpl oidcUserService;
     private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
+    private final CorsConfigurationSource corsConfigurationSource;
+    private final AccessTokenResponseClient accessTokenResponseClient;
 
     @Autowired
     public ResourceServerConfig(final JwtDecoder jwtDecoder,
@@ -56,7 +59,9 @@ public class ResourceServerConfig {
                                 final OAuth2AuthorizedClientService oauth2AuthorizedClientService,
                                 final OAuth2UserServiceImpl oauth2UserService,
                                 final OidcUserServiceImpl oidcUserService,
-                                final AuthenticationSuccessHandlerImpl authenticationSuccessHandler) {
+                                final AuthenticationSuccessHandlerImpl authenticationSuccessHandler,
+                                final CorsConfigurationSource corsConfigurationSource,
+                                final AccessTokenResponseClient accessTokenResponseClient) {
         this.jwtDecoder = jwtDecoder;
         this.sessionRegistry = sessionRegistry;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -65,6 +70,8 @@ public class ResourceServerConfig {
         this.oauth2UserService = oauth2UserService;
         this.oidcUserService = oidcUserService;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.accessTokenResponseClient = accessTokenResponseClient;
     }
 
     @Bean
@@ -83,9 +90,12 @@ public class ResourceServerConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.loginPage("/login")
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
                         .successHandler(authenticationSuccessHandler)
                         .permitAll()
                 )
@@ -99,6 +109,7 @@ public class ResourceServerConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .clientRegistrationRepository(clientRegistrationRepository)
                         .authorizedClientService(oauth2AuthorizedClientService)
+                        .tokenEndpoint(tokenEndpointConfig -> tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient))
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oauth2UserService)
                                 .oidcUserService(oidcUserService))

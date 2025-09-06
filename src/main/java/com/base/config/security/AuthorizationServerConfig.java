@@ -161,7 +161,9 @@ public class AuthorizationServerConfig {
                                 "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.loginPage("/login")
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
                         .successHandler(authenticationSuccessHandler)
                         .permitAll()
                 )
