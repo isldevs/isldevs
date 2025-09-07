@@ -91,7 +91,7 @@ public class RoleController {
                                        @RequestParam(required = false) String search,
                                        PagedResourcesAssembler<RoleDTO> pagination) {
         if (page == null || size == null) {
-            var roles = this.roleService.listRoles(null, null, search);
+            var roles = this.roleService.listRoles(null, null, search).getContent();
             return ResponseEntity.ok(roles);
         }
         var roles = this.roleService.listRoles(page, size, search);

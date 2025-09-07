@@ -93,7 +93,7 @@ public class OfficeController {
                                        @RequestParam(required = false) String search,
                                        PagedResourcesAssembler<OfficeDTO> pagination) {
         if (page == null || size == null) {
-            var offices = this.service.listOffices(null, null, search);
+            var offices = this.service.listOffices(null, null, search).getContent();
             return ResponseEntity.ok(offices);
         }
         var offices = this.service.listOffices(page, size, search);

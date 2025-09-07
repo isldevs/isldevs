@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.office.dto;
-
+package com.base.entity.location.province.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,35 +28,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OfficeDTO {
+public class ProvinceDTO {
 
     private Long id;
-    private OfficeDTO parent;
-    private String decorated;
+    private String type;
+    private String name;
+    @JsonProperty("postalCode")
+    private String postalCode;
 
-    @JsonProperty("nameEn")
-    private String nameEn;
 
-    @JsonProperty("nameKm")
-    private String nameKm;
-
-    @JsonProperty("nameZh")
-    private String nameZh;
-
-    @JsonProperty("hierarchyEn")
-    private String hierarchyEn;
-
-    @JsonProperty("hierarchyKm")
-    private String hierarchyKm;
-
-    @JsonProperty("hierarchyZh")
-    private String hierarchyZh;
-    private String profile;
-
-    public static String decorate(String hierarchy, String name) {
-        if (hierarchy == null || hierarchy.isEmpty() || name == null) return name;
-        var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
-        if (level <= 0) return name;
-        return ".".repeat(level * 4) + name;
-    }
 }
