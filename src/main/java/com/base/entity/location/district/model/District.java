@@ -18,6 +18,7 @@ package com.base.entity.location.district.model;
 
 import com.base.core.auditable.CustomAbstractAuditable;
 import com.base.core.command.data.JsonCommand;
+import com.base.entity.location.commune.model.Commune;
 import com.base.entity.location.district.controller.DistrictConstants;
 import com.base.entity.location.province.model.Province;
 import jakarta.persistence.*;
@@ -26,7 +27,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author YISivlay
@@ -53,17 +56,25 @@ public class District extends CustomAbstractAuditable {
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 
+    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Commune> communes = new HashSet<>();
+
     protected District() {
     }
 
     public District(final Province province,
                     final String type,
                     final String name,
-                    final String postalCode) {
+                    final String postalCode,
+                    final Set<Commune> communes) {
         this.province = province;
         this.type = type;
         this.name = name;
         this.postalCode = postalCode;
+        this.communes = communes;
+        if (this.communes != null && !this.communes.isEmpty()) {
+            this.communes.forEach(commune -> commune.setDistrict(this));
+        }
     }
 
 
@@ -72,12 +83,14 @@ public class District extends CustomAbstractAuditable {
         final var type = command.extractString(DistrictConstants.TYPE);
         final var name = command.extractString(DistrictConstants.NAME);
         final var postalCode = command.extractString(DistrictConstants.POSTAL_CODE);
+        final var communes = command.extractArrayAs(DistrictConstants.COMMUNE, Commune.class);
 
         return District.builder()
                 .province(province)
                 .name(name)
                 .postalCode(postalCode)
                 .type(type)
+                .communes(communes)
                 .build();
     }
 

@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.district.dto;
+package com.base.entity.location.commune.dto;
 
-import com.base.entity.location.commune.dto.CommuneDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * @author YISivlay
@@ -31,15 +28,14 @@ import java.util.List;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DistrictDTO {
+public class CommuneDTO {
 
     private Long id;
-    private Long provinceId;
+    private Long districtId;
     private String type;
     private String name;
     @JsonProperty("postalCode")
     private String postalCode;
-    private List<CommuneDTO> communes;
 
 
 }

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS oauth2_authorization
+CREATE TABLE oauth2_authorization
 (
     id                            varchar(100) NOT NULL,
     registered_client_id          varchar(100) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS oauth2_authorization
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS oauth2_registered_client
+CREATE TABLE oauth2_registered_client
 (
     id                            varchar(100)                            NOT NULL,
     client_id                     varchar(100)                            NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS oauth2_registered_client
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS oauth2_authorization_consent
+CREATE TABLE oauth2_authorization_consent
 (
     registered_client_id varchar(100)  NOT NULL,
     principal_name       varchar(200)  NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS oauth2_authorization_consent
     PRIMARY KEY (registered_client_id, principal_name)
 );
 
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE users
 (
     id                         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username                   VARCHAR(50)  NOT NULL UNIQUE,
@@ -75,26 +75,26 @@ CREATE TABLE IF NOT EXISTS users
     is_credentials_non_expired boolean      NOT NULL DEFAULT true
 );
 
-CREATE TABLE IF NOT EXISTS roles
+CREATE TABLE roles
 (
     id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS authorities
+CREATE TABLE authorities
 (
     id        BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     authority VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_roles
+CREATE TABLE user_roles
 (
     user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     role_id BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, role_id)
 );
 
-CREATE TABLE IF NOT EXISTS role_authorities
+CREATE TABLE role_authorities
 (
     role_id      BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
     authority_id BIGINT NOT NULL REFERENCES authorities (id) ON DELETE CASCADE,

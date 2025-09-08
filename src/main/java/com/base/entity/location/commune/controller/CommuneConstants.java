@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.district.controller;
+package com.base.entity.location.commune.controller;
 
 
 import java.util.Arrays;
@@ -23,17 +23,16 @@ import java.util.HashSet;
 /**
  * @author YISivlay
  */
-public class DistrictConstants {
+public class CommuneConstants {
 
-    public static final String PERMISSION = "DISTRICT";
-    public static final String API_PATH = "/districts";
+    public static final String PERMISSION = "COMMUNE";
+    public static final String API_PATH = "/communes";
 
     public static final String ID = "id";
-    public static final String PROVINCE = "provinceId";
+    public static final String DISTRICT = "districtId";
     public static final String TYPE = "type";
     public static final String NAME = "name";
     public static final String POSTAL_CODE = "postalCode";
-    public static final String COMMUNE = "communes";
 
-    public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ID, PROVINCE, COMMUNE, TYPE, NAME, POSTAL_CODE));
+    public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ID, DISTRICT, TYPE, NAME, POSTAL_CODE));
 }

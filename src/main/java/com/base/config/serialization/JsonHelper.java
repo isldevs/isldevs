@@ -81,11 +81,11 @@ public class JsonHelper {
         if (!unsupportedParameterList.isEmpty()) {
             String message = messageSource.getMessage(
                     "validation.unsupported.parameters",
-                    new Object[]{String.join(", ", unsupportedParameterList)},
+                    unsupportedParameterList.toArray(),
                     "Unsupported parameters: " + String.join(", ", unsupportedParameterList),
                     locale
             );
-            throw new ErrorException(message);
+            throw new ErrorException(message, unsupportedParameterList.toArray());
         }
     }
 

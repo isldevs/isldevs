@@ -42,12 +42,12 @@ public class DistrictDataValidation {
 
     public void create(String json) {
 
-        final var typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, DistrictConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
-        final var province = this.jsonHelper.extractString(DistrictConstants.PROVINCE, jsonElement);
+        final var province = this.jsonHelper.extractLong(DistrictConstants.PROVINCE, jsonElement);
         validator.parameter(DistrictConstants.PROVINCE, province).isNumber().notNull().maxLength(20);
 
         final var type = this.jsonHelper.extractString(DistrictConstants.TYPE, jsonElement);
@@ -58,16 +58,21 @@ public class DistrictDataValidation {
 
         final var postalCode = this.jsonHelper.extractString(DistrictConstants.POSTAL_CODE, jsonElement);
         validator.parameter(DistrictConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
+
+        if (this.jsonHelper.parameterExists(DistrictConstants.COMMUNE, jsonElement)) {
+            final var communes = this.jsonHelper.extractArrayAsObject(DistrictConstants.COMMUNE, jsonElement);
+            validator.parameter(DistrictConstants.COMMUNE, communes).notEmptyCollection();
+        }
     }
 
     public void update(String json) {
-        final var typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, DistrictConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
         if (this.jsonHelper.parameterExists(DistrictConstants.PROVINCE, jsonElement)) {
-            final var province = this.jsonHelper.extractString(DistrictConstants.PROVINCE, jsonElement);
+            final var province = this.jsonHelper.extractLong(DistrictConstants.PROVINCE, jsonElement);
             validator.parameter(DistrictConstants.PROVINCE, province).isNumber().notNull().maxLength(20);
         }
         if (this.jsonHelper.parameterExists(DistrictConstants.TYPE, jsonElement)) {

@@ -19,7 +19,6 @@ package com.base.entity.location.province.service;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
-import com.base.entity.location.province.controller.ProvinceConstants;
 import com.base.entity.location.province.dto.ProvinceDTO;
 import com.base.entity.location.province.mapper.ProvinceMapper;
 import com.base.entity.location.province.model.Province;

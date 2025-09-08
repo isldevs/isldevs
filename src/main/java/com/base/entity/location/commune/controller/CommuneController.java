@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.district.controller;
+package com.base.entity.location.commune.controller;
 
 
 import com.base.core.command.service.LogService;
 import com.base.core.serializer.JsonSerializerImpl;
-import com.base.entity.location.district.dto.DistrictDTO;
-import com.base.entity.location.district.handler.DistrictCommandHandler;
-import com.base.entity.location.district.service.DistrictService;
+import com.base.entity.location.commune.dto.CommuneDTO;
+import com.base.entity.location.commune.handler.CommuneCommandHandler;
+import com.base.entity.location.commune.service.CommuneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.MediaType;
@@ -33,25 +33,25 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * @author YISivlay
  */
 @RestController
-@RequestMapping(DistrictConstants.API_PATH)
-public class DistrictController {
+@RequestMapping(CommuneConstants.API_PATH)
+public class CommuneController {
 
-    private final JsonSerializerImpl<DistrictDTO> serializer;
-    private final DistrictService service;
+    private final JsonSerializerImpl<CommuneDTO> serializer;
+    private final CommuneService service;
     private final LogService logService;
 
     @Autowired
-    public DistrictController(final JsonSerializerImpl<DistrictDTO> serializer,
-                              final DistrictService service,
-                              final LogService logService) {
+    public CommuneController(final JsonSerializerImpl<CommuneDTO> serializer,
+                             final CommuneService service,
+                             final LogService logService) {
         this.serializer = serializer;
         this.service = service;
         this.logService = logService;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createDistrict(@RequestBody String json) {
-        final var command = new DistrictCommandHandler()
+    public String createCommune(@RequestBody String json) {
+        final var command = new CommuneCommandHandler()
                 .create()
                 .json(json)
                 .build();
@@ -60,8 +60,8 @@ public class DistrictController {
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateDistrict(@RequestBody String json, @PathVariable Long id) {
-        final var command = new DistrictCommandHandler()
+    public String updateCommune(@RequestBody String json, @PathVariable Long id) {
+        final var command = new CommuneCommandHandler()
                 .update(id)
                 .json(json)
                 .build();
@@ -70,8 +70,8 @@ public class DistrictController {
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public String deleteDistrict(@PathVariable Long id) {
-        final var command = new DistrictCommandHandler()
+    public String deleteCommune(@PathVariable Long id) {
+        final var command = new CommuneCommandHandler()
                 .delete(id)
                 .build();
         final var data = this.logService.log(command);
@@ -79,22 +79,22 @@ public class DistrictController {
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getDistrict(@PathVariable Long id) {
-        var data = this.service.getDistrictById(id);
+    public String getCommune(@PathVariable Long id) {
+        var data = this.service.getCommuneById(id);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> listDistricts(@RequestParam(required = false) Integer page,
+    public ResponseEntity<?> listCommunes(@RequestParam(required = false) Integer page,
                                          @RequestParam(required = false) Integer size,
                                          @RequestParam(required = false) String search,
-                                         PagedResourcesAssembler<DistrictDTO> pagination) {
+                                         PagedResourcesAssembler<CommuneDTO> pagination) {
         if (page == null || size == null) {
-            var districts = this.service.listDistricts(null, null, search).getContent();
-            return ResponseEntity.ok(districts);
+            var communes = this.service.listCommunes(null, null, search).getContent();
+            return ResponseEntity.ok(communes);
         }
-        var districts = this.service.listDistricts(page, size, search);
-        return ResponseEntity.ok(pagination.toModel(districts));
+        var communes = this.service.listCommunes(page, size, search);
+        return ResponseEntity.ok(pagination.toModel(communes));
     }
 
 }

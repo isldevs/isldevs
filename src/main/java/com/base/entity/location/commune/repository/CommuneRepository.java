@@ -13,33 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.district.dto;
+package com.base.entity.location.commune.repository;
 
-import com.base.entity.location.commune.dto.CommuneDTO;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.util.List;
+import com.base.entity.location.commune.model.Commune;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author YISivlay
  */
-@Builder
-@Getter
-@Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class DistrictDTO {
-
-    private Long id;
-    private Long provinceId;
-    private String type;
-    private String name;
-    @JsonProperty("postalCode")
-    private String postalCode;
-    private List<CommuneDTO> communes;
-
+@Repository
+public interface CommuneRepository extends JpaRepository<Commune, Long>, JpaSpecificationExecutor<Commune> {
 
 }

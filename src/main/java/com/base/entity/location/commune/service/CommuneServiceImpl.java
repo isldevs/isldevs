@@ -13,34 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.district.service;
+package com.base.entity.location.commune.service;
 
 
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
+import com.base.entity.location.commune.controller.CommuneConstants;
 import com.base.entity.location.commune.dto.CommuneDTO;
 import com.base.entity.location.commune.model.Commune;
-import com.base.entity.location.district.controller.DistrictConstants;
-import com.base.entity.location.district.dto.DistrictDTO;
+import com.base.entity.location.commune.repository.CommuneRepository;
+import com.base.entity.location.commune.validation.CommuneDataValidation;
 import com.base.entity.location.district.model.District;
 import com.base.entity.location.district.repository.DistrictRepository;
-import com.base.entity.location.district.validation.DistrictDataValidation;
-import com.base.entity.location.province.model.Province;
-import com.base.entity.location.province.repository.ProvinceRepository;
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -49,37 +48,37 @@ import java.util.stream.IntStream;
  * @author YISivlay
  */
 @Service
-public class DistrictServiceImpl implements DistrictService {
+public class CommuneServiceImpl implements CommuneService {
 
     private final MessageSource messageSource;
     private final JdbcTemplate jdbcTemplate;
-    private final DistrictRepository repository;
-    private final DistrictDataValidation validation;
-    private final ProvinceRepository provinceRepository;
+    private final CommuneRepository repository;
+    private final CommuneDataValidation validation;
+    private final DistrictRepository districtRepository;
 
     @Autowired
-    public DistrictServiceImpl(final MessageSource messageSource,
-                               final JdbcTemplate jdbcTemplate,
-                               final DistrictRepository repository,
-                               final DistrictDataValidation validation,
-                               final ProvinceRepository provinceRepository) {
+    public CommuneServiceImpl(final MessageSource messageSource,
+                              final JdbcTemplate jdbcTemplate,
+                              final CommuneRepository repository,
+                              final CommuneDataValidation validation,
+                              final DistrictRepository districtRepository) {
         this.messageSource = messageSource;
         this.jdbcTemplate = jdbcTemplate;
         this.repository = repository;
         this.validation = validation;
-        this.provinceRepository = provinceRepository;
+        this.districtRepository = districtRepository;
     }
 
 
     @Override
-    public Map<String, Object> createDistrict(JsonCommand command) {
+    public Map<String, Object> createCommune(JsonCommand command) {
         this.validation.create(command.getJson());
 
-        final Long provinceId = command.extractLong(DistrictConstants.PROVINCE);
-        final Province province = this.provinceRepository.findById(provinceId)
-                .orElseThrow(() -> new NotFoundException("msg.not.found", provinceId));
+        final Long districtId = command.extractLong(CommuneConstants.DISTRICT);
+        final District district = this.districtRepository.findById(districtId)
+                .orElseThrow(() -> new NotFoundException(CommuneConstants.DISTRICT));
 
-        final var data = District.fromJson(province, command);
+        final var data = Commune.fromJson(district, command);
 
         this.repository.save(data);
         return LogData.builder()
@@ -89,7 +88,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    public Map<String, Object> updateDistrict(Long id, JsonCommand command) {
+    public Map<String, Object> updateCommune(Long id, JsonCommand command) {
         var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
@@ -108,7 +107,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    public Map<String, Object> deleteDistrict(Long id) {
+    public Map<String, Object> deleteCommune(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
         this.repository.delete(data);
@@ -120,29 +119,10 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    public DistrictDTO getDistrictById(Long id) {
+    public CommuneDTO getCommuneById(Long id) {
         try {
-            return jdbcTemplate.queryForObject("""
-                            SELECT d.id,
-                                                 d.province_id,
-                                                 d.name,
-                                                 d.type,
-                                                 d.postal_code,
-                                                 COALESCE(
-                                                                 json_agg(
-                                                                 json_build_object(
-                                                                         'id', c.id,
-                                                                         'name', c.name,
-                                                                         'type', c.type,
-                                                                         'postalCode', c.postal_code
-                                                                 )
-                                                                         ) FILTER (WHERE c.id IS NOT NULL), '[]'
-                                                 ) AS communes
-                                          FROM district d
-                                                   LEFT JOIN commune c ON d.id = c.district_id
-                                          WHERE d.id = ?
-                                          GROUP BY d.id, d.name, d.type, d.postal_code;
-                            """,
+            return jdbcTemplate.queryForObject(
+                    "SELECT * FROM commune WHERE id = ?",
                     this::mapRow, id
             );
         } catch (EmptyResultDataAccessException e) {
@@ -151,14 +131,14 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    public Page<DistrictDTO> listDistricts(Integer page, Integer size, String search) {
+    public Page<CommuneDTO> listCommunes(Integer page, Integer size, String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""
-                    SELECT d.id, d.province_id, d.type, d.name, d.postal_code,
-                        p.name as province_name, p.type as province_type, p.postal_code as province_postal_code
+                    SELECT c.id, c.district_id, c.type, c.name, c.postal_code,
+                        d.name as district_name, d.type as district_type, d.postal_code as district_postal_code
                     """);
 
-            StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM district d ");
+            StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM commune c ");
 
             List<Object> params = new ArrayList<>();
             List<Object> countParams = new ArrayList<>();
@@ -166,13 +146,13 @@ public class DistrictServiceImpl implements DistrictService {
             if (search != null && !search.isEmpty()) {
                 sqlBuilder.append("""
                         , GREATEST(s.name_sim, s.type_sim, s.postal_sim) AS max_similarity
-                        FROM district d
-                        LEFT JOIN province p ON d.province_id = p.id
+                        FROM commune c
+                        LEFT JOIN district d ON c.district_id = d.id
                         CROSS JOIN LATERAL (
                             SELECT
-                                similarity(?, d.name) as name_sim,
-                                similarity(?, d.type) as type_sim,
-                                similarity(?, d.postal_code) as postal_sim
+                                similarity(?, c.name) as name_sim,
+                                similarity(?, c.type) as type_sim,
+                                similarity(?, c.postal_code) as postal_sim
                         ) s
                         WHERE s.name_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
                         ORDER BY max_similarity DESC
@@ -181,9 +161,9 @@ public class DistrictServiceImpl implements DistrictService {
                 countSqlBuilder.append("""
                         CROSS JOIN LATERAL (
                             SELECT
-                                similarity(?, d.name) as name_sim,
-                                similarity(?, d.type) as type_sim,
-                                similarity(?, d.postal_code) as postal_sim
+                                similarity(?, c.name) as name_sim,
+                                similarity(?, c.type) as type_sim,
+                                similarity(?, c.postal_code) as postal_sim
                         ) s
                         WHERE s.name_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
                         """);
@@ -200,9 +180,9 @@ public class DistrictServiceImpl implements DistrictService {
 
             } else {
                 sqlBuilder.append("""
-                        FROM district d
-                        LEFT JOIN province p ON d.province_id = p.id
-                        ORDER BY d.name ASC
+                        FROM commune c
+                        LEFT JOIN district d ON c.district_id = d.id
+                        ORDER BY c.name ASC
                         """);
 
                 countSqlBuilder.append(" WHERE 1=1");
@@ -216,13 +196,13 @@ public class DistrictServiceImpl implements DistrictService {
                 params.add(size);
                 params.add(page * size);
 
-                List<DistrictDTO> content = jdbcTemplate.query(paginatedSql, this::mapRow, params.toArray());
+                List<CommuneDTO> content = jdbcTemplate.query(paginatedSql, this::mapRow, params.toArray());
                 Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
 
                 Pageable pageable = PageRequest.of(page, size);
                 return new PageImpl<>(content, pageable, total != null ? total : 0);
             } else {
-                List<DistrictDTO> content = jdbcTemplate.query(sql, this::mapRow, params.toArray());
+                List<CommuneDTO> content = jdbcTemplate.query(sql, this::mapRow, params.toArray());
                 Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
 
                 return new PageImpl<>(content, Pageable.unpaged(), total != null ? total : 0);
@@ -233,27 +213,13 @@ public class DistrictServiceImpl implements DistrictService {
         }
     }
 
-    private DistrictDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-        final Long id = rs.getLong("id");
-        final Long provinceId = rs.getLong("province_id");
-        final String name = rs.getString("name");
-        final String type = rs.getString("type");
-        final String postalCode = rs.getString("postal_code");
-        List<CommuneDTO> communes = null;
-        try {
-           communes = fromJsonAsList(rs.getString("communes"), CommuneDTO[].class);
-        } catch (SQLException ignored) {};
-        return DistrictDTO.builder()
-                .id(id)
-                .provinceId(provinceId)
-                .type(type)
-                .name(name)
-                .postalCode(postalCode)
-                .communes(communes)
+    private CommuneDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return CommuneDTO.builder()
+                .id(rs.getLong("id"))
+                .districtId(rs.getLong("district_id"))
+                .name(rs.getString("name"))
+                .type(rs.getString("type"))
+                .postalCode(rs.getString("postal_code"))
                 .build();
-    }
-
-    public static <T> List<T> fromJsonAsList(String json, Class<T[]> className) {
-        return json != null ? Arrays.asList(new Gson().fromJson(json, className)) : new ArrayList<>();
     }
 }
