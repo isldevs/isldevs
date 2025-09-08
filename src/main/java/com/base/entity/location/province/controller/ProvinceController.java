@@ -22,6 +22,9 @@ import com.base.entity.location.province.dto.ProvinceDTO;
 import com.base.entity.location.province.handler.ProvinceCommandHandler;
 import com.base.entity.location.province.service.ProvinceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +63,7 @@ public class ProvinceController {
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @CacheEvict(value = "provinces", key = "#id")
     public String updateProvince(@RequestBody String json, @PathVariable Long id) {
         final var command = new ProvinceCommandHandler()
                 .update(id)
@@ -70,6 +74,7 @@ public class ProvinceController {
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @CacheEvict(value = "provinces", key = "#id")
     public String deleteProvince(@PathVariable Long id) {
         final var command = new ProvinceCommandHandler()
                 .delete(id)
@@ -79,6 +84,7 @@ public class ProvinceController {
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Cacheable(value = "provinces", key = "#id")
     public String getProvince(@PathVariable Long id) {
         var data = this.service.getProvinceById(id);
         return this.serializer.serialize(data);
