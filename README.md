@@ -1,7 +1,13 @@
 # iSLDevs
-A Spring Boot 3.x project that implements a robust and flexible secure OAuth2 Authorization Server 
-using Spring Authorization Server 1.5.x with support for multiple grant types, 
-JWT tokens, and database-backed client/user storage.
+iSLDevs is an all-in-one developer toolset focused on building secure, 
+scalable applications with advanced authentication, user, and location management features. 
+It provides a flexible OAuth2 Authorization Server supporting multiple grant types and social login integrations, backed by JWT and RSA cryptography for robust security. 
+Its extensive configuration options streamline build automation, security, scheduling, caching, and internationalization, 
+enabling developers to accelerate development while maintaining high standards of security and maintainability.
+
+## Why iSLDevs?
+This project aims to simplify complex security and data management tasks for developers. 
+The core features include:
 
 ### 🚀 Features
 - OAuth2 Authorization Server (Spring Authorization Server 1.5.x)
@@ -15,20 +21,60 @@ JWT tokens, and database-backed client/user storage.
 - Token customization (JWT with claims)
 - Postman-ready endpoints for testing
 
-## 🌐 OAuth2 Client (Social Login)
-- Login with GitHub
-- Login with Google
-- Login with Facebook
-- Centralized user principal mapping (convert external providers to internal user model)
+### 🌐 OAuth2 Client (Social Login)
+- Login with GitHub, Google, Facebook, and centralized user principal mapping (convert external providers to internal user model)
 - Automatic token exchange and persistence with Spring Security
 
-### ⚙️ Requirement
+## ⚙️ Requirement
 - Java 17+
 - Spring Boot 3.5.x
 - Spring Authorization Server 1.5.x
 - PostgreSQL/MySQL (pluggable via JDBC)
 - Tomcat 10.1.x (embedded with Spring Boot 3.5.x)
 - Gradle build system
+
+## ⚙️ Installing
+Build isldevs from the source and install dependencies:
+1. **Clone the repository:**
+> git clone https://github.com/isldevs/isldevs
+
+2. **Navigate to the project directory:**
+> cd isldevs
+
+3. **Install the dependencies:**
+```
+./gradlew dependencies --refresh-dependencies
+```
+4. **Setup datasource connection**:
+
+    This project demonstrates how to configure PostgreSQL
+    in Spring Boot 3.5.1 using environment variables instead of property files,
+    following security best practices.
+
+- Required Environment Variables
+
+| Variable          | Example Value                          | Description       |
+|-------------------|----------------------------------------|-------------------|
+| `DB_URL`          | `jdbc:{youurl}://localhost:{port}}/db` | JDBC URL          |
+| `DB_USERNAME`     | `youruser`                             | Username          |
+| `DB_PASSWORD`     | `yourpass`                             | Password          |
+| `DB_DRIVER_CLASS` | `yourdriverclassname`                  | Driver class name |
+
+- Optional Configuration
+
+| Variable                       | Default        | Description                                               |
+|--------------------------------|----------------|-----------------------------------------------------------|
+| `DB_POOL_MAX_SIZE`             | 10             | Maximum connection pool size                              |
+| `DB_POOL_MIN_IDLE`             | 5              | Minimum idle connections                                  |
+| `DB_CONNECTION_TIMEOUT`        | 5000 (ms)      | Fail fast in production (5s)                              |
+| `DB_IDLE_TIMEOUT `             | 120000 (ms)    | Reclaim unused connections faster (2m)                    |
+| `DB_MAX_LIFETIME `             | 1800000 (ms)   | Prevent stale connections (30m)                           |
+| `DB_LEAK_DETECTION_THRESHOLD ` | 60000 (ms)     | Lead to resource exhaustion and application crashes (60s) |
+
+5. Run project
+```
+./gradlew bootRun -Pspring.profiles.active=dev
+```
 
 ## Tomcat SSL Config Guide
 ### Overview
@@ -54,31 +100,6 @@ Check supported protocols (should only show TLS 1.2/1.3)
 ```bash
 nmap --script ssl-enum-ciphers -p 8443 localhost
 ```
-
-## Database Config
-This project demonstrates how to configure PostgreSQL 
-in Spring Boot 3.5.1 using environment variables instead of property files, 
-following security best practices.
-
-### Required Environment Variables
-
-| Variable          | Example Value                          | Description       |
-|-------------------|----------------------------------------|-------------------|
-| `DB_URL`          | `jdbc:{youurl}://localhost:{port}}/db` | JDBC URL          |
-| `DB_USERNAME`     | `youruser`                             | Username          |
-| `DB_PASSWORD`     | `yourpass`                             | Password          |
-| `DB_DRIVER_CLASS` | `yourdriverclassname`                  | Driver class name |
-
-### Optional Configuration
-
-| Variable                       | Default        | Description                                               |
-|--------------------------------|----------------|-----------------------------------------------------------|
-| `DB_POOL_MAX_SIZE`             | 10             | Maximum connection pool size                              |
-| `DB_POOL_MIN_IDLE`             | 5              | Minimum idle connections                                  |
-| `DB_CONNECTION_TIMEOUT`        | 5000 (ms)      | Fail fast in production (5s)                              |
-| `DB_IDLE_TIMEOUT `             | 120000 (ms)    | Reclaim unused connections faster (2m)                    |
-| `DB_MAX_LIFETIME `             | 1800000 (ms)   | Prevent stale connections (30m)                           |
-| `DB_LEAK_DETECTION_THRESHOLD ` | 60000 (ms)     | Lead to resource exhaustion and application crashes (60s) |
 
 ## Setup Guide
 ### Local Development
