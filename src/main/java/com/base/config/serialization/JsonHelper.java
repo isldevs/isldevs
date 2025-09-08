@@ -17,9 +17,7 @@ package com.base.config.serialization;
 
 
 import com.base.core.exception.ErrorException;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -109,6 +107,37 @@ public class JsonHelper {
     }
 
     /**
+     * Extract a Set<Long> by field name from JsonElement
+     */
+    public Set<Long> extractArrayAsLong(final String fieldName, final JsonElement element) {
+        if (element == null || element.getAsJsonObject().get(fieldName) == null || element.getAsJsonObject().get(fieldName).isJsonNull()) {
+            return Collections.emptySet();
+        }
+
+        JsonElement valueElement = element.getAsJsonObject().get(fieldName);
+
+        if (!valueElement.isJsonArray()) {
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be an array of numbers", fieldName);
+        }
+
+        Set<Long> result = new HashSet<>();
+        JsonArray array = valueElement.getAsJsonArray();
+
+        for (JsonElement item : array) {
+            if (!item.isJsonPrimitive() || !item.getAsJsonPrimitive().isNumber()) {
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "All elements of array must be numbers", fieldName);
+            }
+            try {
+                result.add(item.getAsLong());
+            } catch (NumberFormatException ex) {
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Invalid number format in array", fieldName);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Extract a Long value by field name from JsonElement
      */
     public Long extractLong(final String fieldName, final JsonElement element) {
@@ -178,4 +207,33 @@ public class JsonHelper {
                 && element.getAsJsonObject().has(fieldName)
                 && !element.getAsJsonObject().get(fieldName).isJsonNull();
     }
+
+    /**
+     * Extract a List<JsonObject> by field name from JsonElement
+     */
+    public List<JsonObject> extractArrayAsObject(final String fieldName, final JsonElement element) {
+        if (element == null || element.getAsJsonObject().get(fieldName) == null
+                || element.getAsJsonObject().get(fieldName).isJsonNull()) {
+            return Collections.emptyList();
+        }
+
+        JsonElement valueElement = element.getAsJsonObject().get(fieldName);
+
+        if (!valueElement.isJsonArray()) {
+            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be an array of objects", fieldName);
+        }
+
+        List<JsonObject> result = new ArrayList<>();
+        JsonArray array = valueElement.getAsJsonArray();
+
+        for (JsonElement item : array) {
+            if (!item.isJsonObject()) {
+                throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "All elements of array must be objects", fieldName);
+            }
+            result.add(item.getAsJsonObject());
+        }
+
+        return result;
+    }
+
 }

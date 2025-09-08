@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.entity.location.province.dto;
+package com.base.entity.location.district.dto;
 
-import com.base.entity.location.district.dto.DistrictDTO;
-import com.base.entity.location.district.model.District;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 
 /**
  * @author YISivlay
@@ -32,14 +28,14 @@ import java.util.Set;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProvinceDTO {
+public class DistrictDTO {
 
     private Long id;
+    private Long provinceId;
     private String type;
     private String name;
     @JsonProperty("postalCode")
     private String postalCode;
-    private Set<DistrictDTO> districts;
 
 
 }

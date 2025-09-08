@@ -16,6 +16,7 @@
 package com.base.core.command.data;
 
 import com.base.core.serializer.JsonDelegator;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -169,18 +170,23 @@ public final class JsonCommand {
             if (object.has(parameter) && object.get(parameter).isJsonArray()) {
                 var array = object.get(parameter).getAsJsonArray();
                 for (JsonElement element : array) {
+                    T value = null;
                     if (element.isJsonPrimitive()) {
                         var primitive = element.getAsJsonPrimitive();
-                        var value = convertPrimitiveToType(primitive, type);
-                        if (value != null) {
-                            result.add(value);
-                        }
+                        value = convertPrimitiveToType(primitive, type);
+                    } else if (element.isJsonObject()) {
+                        value = new Gson().fromJson(element, type);
+                    }
+
+                    if (value != null) {
+                        result.add(value);
                     }
                 }
             }
         }
         return result;
     }
+
 
     public boolean isChangeAsString(String parameter, String existing) {
         if (this.jsonDelegator.hasParameter(this.json, parameter)) {

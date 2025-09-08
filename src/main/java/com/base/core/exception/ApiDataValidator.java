@@ -114,6 +114,33 @@ public class ApiDataValidator {
         }
 
         /**
+         * Check if value is an Array of Numbers
+         */
+        public Validator isArrayOfNumber() {
+            if (value != null) {
+                if (value instanceof Collection<?>) {
+                    for (Object item : (Collection<?>) value) {
+                        if (!(item instanceof Number)) {
+                            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "All elements of param must be numbers", param);
+                        }
+                    }
+                } else if (value.getClass().isArray()) {
+                    int length = java.lang.reflect.Array.getLength(value);
+                    for (int i = 0; i < length; i++) {
+                        Object item = java.lang.reflect.Array.get(value, i);
+                        if (!(item instanceof Number)) {
+                            throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "All elements of param must be numbers", param);
+                        }
+                    }
+                } else {
+                    throw new ErrorException(HttpStatus.BAD_REQUEST, "msg.internal.error", "Value of param must be an array of numbers", param);
+                }
+            }
+            return this;
+        }
+
+
+        /**
          * Check if value is a positive Number
          */
         public Validator isPositive() {

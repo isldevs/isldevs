@@ -18,27 +18,25 @@ package com.base.entity.location.province.model;
 
 import com.base.core.auditable.CustomAbstractAuditable;
 import com.base.core.command.data.JsonCommand;
+import com.base.entity.location.district.model.District;
 import com.base.entity.location.province.controller.ProvinceConstants;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import lombok.Builder;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author YISivlay
  */
-@Builder
 @Getter
 @Setter
 @Entity
 @Table(name = "province", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"postal_code"})
+        @UniqueConstraint(columnNames = {"postal_code"}, name = "idx_province_postal_code_key")
 })
 public class Province extends CustomAbstractAuditable {
 
@@ -51,29 +49,33 @@ public class Province extends CustomAbstractAuditable {
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 
+    @OneToMany(mappedBy = "province", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<District> districts = new HashSet<>();
+
     protected Province() {
     }
 
     public Province(final String type,
                     final String name,
-                    final String postalCode) {
+                    final String postalCode,
+                    final Set<District> districts) {
         this.type = type;
         this.name = name;
         this.postalCode = postalCode;
+        this.districts = districts;
+        if (this.districts != null && !this.districts.isEmpty()) {
+            this.districts.forEach(district -> district.setProvince(this));
+        }
     }
-
 
     public static Province fromJson(JsonCommand command) {
 
         final var type = command.extractString(ProvinceConstants.TYPE);
         final var name = command.extractString(ProvinceConstants.NAME);
         final var postalCode = command.extractString(ProvinceConstants.POSTAL_CODE);
+        final Set<District> districts = command.extractArrayAs(ProvinceConstants.DISTRICT, District.class);
 
-        return Province.builder()
-                .name(name)
-                .postalCode(postalCode)
-                .type(type)
-                .build();
+        return new Province(type, name, postalCode, districts);
     }
 
     public Map<String, Object> changed(JsonCommand command) {
