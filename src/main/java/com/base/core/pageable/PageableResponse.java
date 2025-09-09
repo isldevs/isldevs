@@ -36,6 +36,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PageableResponse<T> {
 
@@ -77,11 +78,12 @@ public class PageableResponse<T> {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class PageMetadata {
 
         private Integer size;
+        @JsonProperty("totalElements")
         private Long totalElements;
+        @JsonProperty("totalPages")
         private Integer totalPages;
         private Integer number;
 
