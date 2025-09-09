@@ -442,21 +442,6 @@ public class SecurityConfig {
         return validator;
     }
 
-    @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        return JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .addModule(new Jdk8Module())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
-                .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-                .enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
-                .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                .build();
-    }
-
     abstract static class ImmutableCollections {
     }
 }
