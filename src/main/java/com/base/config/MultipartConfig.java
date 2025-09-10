@@ -16,7 +16,7 @@
 package com.base.config;
 
 
-import com.base.entity.file.controller.FileConstants;
+import com.base.portfolio.file.controller.FileConstants;
 import jakarta.servlet.MultipartConfigElement;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;

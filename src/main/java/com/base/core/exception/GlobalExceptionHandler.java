@@ -18,7 +18,7 @@ package com.base.core.exception;
 
 import com.base.config.security.service.SecurityContext;
 import com.base.core.data.ErrorData;
-import com.base.entity.file.controller.FileConstants;
+import com.base.portfolio.file.controller.FileConstants;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;

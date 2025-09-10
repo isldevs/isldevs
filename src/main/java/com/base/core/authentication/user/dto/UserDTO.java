@@ -18,8 +18,8 @@ package com.base.core.authentication.user.dto;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.user.model.User;
 import com.base.core.exception.NotFoundException;
-import com.base.entity.file.repository.FileUtils;
-import com.base.entity.file.service.FileService;
+import com.base.portfolio.file.repository.FileUtils;
+import com.base.portfolio.file.service.FileService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
