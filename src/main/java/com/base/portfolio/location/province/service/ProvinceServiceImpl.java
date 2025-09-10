@@ -26,6 +26,8 @@ import com.base.portfolio.location.province.repository.ProvinceRepository;
 import com.base.portfolio.location.province.validation.ProvinceDataValidation;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +61,7 @@ public class ProvinceServiceImpl implements ProvinceService {
 
 
     @Override
+    @CacheEvict(value = "provinces", allEntries = true)
     public Map<String, Object> createProvince(JsonCommand command) {
         this.validation.create(command.getJson());
 
@@ -72,6 +75,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
+    @CacheEvict(value = "provinces", key = "#id")
     public Map<String, Object> updateProvince(Long id, JsonCommand command) {
         var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
@@ -91,6 +95,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
+    @CacheEvict(value = "provinces", key = "#id")
     public Map<String, Object> deleteProvince(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
@@ -103,6 +108,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
+    @Cacheable(value = "provinces", key = "#id")
     public ProvinceDTO getProvinceById(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

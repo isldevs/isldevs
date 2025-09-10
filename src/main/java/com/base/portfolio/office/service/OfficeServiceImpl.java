@@ -27,6 +27,8 @@ import com.base.portfolio.office.repository.OfficeRepository;
 import com.base.portfolio.office.validation.OfficeDataValidation;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +61,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
+    @CacheEvict(value = "offices", allEntries = true)
     public Map<String, Object> createOffice(JsonCommand command) {
         this.validator.create(command.getJson());
 
@@ -89,6 +92,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
+    @CacheEvict(value = "offices", key = "#id")
     public Map<String, Object> updateOffice(Long id, JsonCommand command) {
         var exist = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
@@ -115,6 +119,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
+    @CacheEvict(value = "offices", key = "#id")
     public Map<String, Object> deleteOffice(Long id) {
 
         var exist = this.repository.findById(id)
@@ -131,6 +136,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
+    @Cacheable(value = "offices", key = "#id")
     public OfficeDTO getOfficeById(Long id) {
         var office = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

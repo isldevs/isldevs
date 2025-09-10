@@ -30,6 +30,8 @@ import com.base.config.security.service.SecurityContext;
 import com.base.portfolio.file.service.FileService;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -70,6 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", allEntries = true)
     public Map<String, Object> createUser(JsonCommand command) {
         this.validation.create(command.getJson());
 
@@ -90,6 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#id")
     public UserDTO getUserById(Long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
@@ -120,6 +124,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#id")
     public Map<String, Object> updateUser(Long id, JsonCommand command) {
         var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
 
@@ -142,6 +147,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#id")
     public Map<String, Object> deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new NotFoundException("msg.not.found.user", id);

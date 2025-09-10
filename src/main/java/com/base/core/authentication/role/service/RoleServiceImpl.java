@@ -28,6 +28,8 @@ import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -62,6 +64,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @CacheEvict(value = "roles", allEntries = true)
     public Map<String, Object> createRole(JsonCommand command) {
 
         this.validator.create(command.getJson());
@@ -89,6 +92,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @CacheEvict(value = "roles", key = "T(java.util.Objects).hash(#id, #command)")
     public Map<String, Object> updateRole(Long id, JsonCommand command) {
 
         var exist = this.roleRepository.findById(id)
@@ -110,6 +114,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @CacheEvict(value = "roles", key = "#id")
     public Map<String, Object> deleteRole(Long id) {
 
         final var role = this.roleRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
@@ -124,6 +129,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Cacheable(value = "roles", key = "#id")
     public RoleDTO getRoleById(Long id) {
 
         var role = this.roleRepository.findById(id)

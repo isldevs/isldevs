@@ -30,22 +30,25 @@ import java.util.stream.Collectors;
  */
 public class UserDTO {
 
-    private final Long id;
-    private final String username;
-    private final String name;
-    private final String email;
-    private final Set<String> roles;
-    private final boolean enabled;
+    private Long id;
+    private String username;
+    private String name;
+    private String email;
+    private Set<String> roles;
+    private boolean enabled;
 
     @JsonProperty("accountNonExpired")
-    private final boolean accountNonExpired;
+    private boolean accountNonExpired;
 
     @JsonProperty("accountNonLocked")
-    private final boolean accountNonLocked;
+    private boolean accountNonLocked;
 
     @JsonProperty("credentialsNonExpired")
-    private final boolean credentialsNonExpired;
-    private final String profile;
+    private boolean credentialsNonExpired;
+    private String profile;
+
+    protected UserDTO() {
+    }
 
     public UserDTO(Builder builder) {
         this.id = builder.id;

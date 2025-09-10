@@ -21,6 +21,7 @@ import com.base.core.command.data.JsonCommand;
 import com.base.portfolio.location.commune.controller.CommuneConstants;
 import com.base.portfolio.location.district.model.District;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
+@AllArgsConstructor
 @Entity
 @Table(name = "commune", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"district_id","postal_code"}, name = "idx_commune_postal_code_key")
@@ -55,17 +57,6 @@ public class Commune extends CustomAbstractAuditable {
 
     protected Commune() {
     }
-
-    public Commune(final District district,
-                   final String type,
-                   final String name,
-                   final String postalCode) {
-        this.district = district;
-        this.type = type;
-        this.name = name;
-        this.postalCode = postalCode;
-    }
-
 
     public static Commune fromJson(final District district, final JsonCommand command) {
 

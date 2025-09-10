@@ -33,17 +33,20 @@ import java.util.Set;
  */
 public final class JsonCommand {
 
-    private final Long id;
-    private final String action;
-    private final String entity;
-    private final String entityType;
-    private final Long entityId;
-    private final String permission;
-    private final String href;
-    private final MultipartFile file;
-    private final String json;
-    private final JsonElement jsonElement;
-    private final JsonDelegator jsonDelegator;
+    private Long id;
+    private String action;
+    private String entity;
+    private String entityType;
+    private Long entityId;
+    private String permission;
+    private String href;
+    private MultipartFile file;
+    private String json;
+    private JsonElement jsonElement;
+    private JsonDelegator jsonDelegator;
+
+    public JsonCommand() {
+    }
 
     public static class Builder {
 

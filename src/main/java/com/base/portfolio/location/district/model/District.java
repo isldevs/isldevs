@@ -85,13 +85,7 @@ public class District extends CustomAbstractAuditable {
         final var postalCode = command.extractString(DistrictConstants.POSTAL_CODE);
         final var communes = command.extractArrayAs(DistrictConstants.COMMUNE, Commune.class);
 
-        return District.builder()
-                .province(province)
-                .name(name)
-                .postalCode(postalCode)
-                .type(type)
-                .communes(communes)
-                .build();
+        return new District(province,name,postalCode,type, communes);
     }
 
     public Map<String, Object> changed(JsonCommand command) {

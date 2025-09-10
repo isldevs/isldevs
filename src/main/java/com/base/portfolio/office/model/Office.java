@@ -56,7 +56,6 @@ public class Office extends CustomAbstractAuditable {
 
     public Office(Builder builder) {
         this.parent = builder.parent;
-        this.hierarchy = builder.hierarchy;
         this.nameEn = builder.nameEn;
         this.nameKm = builder.nameKm;
         this.nameZh = builder.nameZh;
@@ -109,7 +108,6 @@ public class Office extends CustomAbstractAuditable {
     public static class Builder {
 
         private Office parent;
-        private String hierarchy;
         private String nameEn;
         private String nameKm;
         private String nameZh;
@@ -120,11 +118,6 @@ public class Office extends CustomAbstractAuditable {
 
         public Builder parent(Office parent) {
             this.parent = parent;
-            return this;
-        }
-
-        public Builder hierarchy(String hierarchy) {
-            this.hierarchy = hierarchy;
             return this;
         }
 
