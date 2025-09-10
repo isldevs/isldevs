@@ -36,7 +36,7 @@ public class PageableHateoasAssembler {
     @Autowired
     private HttpServletRequest request;
 
-    public <T> PageableResponse<T> toPagedModel(Page<T> page) {
+    public <T> PageableResponse<T> toModel(Page<T> page) {
 
         PageableResponse.EmbeddedContent<T> embedded = PageableResponse.EmbeddedContent.<T>builder()
                 .content(page.getContent())
@@ -87,7 +87,7 @@ public class PageableHateoasAssembler {
         return Link.of(builder.build().toUriString());
     }
 
-    public <T> List<T> toUnpagedModel(Page<T> page) {
+    public <T> List<T> unpaged(Page<T> page) {
         return page.getContent();
     }
 

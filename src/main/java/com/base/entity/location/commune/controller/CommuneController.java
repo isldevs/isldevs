@@ -15,14 +15,13 @@
  */
 package com.base.entity.location.commune.controller;
 
-
 import com.base.core.command.service.LogService;
+import com.base.core.pageable.PageableHateoasAssembler;
 import com.base.core.serializer.JsonSerializerImpl;
 import com.base.entity.location.commune.dto.CommuneDTO;
 import com.base.entity.location.commune.handler.CommuneCommandHandler;
 import com.base.entity.location.commune.service.CommuneService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +35,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(CommuneConstants.API_PATH)
 public class CommuneController {
 
+    private final PageableHateoasAssembler pageable;
     private final JsonSerializerImpl<CommuneDTO> serializer;
     private final CommuneService service;
     private final LogService logService;
 
     @Autowired
-    public CommuneController(final JsonSerializerImpl<CommuneDTO> serializer,
+    public CommuneController(final PageableHateoasAssembler pageable,
+                             final JsonSerializerImpl<CommuneDTO> serializer,
                              final CommuneService service,
                              final LogService logService) {
+        this.pageable = pageable;
         this.serializer = serializer;
         this.service = service;
         this.logService = logService;
@@ -87,14 +89,10 @@ public class CommuneController {
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> listCommunes(@RequestParam(required = false) Integer page,
                                          @RequestParam(required = false) Integer size,
-                                         @RequestParam(required = false) String search,
-                                         PagedResourcesAssembler<CommuneDTO> pagination) {
-        if (page == null || size == null) {
-            var communes = this.service.listCommunes(null, null, search).getContent();
-            return ResponseEntity.ok(communes);
-        }
+                                         @RequestParam(required = false) String search) {
         var communes = this.service.listCommunes(page, size, search);
-        return ResponseEntity.ok(pagination.toModel(communes));
+        var response = (page == null || size == null) ? pageable.unpaged(communes) : pageable.toModel(communes);
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -21,7 +21,6 @@ import com.base.core.command.data.LogData;
 import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
 import com.base.entity.location.commune.dto.CommuneDTO;
-import com.base.entity.location.commune.model.Commune;
 import com.base.entity.location.district.controller.DistrictConstants;
 import com.base.entity.location.district.dto.DistrictDTO;
 import com.base.entity.location.district.model.District;

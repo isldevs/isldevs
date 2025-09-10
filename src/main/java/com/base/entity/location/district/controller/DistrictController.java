@@ -17,12 +17,12 @@ package com.base.entity.location.district.controller;
 
 
 import com.base.core.command.service.LogService;
+import com.base.core.pageable.PageableHateoasAssembler;
 import com.base.core.serializer.JsonSerializerImpl;
 import com.base.entity.location.district.dto.DistrictDTO;
 import com.base.entity.location.district.handler.DistrictCommandHandler;
 import com.base.entity.location.district.service.DistrictService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +36,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(DistrictConstants.API_PATH)
 public class DistrictController {
 
+    private final PageableHateoasAssembler pageable;
     private final JsonSerializerImpl<DistrictDTO> serializer;
     private final DistrictService service;
     private final LogService logService;
 
     @Autowired
-    public DistrictController(final JsonSerializerImpl<DistrictDTO> serializer,
+    public DistrictController(final PageableHateoasAssembler pageable,
+                              final JsonSerializerImpl<DistrictDTO> serializer,
                               final DistrictService service,
                               final LogService logService) {
+        this.pageable = pageable;
         this.serializer = serializer;
         this.service = service;
         this.logService = logService;
@@ -87,14 +90,10 @@ public class DistrictController {
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> listDistricts(@RequestParam(required = false) Integer page,
                                          @RequestParam(required = false) Integer size,
-                                         @RequestParam(required = false) String search,
-                                         PagedResourcesAssembler<DistrictDTO> pagination) {
-        if (page == null || size == null) {
-            var districts = this.service.listDistricts(null, null, search).getContent();
-            return ResponseEntity.ok(districts);
-        }
+                                         @RequestParam(required = false) String search) {
         var districts = this.service.listDistricts(page, size, search);
-        return ResponseEntity.ok(pagination.toModel(districts));
+        var response = (page == null || size == null) ? pageable.unpaged(districts) : pageable.toModel(districts);
+        return ResponseEntity.ok(response);
     }
 
 }

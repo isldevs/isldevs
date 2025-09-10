@@ -20,9 +20,9 @@ import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.role.handler.RoleCommandHandler;
 import com.base.core.authentication.role.service.RoleService;
 import com.base.core.command.service.LogService;
+import com.base.core.pageable.PageableHateoasAssembler;
 import com.base.core.serializer.JsonSerializerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +33,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(RoleConstants.API_PATH)
 public class RoleController {
 
+    private final PageableHateoasAssembler pageable;
     private final JsonSerializerImpl<RoleDTO> serializer;
     private final RoleService roleService;
     private final LogService logService;
 
     @Autowired
-    public RoleController(final JsonSerializerImpl<RoleDTO> serializer,
+    public RoleController(final PageableHateoasAssembler pageable,
+                          final JsonSerializerImpl<RoleDTO> serializer,
                           final RoleService roleService,
                           final LogService logService) {
+        this.pageable = pageable;
         this.serializer = serializer;
         this.roleService = roleService;
         this.logService = logService;
@@ -88,13 +91,9 @@ public class RoleController {
     @GetMapping
     public ResponseEntity<?> listRoles(@RequestParam(required = false) Integer page,
                                        @RequestParam(required = false) Integer size,
-                                       @RequestParam(required = false) String search,
-                                       PagedResourcesAssembler<RoleDTO> pagination) {
-        if (page == null || size == null) {
-            var roles = this.roleService.listRoles(null, null, search).getContent();
-            return ResponseEntity.ok(roles);
-        }
+                                       @RequestParam(required = false) String search) {
         var roles = this.roleService.listRoles(page, size, search);
-        return ResponseEntity.ok(pagination.toModel(roles));
+        var response = (page == null || size == null) ? pageable.unpaged(roles) : pageable.toModel(roles);
+        return ResponseEntity.ok(response);
     }
 }

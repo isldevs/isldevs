@@ -132,7 +132,6 @@ public class OfficeServiceImpl implements OfficeService {
 
     @Override
     public OfficeDTO getOfficeById(Long id) {
-
         var office = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));
         return officeMapper.toDTOWithProfile(office);

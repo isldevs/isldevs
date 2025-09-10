@@ -19,9 +19,9 @@ import com.base.core.authentication.user.dto.UserDTO;
 import com.base.core.authentication.user.handler.UserCommandBuilder;
 import com.base.core.authentication.user.service.UserService;
 import com.base.core.command.service.LogService;
+import com.base.core.pageable.PageableHateoasAssembler;
 import com.base.core.serializer.JsonSerializerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,14 +32,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(UserConstants.API_PATH)
 public class UserController {
 
+    private final PageableHateoasAssembler pageable;
     private final JsonSerializerImpl<UserDTO> serializer;
     private final UserService userService;
     private final LogService logService;
 
     @Autowired
-    public UserController(final JsonSerializerImpl<UserDTO> serializer,
+    public UserController(final PageableHateoasAssembler pageable,
+                          final JsonSerializerImpl<UserDTO> serializer,
                           final UserService userService,
                           final LogService logService) {
+        this.pageable = pageable;
         this.serializer = serializer;
         this.userService = userService;
         this.logService = logService;
@@ -65,14 +68,10 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> listUsers(@RequestParam(required = false) Integer page,
                                        @RequestParam(required = false) Integer size,
-                                       @RequestParam(required = false) String search,
-                                       PagedResourcesAssembler<UserDTO> pagination) {
-        if (page == null || size == null) {
-            var allUsers = userService.listUsers(null, null, search).getContent();
-            return ResponseEntity.ok(allUsers);
-        }
+                                       @RequestParam(required = false) String search) {
         var users = userService.listUsers(page, size, search);
-        return ResponseEntity.ok(pagination.toModel(users));
+        var response = (page == null || size == null) ? pageable.unpaged(users) : pageable.toModel(users);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
