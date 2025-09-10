@@ -30,6 +30,7 @@ import com.base.portfolio.location.province.model.Province;
 import com.base.portfolio.location.province.repository.ProvinceRepository;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
@@ -119,6 +120,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
+    @Cacheable(value = "districts", key = "#id")
     public DistrictDTO getDistrictById(Long id) {
         try {
             return jdbcTemplate.queryForObject("""

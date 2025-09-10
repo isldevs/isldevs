@@ -15,8 +15,10 @@
  */
 package com.base.core.authentication.role.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
@@ -25,10 +27,12 @@ import java.util.Set;
  */
 @Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RoleDTO {
 
-    private final Long id;
-    private final String name;
-    private final Set<String> authorities;
+    private Long id;
+    private String name;
+    private Set<String> authorities;
 
 }

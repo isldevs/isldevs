@@ -18,9 +18,7 @@ package com.base.portfolio.location.district.dto;
 import com.base.portfolio.location.commune.dto.CommuneDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -30,6 +28,8 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DistrictDTO {
 
