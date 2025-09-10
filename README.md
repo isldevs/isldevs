@@ -48,7 +48,7 @@ Build isldevs from the source and install dependencies:
 4. **Setup datasource connection**:
 
     This project demonstrates how to configure PostgreSQL
-    in Spring Boot 3.5.1 using environment variables instead of property files,
+    in Spring Boot 3.5.x using environment variables instead of property files,
     following security best practices.
 
 - Required Environment Variables
@@ -182,6 +182,11 @@ HIBERNATE_DIALECT=yourhibernatedialect
 HIBERNATE_DDL_AUTO=update
 HIBERNATE_SHOW_SQL=true
 HIBERNATE_FORMAT_SQL=true
+
+REDIS_ENABLED=false
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=password
 ```
 
 ### Production
@@ -203,6 +208,11 @@ HIBERNATE_DIALECT=yourhibernatedialect
 HIBERNATE_DDL_AUTO=validate
 HIBERNATE_SHOW_SQL=false
 HIBERNATE_FORMAT_SQL=true
+
+REDIS_ENABLED=false
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=password
 ```
 ## Spring Boot OAuth 2.1 Authorization Server Testing with Postman (Client ID Flows)
 This provides specific Postman endpoint configurations for testing each client ID flow.

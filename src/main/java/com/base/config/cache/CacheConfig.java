@@ -20,6 +20,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -29,13 +30,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -44,6 +47,10 @@ import java.util.concurrent.TimeUnit;
 public class CacheConfig {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private static final String[] CACHE_NAMES = new String[]{
+            "users", "roles", "offices", "provinces", "districts", "communes", "villages"
+    };
 
     private final Dotenv env;
     private final Environment springEnvironment;
@@ -60,59 +67,64 @@ public class CacheConfig {
     }
 
     @Bean
-    public CacheManager cacheManager() {
-        boolean useRedis = shouldUseRedis();
-        logger.info("Using {} cache manager", useRedis ? "redis" : "default");
-
-        if (useRedis) {
-            return createRedisCacheManager();
-        } else {
-            return createDefaultCacheManager();
+    public CacheManager cacheManager(ObjectProvider<RedisConnectionFactory> redisConnectionFactory) {
+        if (shouldUseRedis()) {
+            var connectionFactory = redisConnectionFactory.getIfAvailable();
+            if (connectionFactory != null) {
+                logger.info("Using redis cache manager");
+                return createRedisCacheManager(connectionFactory);
+            }
         }
+        logger.info("Using default caffeine cache manager");
+        return createCaffeineCacheManager();
     }
 
     private boolean shouldUseRedis() {
 
-        String redisEnabled = env.get("REDIS_ENABLED");
-        String systemRedis = System.getProperty("redis.enabled");
-        String springRedis = springEnvironment.getProperty("spring.cache.redis.enabled");
+        var redisEnabled = env.get("REDIS_ENABLED");
+        var systemRedis = System.getProperty("redis.enabled");
+        var springRedis = springEnvironment.getProperty("spring.cache.redis.enabled");
 
         return "true".equalsIgnoreCase(redisEnabled) ||
                 "true".equalsIgnoreCase(systemRedis) ||
                 "true".equalsIgnoreCase(springRedis);
     }
 
-    private CacheManager createRedisCacheManager() {
+    private CacheManager createRedisCacheManager(RedisConnectionFactory connectionFactory) {
         try {
-            RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+            var config = new RedisStandaloneConfiguration();
             config.setHostName(env.get("REDIS_HOST", "localhost"));
             config.setPort(Integer.parseInt(env.get("REDIS_PORT", "6379")));
             config.setPassword(env.get("REDIS_PASSWORD", ""));
 
-            LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(config);
-            connectionFactory.afterPropertiesSet();
-
-            RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                    .entryTtl(Duration.ofDays(7))
+            var cacheDefaults = RedisCacheConfiguration.defaultCacheConfig()
+                    .entryTtl(Duration.ofHours(1))
                     .disableCachingNullValues()
                     .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
+            var initialCacheConfig = Arrays.stream(CACHE_NAMES)
+                    .collect(Collectors.toMap(name -> name, name -> cacheDefaults.entryTtl(Duration.ofHours(1)), (a, b) -> b));
+
             return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory))
-                    .cacheDefaults(cacheConfig)
+                    .cacheDefaults(cacheDefaults)
+                    .withInitialCacheConfigurations(initialCacheConfig)
                     .transactionAware()
                     .build();
 
         } catch (Exception e) {
-            logger.warn("Failed to create redis cache manager, switch back to default cache manager", e);
-            return createDefaultCacheManager();
+            logger.warn("Failed to create redis cache manager, falling back to caffeine cache manager", e);
+            return createCaffeineCacheManager();
         }
     }
 
-    private CacheManager createDefaultCacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(Caffeine.newBuilder()
-                .expireAfterWrite(7, TimeUnit.DAYS)
-                .maximumSize(1000));
+    private CacheManager createCaffeineCacheManager() {
+        var cacheManager = new CaffeineCacheManager(CACHE_NAMES);
+        cacheManager.setCaffeine(
+                Caffeine.newBuilder()
+                        .expireAfterWrite(1, TimeUnit.HOURS)
+                        .maximumSize(1000)
+                        .recordStats()
+        );
         return cacheManager;
     }
 }
