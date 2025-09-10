@@ -16,6 +16,7 @@
 package com.base.config;
 
 
+import com.base.config.datasource.DatasourceConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

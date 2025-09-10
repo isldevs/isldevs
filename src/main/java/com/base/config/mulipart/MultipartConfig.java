@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2025 iSLDevs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,32 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config;
+package com.base.config.mulipart;
 
-import com.base.core.service.DataInitializationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+
+import com.base.portfolio.file.controller.FileConstants;
+import jakarta.servlet.MultipartConfigElement;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.unit.DataSize;
 
 /**
  * @author YISivlay
  */
 @Configuration
-@EnableTransactionManagement
-public class DataInitializationConfig {
-
-    private final DataInitializationService dataInitializationService;
-
-    @Autowired
-    public DataInitializationConfig(DataInitializationService dataInitializationService) {
-        this.dataInitializationService = dataInitializationService;
-    }
+public class MultipartConfig {
 
     @Bean
-    public CommandLineRunner dataInitialization() {
-        return args -> dataInitializationService.init();
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofMegabytes(FileConstants.MAX_FILE_SIZE));
+        factory.setMaxRequestSize(DataSize.ofMegabytes(FileConstants.MAX_REQUEST_SIZE));
+        return factory.createMultipartConfig();
     }
-
 }
