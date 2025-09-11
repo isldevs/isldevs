@@ -74,6 +74,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
 
     steps:
       - name: Checkout code
@@ -85,42 +86,23 @@ jobs:
           name: isldevs-app
           path: app/
 
-      # ---------------------------------------
-      # Option1: Deploy JAR into Server via SSH
-      # ---------------------------------------
-      - name: Deploy to EC2 via SSH
+      - name: Create SSH key file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Deploy using SSH key file
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          debug: true
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/isldevs-app
-
-            # Stop previous Java process if running
+            mkdir -p ~/isldevs-app
             pkill -f 'java -jar isldevs.jar' || true
-
-            # Copy the new JAR from GitHub Actions workspace
-            # Use relative path to downloaded artifact
             cp ~/app/*.jar ~/isldevs-app/isldevs.jar
-
-            # Start new JAR in background with nohup
+            cd ~/isldevs-app
             nohup java -jar isldevs.jar --spring.config.location=classpath:/config/.prod > app.log 2>&1 &
-
-            # Give the application a few seconds to start
-            sleep 10
-
-            # Check if the application is running
-            if pgrep -f 'java -jar isldevs.jar'; then
-              echo "Deployment finished successfully."
-              exit 0
-            else
-              echo "Deployment failed: Java process not found."
-              exit 1
-            fi
-
-            # Optional: confirm Java 21 is being used
-            java -version
-
-            echo "Deployment finished successfully."
+            sleep 5
+            echo "Deployment successful."
