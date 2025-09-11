@@ -85,6 +85,10 @@ jobs:
           name: isldevs-app
           path: app/
 
+      - name: Test SSH connection
+        run: |
+            ssh -i ~/.ssh/key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
+
       # ---------------------------------------
       # Option1: Deploy JAR into Server via SSH
       # ---------------------------------------
