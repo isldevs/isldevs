@@ -87,7 +87,7 @@ jobs:
 
       - name: Test SSH connection
         run: |
-            ssh -i ~/.ssh/authorized_keys -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
+            ssh -i ~/github-ci-key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
 
       # ---------------------------------------
       # Option1: Deploy JAR into Server via SSH
