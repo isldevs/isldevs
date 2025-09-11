@@ -92,9 +92,9 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
       - name: Add SSH key
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-add ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-add ~/.ssh/id_ed25519
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -114,6 +114,15 @@ jobs:
 
             # Give the application a few seconds to start
             sleep 10
+
+            # Check if the application is running
+            if pgrep -f 'java -jar isldevs.jar'; then
+              echo "Deployment finished successfully."
+              exit 0
+            else
+              echo "Deployment failed: Java process not found."
+              exit 1
+            fi
 
             # Optional: confirm Java 21 is being used
             java -version
