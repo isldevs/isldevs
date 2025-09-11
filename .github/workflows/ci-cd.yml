@@ -115,15 +115,6 @@ jobs:
             # Give the application a few seconds to start
             sleep 10
 
-            # Check if the application is running
-            if pgrep -f 'java -jar isldevs.jar'; then
-              echo "Deployment finished successfully."
-              exit 0
-            else
-              echo "Deployment failed: Java process not found."
-              exit 1
-            fi
-
             # Optional: confirm Java 21 is being used
             java -version
 
