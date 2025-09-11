@@ -85,29 +85,17 @@ jobs:
           name: isldevs-app
           path: app/
 
-      # ---------------------------------------
-      # Option1: Deploy JAR into Server via SSH
-      # ---------------------------------------
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/isldevs-app
 
-            # Stop previous Java process if running
             pkill -f 'java -jar isldevs.jar' || true
-
-            # Copy the new JAR from GitHub Actions workspace
-            # Use relative path to downloaded artifact
             cp ~/app/*.jar ~/isldevs-app/isldevs.jar
-
-            # Start new JAR in background with nohup
             nohup java -jar isldevs.jar --spring.config.location=classpath:/config/.prod > app.log 2>&1 &
-
-            # Optional: confirm Java 21 is being used
             java -version
-
             echo "Deployment finished successfully."
