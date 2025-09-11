@@ -56,6 +56,7 @@ public class District extends CustomAbstractAuditable {
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 
+    @Builder.Default
     @OneToMany(mappedBy = "district", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commune> communes = new HashSet<>();
 

@@ -16,7 +16,6 @@
 package com.base.config.cache;
 
 
-import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;

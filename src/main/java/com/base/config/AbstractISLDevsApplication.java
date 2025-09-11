@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.annotation.IntegrationComponentScan;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -37,8 +38,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author YISivlay
  */
 @Configuration
-@EnableWebSecurity
 @EnableCaching
+@EnableWebSecurity
+@EnableMethodSecurity
 @EnableTransactionManagement
 @EnableAutoConfiguration(exclude = {
         DataSourceAutoConfiguration.class,
