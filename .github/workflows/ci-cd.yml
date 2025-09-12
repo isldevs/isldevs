@@ -87,5 +87,4 @@ jobs:
 
       - name: Connect SSH and Restart Services
         run: |
-          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.DEPLOY_HOST }} '
-            sudo systemctl restart isldevs
+          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.DEPLOY_HOST }} "sudo systemctl restart isldevs"
