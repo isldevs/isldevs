@@ -165,16 +165,10 @@ on:
     branches: [ "master", "main" ]
 
 jobs:
-  # -----------------
-  # Build & Test (CI)
-  # -----------------
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
-    outputs:
-      jar-path: build/libs/*.jar
 
     steps:
       - name: Checkout code
@@ -192,14 +186,9 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.0.0
-        with:
-          gradle-version: 8.13
 
-      - name: Clean Gradle cache
-        run: ./gradlew clean --gradle-user-home=$GITHUB_WORKSPACE/.gradle
-
-      - name: Build with Gradle Wrapper
-        run: ./gradlew build -PskipIntegrationTests=true
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
       - name: Run Tests
         run: ./gradlew test
@@ -214,7 +203,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -222,18 +210,12 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v4.0.0
-
-  # -----------
-  # Deploy (CD)
-  # -----------
+        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    # Only deploy on push to master/main, not on pull requests
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
 
     steps:
       - name: Checkout code
@@ -243,43 +225,34 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: isldevs-app
-          path: app/
-
-      - name: Setup SSH key
+          path: ./artifact
+      - name: Setup key
+        id: setup-key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          echo "$SSH_PRIVATE_KEY" >> $HOME/isldevs.pem
+          chmod 400 $HOME/isldevs.pem
 
-      - name: Test SSH connection
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo SSH connection successful"
-
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Copy JAR to EC2
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Create directory if it doesn't exist
-            mkdir -p ~/isldevs-app
-            
-            # Stop existing application
-            pkill -f 'java -jar isldevs.jar' || true
-            
-            # Copy new JAR file
-            cp ~/app/*.jar ~/isldevs-app/isldevs.jar
-            
-            # Start application
-            cd ~/isldevs-app
-            nohup java -jar isldevs.jar --spring.config.location=classpath:/config/.prod > app.log 2>&1 &
-            
-            # Wait a moment and check if application started
-            sleep 5
-            ps aux | grep java
-            
-            echo "Deployment finished successfully."
+          source: "./artifact/*.jar"
+          target: "/home/ec2-user/isldevs-app/"
+
+      - name: Connect SSH and Restart Services
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.SERVER_HOST }} "
+            export DB_HOST=$DB_HOST
+            export DB_PASSWORD=$DB_PASSWORD
+            sudo systemctl restart isldevs
+          "
 ```
 
 ## 📁 Step 3: EC2 Post-Deployment Setup
@@ -310,7 +283,9 @@ After=network.target
 [Service]
 User=ec2-user
 WorkingDirectory=/home/ec2-user/isldevs-app
-ExecStart=/usr/bin/java -jar isldevs.jar --spring.config.location=classpath:/config/.prod
+ExecStart=/usr/bin/java -jar /home/ec2-user/isldevs-app/artifact/isldevs.jar --spring.profiles.active=prod
+Environment=DB_HOST=your-db-host
+Environment=DB_PASSWORD=your-db-password
 SuccessExitStatus=143
 Restart=always
 RestartSec=30
