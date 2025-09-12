@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: isldevs-app
-          path: /
+          path: ./artifact
       - name: Setup key
         id: setup-key
         env:
@@ -82,7 +82,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "*.jar"
+          source: "./artifact/*.jar"
           target: "/home/ec2-user/isldevs-app/"
 
       - name: Connect SSH and Restart Services
