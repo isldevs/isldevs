@@ -86,5 +86,12 @@ jobs:
           target: "/home/ec2-user/isldevs-app/"
 
       - name: Connect SSH and Restart Services
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.SERVER_HOST }} "sudo systemctl restart isldevs"
+          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.SERVER_HOST }} "
+            export DB_HOST=$DB_HOST
+            export DB_PASSWORD=$DB_PASSWORD
+            sudo systemctl restart isldevs
+          "
