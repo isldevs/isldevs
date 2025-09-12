@@ -20,6 +20,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,42 @@ public class DatasourceConfig {
 
     private final Dotenv env;
 
+    @Value("${spring.datasource.url}")
+    private String url;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
+    @Value("${spring.datasource.driver-class-name}")
+    private String driverClassName;
+
+    @Value("${spring.datasource.hikari.connection-timeout}")
+    private int connectionTimeout;
+
+    @Value("${spring.datasource.hikari.idle-timeout}")
+    private int idleTimeout;
+
+    @Value("${spring.datasource.hikari.max-lifetime}")
+    private int maxLifetime;
+
+    @Value("${spring.datasource.hikari.leak-detection-threshold}")
+    private int leakDetectionThreshold;
+
+    @Value("${spring.jpa.database-platform}")
+    private String databasePlatform;
+
+    @Value("${spring.jpa.hibernate.ddl-auto}")
+    private String hibernateDdlAuto;
+
+    @Value("${spring.jpa.show-sql:false}")
+    private String showSql;
+
+    @Value("${spring.jpa.properties.hibernate.format_sql:true}")
+    private String formatSql;
+
     @Autowired
     public DatasourceConfig(Environment environment) {
         var activeProfile = environment.getActiveProfiles()[0];
@@ -55,17 +92,17 @@ public class DatasourceConfig {
 
         var config = new HikariConfig();
 
-        config.setJdbcUrl(env.get("DB_URL"));
-        config.setUsername(env.get("DB_USERNAME"));
-        config.setPassword(env.get("DB_PASSWORD"));
-        config.setDriverClassName(env.get("DB_DRIVER_CLASS"));
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setDriverClassName(driverClassName);
 
-        config.setMaximumPoolSize(Integer.parseInt(env.get("DB_POOL_MAX_SIZE", String.valueOf(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30)))));
-        config.setMinimumIdle(Integer.parseInt(env.get("DB_POOL_MIN_IDLE", String.valueOf(config.getMaximumPoolSize() / 2))));
-        config.setConnectionTimeout(Long.parseLong(env.get("DB_CONNECTION_TIMEOUT")));
-        config.setIdleTimeout(Long.parseLong(env.get("DB_IDLE_TIMEOUT")));
-        config.setMaxLifetime(Long.parseLong(env.get("DB_MAX_LIFETIME")));
-        config.setLeakDetectionThreshold(Long.parseLong(env.get("DB_LEAK_DETECTION_THRESHOLD")));
+        config.setMaximumPoolSize(Math.min((Runtime.getRuntime().availableProcessors() * 2) + 1, 30));
+        config.setMinimumIdle(config.getMaximumPoolSize() / 2);
+        config.setConnectionTimeout(connectionTimeout);
+        config.setIdleTimeout(idleTimeout);
+        config.setMaxLifetime(maxLifetime);
+        config.setLeakDetectionThreshold(leakDetectionThreshold);
 
         if (config.getDriverClassName().contains("postgresql")) {
             config.addDataSourceProperty("prepStmtCacheSize", "250");
@@ -111,9 +148,9 @@ public class DatasourceConfig {
 
     private Properties hibernateProperties() {
         var properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", env.get("HIBERNATE_DDL_AUTO"));
-        properties.setProperty("hibernate.show_sql", env.get("HIBERNATE_SHOW_SQL"));
-        properties.setProperty("hibernate.format_sql", env.get("HIBERNATE_FORMAT_SQL"));
+        properties.setProperty("hibernate.hbm2ddl.auto", hibernateDdlAuto);
+        properties.setProperty("hibernate.show_sql", showSql);
+        properties.setProperty("hibernate.format_sql", formatSql);
         return properties;
     }
 
