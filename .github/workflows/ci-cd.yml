@@ -55,43 +55,43 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
         
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
+  #deploy:
+  #  runs-on: ubuntu-latest
+  #  needs: build
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #  steps:
+  #    - name: Checkout code
+  #      uses: actions/checkout@v4
 
-      - name: Download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: isldevs-app
-          path: ./artifact
-      - name: Setup key
-        id: setup-key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" >> $HOME/isldevs.pem
-          chmod 400 $HOME/isldevs.pem
+  #    - name: Download JAR artifact
+  #      uses: actions/download-artifact@v4
+  #      with:
+  #        name: isldevs-app
+  #        path: ./artifact
+  #    - name: Setup key
+  #      id: setup-key
+  #      env:
+  #        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #      run: |
+  #        echo "$SSH_PRIVATE_KEY" >> $HOME/isldevs.pem
+  #        chmod 400 $HOME/isldevs.pem
 
-      - name: Copy JAR to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./artifact/*.jar"
-          target: "/home/ec2-user/isldevs-app/"
+  #    - name: Copy JAR to EC2
+  #      uses: appleboy/scp-action@master
+  #      with:
+  #        host: ${{ secrets.SERVER_HOST }}
+  #        username: ${{ secrets.SERVER_USER }}
+  #        key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #        source: "./artifact/*.jar"
+  #        target: "/home/ec2-user/isldevs-app/"
 
-      - name: Connect SSH and Restart Services
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.SERVER_HOST }} "
-            export DB_HOST=$DB_HOST
-            export DB_PASSWORD=$DB_PASSWORD
-            sudo systemctl restart isldevs
-          "
+  #    - name: Connect SSH and Restart Services
+  #      env:
+  #        DB_HOST: ${{ secrets.DB_HOST }}
+  #        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  #      run: |
+  #        ssh -o StrictHostKeyChecking=no -i $HOME/isldevs.pem ec2-user@${{ secrets.SERVER_HOST }} "
+  #          export DB_HOST=$DB_HOST
+  #          export DB_PASSWORD=$DB_PASSWORD
+  #          sudo systemctl restart isldevs
+  #        "

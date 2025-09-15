@@ -284,8 +284,9 @@ After=network.target
 User=ec2-user
 WorkingDirectory=/home/ec2-user/isldevs-app
 ExecStart=/usr/bin/java -jar /home/ec2-user/isldevs-app/artifact/isldevs.jar --spring.profiles.active=prod
-Environment=DB_HOST=your-db-host
-Environment=DB_PASSWORD=your-db-password
+Environment="SPRING_DATASOURCE_URL=jdbc:postgresql://your-db-host:5432/your-db-name"
+Environment="SPRING_DATASOURCE_USERNAME=your-db-user"
+Environment="SPRING_DATASOURCE_PASSWORD=your-db-password"
 SuccessExitStatus=143
 Restart=always
 RestartSec=30
@@ -307,6 +308,9 @@ ps aux | grep java
 
 # Check application logs
 tail -f ~/isldevs-app/app.log
+
+# Check application logs (EC2)
+sudo journalctl -u isldevs.service -f
 
 # Test application endpoint
 curl http://localhost:8080/health
