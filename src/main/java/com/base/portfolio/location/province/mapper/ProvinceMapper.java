@@ -27,7 +27,10 @@ import java.util.List;
 /**
  * @author YISivlay
  */
-@Mapper(componentModel = "spring",injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(
+        componentModel = "spring",
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class ProvinceMapper {
 
     protected ProvinceMapper() {

@@ -80,22 +80,16 @@ public class CacheConfig {
     }
 
     private boolean shouldUseRedis() {
-
-        var redisEnabled = env.get("REDIS_ENABLED");
-        var systemRedis = System.getProperty("redis.enabled");
-        var springRedis = springEnvironment.getProperty("spring.cache.redis.enabled");
-
-        return "true".equalsIgnoreCase(redisEnabled) ||
-                "true".equalsIgnoreCase(systemRedis) ||
-                "true".equalsIgnoreCase(springRedis);
+        var redisEnabled = springEnvironment.getProperty("redis.enabled");
+        return "true".equalsIgnoreCase(redisEnabled);
     }
 
     private CacheManager createRedisCacheManager(RedisConnectionFactory connectionFactory) {
         try {
             var config = new RedisStandaloneConfiguration();
-            config.setHostName(env.get("REDIS_HOST", "localhost"));
-            config.setPort(Integer.parseInt(env.get("REDIS_PORT", "6379")));
-            config.setPassword(env.get("REDIS_PASSWORD", ""));
+            config.setHostName(springEnvironment.getProperty("redis.host", "localhost"));
+            config.setPort(Integer.parseInt(springEnvironment.getProperty("redis.port", "6379")));
+            config.setPassword(springEnvironment.getProperty("redis.password'", ""));
 
             var cacheDefaults = RedisCacheConfiguration.defaultCacheConfig()
                     .entryTtl(Duration.ofHours(1))

@@ -1,16 +1,17 @@
 plugins {
     id 'java'
     id 'war'
-    id 'com.diffplug.spotless'
-    id 'org.springframework.boot'
-    id 'io.spring.dependency-management'
-    id 'org.graalvm.buildtools.native'
-    id 'org.flywaydb.flyway'
-    id 'com.github.hierynomus.license'
-    id 'com.github.ben-manes.versions'
+    id 'com.diffplug.spotless' version '7.2.1'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.graalvm.buildtools.native' version '0.10.5'
+    id "org.flywaydb.flyway" version "9.22.3"
+    id "com.github.hierynomus.license" version "0.16.1"
+    id 'com.github.ben-manes.versions' version '0.51.0'
 }
 
 group = 'com.base'
+version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
@@ -20,7 +21,38 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    developmentOnly {
+        extendsFrom runtimeOnly
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
+        cacheChangingModulesFor 10, 'minutes'
+        cacheDynamicVersionsFor 10, 'minutes'
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.spring.io/milestone/' }
+    maven { url = uri("https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots") }
+}
+
+apply from: 'gradle/dependencies.gradle'
+
+dependencyLocking {
+    lockAllConfigurations()
+    lockMode = LockMode.STRICT
+}
+
 graalvmNative {
+    toolchainDetection = false
     binaries {
         main {
             imageName = "${project.name}"
@@ -36,52 +68,69 @@ graalvmNative {
                     '-H:+AddAllCharsets',
                     '-H:EnableURLProtocols=http,https',
                     '-H:NativeLinkerOption=-z',
-                    '-H:NativeLinkerOption=stack-size=2097152'
+                    '-H:NativeLinkerOption=stack-size=2097152',
+                    '-H:+StaticExecutableWithDynamicLibC'
             ])
         }
     }
-
-    toolchainDetection = false
 }
 
-repositories {
-    mavenCentral()
-    maven { url = 'https://repo.spring.io/milestone' }
-}
-
-configurations.configureEach {
-    resolutionStrategy {
-        force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
-        cacheChangingModulesFor 10, 'minutes'
+def loadEnvironment() {
+    def env = new Properties()
+    def activeProfile = findProperty("spring.profiles.active") ?: "dev"
+    def profilePropsFile = file("src/main/resources/application-${activeProfile}.properties")
+    if (profilePropsFile.exists()) {
+        profilePropsFile.withInputStream { stream ->
+            env.load(stream)
+        }
+        logger.info("Loaded properties from: ${profilePropsFile.name}")
     }
-}
-
-apply from: 'gradle/dependencies.gradle'
-
-dependencyLocking {
-    lockAllConfigurations()
-}
-
-def env = new Properties()
-def activeProfile = findProperty("spring.profiles.active") ?: "dev"
-def envFiles = [
-        file("src/main/resources/config/.${activeProfile}"),
-        file(".env")
-]
-
-envFiles.each { envFile ->
+    def defaultPropsFile = file("src/main/resources/application.properties")
+    if (defaultPropsFile.exists()) {
+        defaultPropsFile.withInputStream { stream ->
+            def defaultProps = new Properties()
+            defaultProps.load(stream)
+            defaultProps.each { key, value ->
+                if (!env.containsKey(key)) {
+                    env.setProperty(key, value)
+                }
+            }
+        }
+        logger.info("Loaded properties from: ${defaultPropsFile.name}")
+    }
+    def envFile = file(".env")
     if (envFile.exists()) {
-        envFile.withInputStream { env.load(it) }
-        println "Loaded environment from: ${envFile}"
+        envFile.withInputStream { stream ->
+            env.load(stream)
+        }
+        logger.info("Loaded environment from: .env")
     }
+    System.getenv().each { key, value ->
+        if (key.startsWith('DB_') || key.startsWith('SPRING_')) {
+            env.setProperty(key, value)
+        }
+    }
+
+    return env
 }
+
+def env = loadEnvironment()
+def activeProfile = findProperty("spring.profiles.active") ?: "dev"
 
 dependencyUpdates {
     rejectVersionIf {
-        isNonStable(it.candidate.version)
+        isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
     }
     outputDir = "build/dependencyUpdates"
     reportfileName = "report"
+    checkForGradleUpdate = true
+    outputFormatter = "json"
+}
+
+static boolean isNonStable(String version) {
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { version.toUpperCase().contains(it) }
+    def regex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(version ==~ regex)
 }
 
 compileJava {
@@ -90,23 +139,30 @@ compileJava {
             '-Amapstruct.suppressGeneratorTimestamp=true',
             '-Amapstruct.suppressGeneratorVersionInfoComment=true',
             '-Amapstruct.defaultComponentModel=spring',
-            '-Amapstruct.verbose=' + (isDev)
+            '-Amapstruct.verbose=' + (isDev),
+            '--enable-preview'
     ]
-}
-
-static boolean isNonStable(String version) {
-    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
-    def regex = /^[0-9,.v-]+(-r)?$/
-    return !stableKeyword && !(version ==~ regex)
+    options.encoding = 'UTF-8'
+    options.fork = true
+    options.forkOptions.jvmArgs = ['-Duser.language=en', '-Duser.country=US']
 }
 
 flyway {
-    url = env.getProperty("DB_URL") ?: System.getenv("DB_URL")
-    user = env.getProperty("DB_USERNAME") ?: System.getenv("DB_USERNAME")
-    password = env.getProperty("DB_PASSWORD") ?: System.getenv("DB_PASSWORD")
+
+    def propsFile = file("src/main/resources/application-${activeProfile}.properties")
+    def properties = new Properties()
+
+    if (propsFile.exists()) {
+        propsFile.withInputStream { properties.load(it) }
+    }
+
+    url = properties.getProperty('spring.datasource.url') ?: env.getProperty('DB_URL') ?: System.getenv('DB_URL') ?: "jdbc:postgresql://localhost:5432/isl_devs"
+    user = properties.getProperty('spring.datasource.username') ?: env.getProperty('DB_USERNAME') ?: System.getenv('DB_USERNAME') ?: "postgres"
+    password = properties.getProperty('spring.datasource.password') ?: env.getProperty('DB_PASSWORD') ?: System.getenv('DB_PASSWORD') ?: "password"
     locations = ['classpath:db/migration']
     baselineOnMigrate = true
     validateMigrationNaming = true
+    cleanDisabled = false
 }
 
 bootRun {
@@ -114,19 +170,57 @@ bootRun {
     jvmArgs = [
             "-Dspring.profiles.active=${activeProfile}",
             "-Dfile.encoding=UTF-8",
-            "-XX:+HeapDumpOnOutOfMemoryError"
+            "-XX:+HeapDumpOnOutOfMemoryError",
+            "--enable-preview"
     ]
     systemProperties = System.properties
+    sourceResources sourceSets.main
+    if (activeProfile == 'dev') {
+        classpath = sourceSets.main.runtimeClasspath + configurations.developmentOnly
+    }
+}
+
+processResources {
+    filesMatching("application*.properties") {
+        expand(project.properties)
+    }
+    if (activeProfile != 'dev') {
+        exclude 'application-dev.properties'
+    }
+    if (activeProfile != 'prod') {
+        exclude 'application-prod.properties'
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 bootWar {
     archiveClassifier = 'boot'
     archiveFileName = "${project.name}.war"
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Spring-Boot-Version': '3.5.4'
+        )
+    }
 }
 
 bootJar {
     archiveFileName = "${project.name}.jar"
     launchScript()
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Spring-Boot-Version': '3.5.4'
+        )
+    }
 }
 
 sourceSets {
@@ -159,6 +253,7 @@ tasks.withType(JavaCompile).configureEach {
             '-Xlint:deprecation',
             '-Xlint:preview',
             '--enable-preview',
+            '-parameters',
             '-Amapstruct.suppressGeneratorTimestamp=true',
             '-Amapstruct.verbose=false'
     ]
@@ -170,6 +265,41 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Test).configureEach {
     jvmArgs += "--enable-preview"
+    useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
+    maxHeapSize = '2G'
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = "full"
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+
+    filter {
+        includeTestsMatching "*Test"
+        includeTestsMatching "*Tests"
+    }
+}
+
+war {
+    enabled = true
+    archiveClassifier = ''
+    classpath = classpath.filter { file ->
+        !file.name.contains('spring-boot-starter-tomcat') &&
+                !file.name.contains('spring-boot-starter-jetty') &&
+                !file.name.contains('spring-boot-starter-undertow')
+    }
+}
+
+tasks.named('assemble') {
+    dependsOn bootWar, bootJar
+}
+
+tasks.named('build') {
+    dependsOn 'test', 'spotlessCheck', 'licenseMain'
 }
 
 license {
@@ -313,20 +443,6 @@ tasks.withType(JavaCompile).configureEach {
             '-Xlint:-processing'
     ]
     options.encoding = 'UTF-8'
-}
-
-tasks.named('assemble') {
-    dependsOn bootWar, bootJar
-}
-
-war {
-    enabled = true
-    archiveClassifier = ''
-    classpath = classpath.filter { file ->
-        !file.name.contains('spring-boot-starter-tomcat') &&
-                !file.name.contains('spring-boot-starter-jetty') &&
-                !file.name.contains('spring-boot-starter-undertow')
-    }
 }
 
 tasks.withType(AbstractArchiveTask).configureEach {
