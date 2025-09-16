@@ -180,19 +180,6 @@ bootRun {
     }
 }
 
-processResources {
-    filesMatching("application*.properties") {
-        expand(project.properties)
-    }
-    if (activeProfile != 'dev') {
-        exclude 'application-dev.properties'
-    }
-    if (activeProfile != 'prod') {
-        exclude 'application-prod.properties'
-    }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
 bootWar {
     archiveClassifier = 'boot'
     archiveFileName = "${project.name}.war"

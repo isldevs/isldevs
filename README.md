@@ -73,7 +73,11 @@ Build isldevs from the source and install dependencies:
 
 5. Run project
 ```
+./gradlew clean build
 ./gradlew bootRun -Pspring.profiles.active=dev
+OR
+./gradlew clean build
+./gradlew bootRun -Pspring.profiles.active=prod
 ```
 
 ## Tomcat SSL Config Guide
