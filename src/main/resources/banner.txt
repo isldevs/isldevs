@@ -1,7 +1,7 @@
-,--. ,---. ,--.   ,------.
-`--''   .-'|  |   |  .-.  \  ,---.,--.  ,--.,---.
-,--.`.  `-.|  |   |  |  \  :| .-. :\  `'  /(  .-'
-|  |.-'    |  '--.|  '--'  /\   --. \    / .-'  `)
-`--'`-----'`-----'`-------'  `----'  `--'  `----'
-        Spring Boot ${spring-boot.version} | Java ${java.version}
-          Running on ${spring.profiles.active} environment.
+${Ansi.BRIGHT_GREEN} ,--. ,---. ,--.   ,------.${Ansi.DEFAULT}
+${Ansi.BRIGHT_GREEN} `--''   .-'|  |   |  .-.  \  ,---.,--.  ,--.,---. ${Ansi.DEFAULT}
+${Ansi.BRIGHT_GREEN} ,--.`.  `-.|  |   |  |  \  :| .-. :\  `'  /(  .-' ${Ansi.DEFAULT}
+${Ansi.BRIGHT_GREEN} |  |.-'    |  '--.|  '--'  /\   --. \    / .-'  `)${Ansi.DEFAULT}
+${Ansi.BRIGHT_GREEN} `--'`-----'`-----'`-------'  `----'  `--'  `----' ${Ansi.DEFAULT}
+        ${Ansi.BRIGHT_GREEN}Spring Boot ${spring-boot.version}${Ansi.DEFAULT} | ${Ansi.BRIGHT_GREEN}Java ${java.version}${Ansi.DEFAULT}
+          Running on ${Ansi.BRIGHT_GREEN}${spring.profiles.active}${Ansi.DEFAULT} environment.
