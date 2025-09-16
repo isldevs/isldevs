@@ -251,7 +251,6 @@ tasks.withType(JavaCompile).configureEach {
             '-parameters',
             '-Xlint:unchecked',
             '-Xlint:deprecation',
-            '-Xlint:preview',
             '--enable-preview',
             '-parameters',
             '-Amapstruct.suppressGeneratorTimestamp=true',

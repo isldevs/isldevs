@@ -18,8 +18,10 @@ package com.base.config.cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.transaction.TransactionAwareCacheDecorator;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,27 +30,41 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CacheMonitor {
-    private final CacheManager cacheManager;
+
     private final Logger logger = LoggerFactory.getLogger(CacheMonitor.class);
 
-    public CacheMonitor(CacheManager cacheManager) {
+    private final CacheManager cacheManager;
+    private final RedisConnectionFactory redisConnectionFactory;
+
+    public CacheMonitor(final CacheManager cacheManager,
+                        final ObjectProvider<RedisConnectionFactory> redisConnectionFactory) {
         this.cacheManager = cacheManager;
+        this.redisConnectionFactory = redisConnectionFactory.getIfAvailable();
     }
 
     @Scheduled(fixedRate = 60000)
     public void logCacheStats() {
         cacheManager.getCacheNames().forEach(name -> {
-            var cache = (CaffeineCache) cacheManager.getCache(name);
-            if (cache != null) {
-                var stats = cache.getNativeCache().stats();
-                var hitRatio = (stats.hitCount() + stats.missCount()) > 0
-                        ? (double) stats.hitCount() / (stats.hitCount() + stats.missCount())
-                        : 1.0;
-                if (hitRatio < 0.7) {
-                    //Many database call, potential performance bottleneck
-                    logger.warn("Cache [{}] hit ratio low: {}%", name, hitRatio * 100);
-                }
+            if (!CustomCaffeineCache.wasAccessed(name)) return;
+            var cache = cacheManager.getCache(name);
+            if (cache == null) return;
+            if (cache instanceof TransactionAwareCacheDecorator decorator) {
+                cache = decorator.getTargetCache();
+            }
+            if (cache instanceof CustomCaffeineCache caffeineCache) {
+                var hits = caffeineCache.getCacheHits();
+                var misses = caffeineCache.getDatabaseHits();
+                var total = hits + misses;
+                var hitRatio = total > 0 ? (double) hits / total : 1.0;
+                logger.info("Caffeine Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})", name, hitRatio * 100, hits, misses);
+            } else if (cache instanceof CustomRedisCache redisCache && redisConnectionFactory != null) {
+                var hits = redisCache.getCacheHits();
+                var misses = redisCache.getDatabaseHits();
+                var total = hits + misses;
+                var hitRatio = total > 0 ? (double) hits / total : 1.0;
+                logger.info("Redis Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})", name, hitRatio * 100, hits, misses);
             }
         });
+        CustomCaffeineCache.clearAccessed();
     }
 }

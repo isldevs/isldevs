@@ -63,11 +63,6 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
                 })
                 .body(BodyInserters.fromFormData(createTokenRequestParameters(authorizationGrantRequest)))
                 .retrieve()
-                //.onStatus(t -> HttpStatus.isError(t), response ->
-                //        response.bodyToMono(String.class)
-                //                .flatMap(errorBody -> Mono.error(new OAuth2AuthorizationException(
-                //                        "An error occurred while attempting to retrieve the OAuth 2.0 Access Token: " + errorBody)))
-                //)
                 .bodyToMono(String.class)
                 .map(responseBody -> extractTokenResponse(responseBody, clientRegistration))
                 .block();

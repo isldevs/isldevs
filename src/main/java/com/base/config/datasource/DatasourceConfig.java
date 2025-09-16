@@ -17,14 +17,11 @@ package com.base.config.datasource;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -37,8 +34,6 @@ import java.util.Properties;
  */
 @Configuration
 public class DatasourceConfig {
-
-    private final Dotenv env;
 
     @Value("${spring.datasource.url}")
     private String url;
@@ -75,17 +70,6 @@ public class DatasourceConfig {
 
     @Value("${spring.jpa.properties.hibernate.format_sql:true}")
     private String formatSql;
-
-    @Autowired
-    public DatasourceConfig(Environment environment) {
-        var activeProfile = environment.getActiveProfiles()[0];
-        this.env = Dotenv.configure()
-                .directory("./config")
-                .filename("." + activeProfile)
-                .ignoreIfMissing()
-                .load();
-    }
-
 
     @Bean
     public DataSource dataSource() {

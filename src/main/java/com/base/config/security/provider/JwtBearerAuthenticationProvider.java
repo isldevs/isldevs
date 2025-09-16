@@ -110,7 +110,7 @@ public class JwtBearerAuthenticationProvider implements AuthenticationProvider {
                         OAuth2AccessToken.TokenType.BEARER,
                         accessTokenValue,
                         Instant.now(),
-                        Instant.now().plusSeconds(3600)), (token) -> {
+                        Instant.now().plusSeconds(3600)), (_) -> {
                 });
         var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
