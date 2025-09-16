@@ -59,9 +59,6 @@ public class DatasourceConfig {
     @Value("${spring.datasource.hikari.leak-detection-threshold}")
     private int leakDetectionThreshold;
 
-    @Value("${spring.jpa.database-platform}")
-    private String databasePlatform;
-
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String hibernateDdlAuto;
 
