@@ -1,0 +1,12 @@
+LOAD DATABASE
+     FROM mysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}
+     INTO postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}
+
+INCLUDING ONLY TABLE NAMES MATCHING 'TABLE_A'
+INCLUDING ONLY TABLE NAMES MATCHING 'TABLE_B'
+
+WITH include no drop, create tables, create indexes, reset sequences
+
+SET work_mem to '1GB', maintenance_work_mem to '1 GB'
+
+CAST type datetime to timestamptz drop default using zero-dates-to-null;

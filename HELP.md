@@ -350,3 +350,48 @@ sudo netstat -tulpn | grep :8080
 # Kill process if needed
 sudo kill -9 <PID>
 ```
+
+## Migration data from Source(MySQL) to Target(PostgreSQL)
+
+### Install pgloader package
+1. Linux/Mac
+    * sudo apt install pgloader
+
+### Prepare the pgloader Config File
+
+1. **URL-encode MySQL password**
+    - Original password: `Pass@2021!`
+    - URL-encoded: `Pass%402021%21`
+        - `@` → `%40`
+        - `!` → `%21`
+
+2. **Create a pgloader config file** named `mysql_to_pg.load` with the following content:
+
+```lisp
+LOAD DATABASE
+     FROM mysql://DB_USERNAME:Pass%402021%21@{IP}:{PORT}/{DATABASE}
+     INTO postgresql://postgres:password@localhost/isldevs_db
+
+INCLUDING ONLY TABLE NAMES MATCHING 'table_A'
+INCLUDING ONLY TABLE NAMES MATCHING 'table_B'
+
+WITH include no drop, create tables, create indexes, reset sequences
+
+SET work_mem to '16MB', maintenance_work_mem to '512 MB'
+
+-- Convert MySQL datetime → Postgres timestamptz
+CAST type datetime to timestamptz drop default using zero-dates-to-null
+
+WITH SCHEMA MAPPING
+     {DATABASE} TO 'public';
+```
+
+3. **Test Postgres Connection**
+   >mysql -h {IP} -u {DB_USERNAME} -p
+
+   >psql -h {IP} -u {DB_USERNAME} -d isldevs_db
+
+4. **Run migration**
+   ```
+   pgloader mysql_to_pg.load
+   ```
