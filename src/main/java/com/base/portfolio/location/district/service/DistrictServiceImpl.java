@@ -156,6 +156,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
+    @Cacheable(value = "districts", key = "#page + '-' + #size + '-' + #search")
     public Page<DistrictDTO> listDistricts(Integer page, Integer size, String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""

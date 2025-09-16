@@ -137,6 +137,7 @@ public class VillageServiceImpl implements VillageService {
     }
 
     @Override
+    @Cacheable(value = "villages", key = "#page + '-' + #size + '-' + #search")
     public Page<VillageDTO> listVillages(Integer page, Integer size, String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""

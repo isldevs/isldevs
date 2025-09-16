@@ -144,8 +144,9 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
+    @Cacheable(value = "offices", key = "#page + '-' + #size + '-' + #search")
     public Page<OfficeDTO> listOffices(Integer page, Integer size, String search) {
-        Specification<Office> specification = (root, query, sp) -> {
+        Specification<Office> specification = (root, _, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
                 var likeSearch = "%" + search.toLowerCase() + "%";

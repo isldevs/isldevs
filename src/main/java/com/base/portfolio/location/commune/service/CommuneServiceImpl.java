@@ -137,6 +137,7 @@ public class CommuneServiceImpl implements CommuneService {
     }
 
     @Override
+    @Cacheable(value = "communes", key = "#page + '-' + #size + '-' + #search")
     public Page<CommuneDTO> listCommunes(Integer page, Integer size, String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""

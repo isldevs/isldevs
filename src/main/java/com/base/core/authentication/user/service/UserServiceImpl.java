@@ -101,6 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#page + '-' + #size + '-' + #search")
     public Page<UserDTO> listUsers(Integer page, Integer size, String search) {
         Specification<User> specification = (root, query, sp) -> {
             List<Predicate> predicates = new ArrayList<>();

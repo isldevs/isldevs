@@ -139,6 +139,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Cacheable(value = "roles", key = "#page + '-' + #size + '-' + #search")
     public Page<RoleDTO> listRoles(Integer page, Integer size, String search) {
         Specification<Role> specification = (root, query, sp) -> {
             List<Predicate> predicates = new ArrayList<>();

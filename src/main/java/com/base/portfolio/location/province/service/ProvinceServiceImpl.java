@@ -116,6 +116,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
+    @Cacheable(value = "provinces", key = "#page + '-' + #size + '-' + #search")
     public Page<ProvinceDTO> listProvinces(Integer page, Integer size, String search) {
         Specification<Province> specification = (root, query, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
