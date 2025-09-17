@@ -21,7 +21,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.Nullable;
 
@@ -45,19 +44,19 @@ public abstract class CustomAbstractAuditable extends CustomAbstractPersistable 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
     @CreatedDate
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_at")
+    private Date createdAt;
 
     @Nullable
     @LastModifiedBy
-    @Column(name = "last_modified_by")
-    private String lastModifiedBy;
+    @Column(name = "updated_by")
+    private String updatedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Nullable
     @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private Date lastModifiedDate;
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
     public CustomAbstractAuditable() {
     }
@@ -66,23 +65,23 @@ public abstract class CustomAbstractAuditable extends CustomAbstractPersistable 
         return this.createdBy;
     }
 
-    public Optional<LocalDateTime> getCreatedDate() {
-        return this.createdDate == null ? Optional.empty() : Optional.of(LocalDateTime.ofInstant(this.createdDate.toInstant(), ZoneId.systemDefault()));
+    public Optional<LocalDateTime> getCreatedAt() {
+        return this.createdAt == null ? Optional.empty() : Optional.of(LocalDateTime.ofInstant(this.createdAt.toInstant(), ZoneId.systemDefault()));
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant());
+    public void setCreatedAt(LocalDateTime createdDate) {
+        this.createdAt = Date.from(createdDate.atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    public String getLastModifiedBy() {
-        return this.lastModifiedBy;
+    public String getUpdatedBy() {
+        return this.updatedBy;
     }
 
-    public Optional<LocalDateTime> getLastModifiedDate() {
-        return this.lastModifiedDate == null ? Optional.empty() : Optional.of(LocalDateTime.ofInstant(this.lastModifiedDate.toInstant(), ZoneId.systemDefault()));
+    public Optional<LocalDateTime> getUpdatedAt() {
+        return this.updatedAt == null ? Optional.empty() : Optional.of(LocalDateTime.ofInstant(this.updatedAt.toInstant(), ZoneId.systemDefault()));
     }
 
-    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
-        this.lastModifiedDate = Date.from(lastModifiedDate.atZone(ZoneId.systemDefault()).toInstant());
+    public void setUpdatedAt(LocalDateTime lastModifiedDate) {
+        this.updatedAt = Date.from(lastModifiedDate.atZone(ZoneId.systemDefault()).toInstant());
     }
 }
