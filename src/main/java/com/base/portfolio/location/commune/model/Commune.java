@@ -49,8 +49,14 @@ public class Commune extends CustomAbstractAuditable {
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "name_en", nullable = false)
+    private String nameEn;
+
+    @Column(name = "name_km", nullable = false)
+    private String nameKm;
+
+    @Column(name = "name_zh", nullable = false)
+    private String nameZh;
 
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
@@ -61,12 +67,16 @@ public class Commune extends CustomAbstractAuditable {
     public static Commune fromJson(final District district, final JsonCommand command) {
 
         final var type = command.extractString(CommuneConstants.TYPE);
-        final var name = command.extractString(CommuneConstants.NAME);
+        final var nameEn = command.extractString(CommuneConstants.NAME_EN);
+        final var nameKm = command.extractString(CommuneConstants.NAME_KM);
+        final var nameZh = command.extractString(CommuneConstants.NAME_ZH);
         final var postalCode = command.extractString(CommuneConstants.POSTAL_CODE);
 
         return Commune.builder()
                 .district(district)
-                .name(name)
+                .nameEn(nameEn)
+                .nameKm(nameKm)
+                .nameZh(nameZh)
                 .postalCode(postalCode)
                 .type(type)
                 .build();
@@ -85,10 +95,20 @@ public class Commune extends CustomAbstractAuditable {
             this.type = type;
             changes.put(CommuneConstants.TYPE, type);
         }
-        if (command.isChangeAsString(CommuneConstants.NAME, this.name)) {
-            final var name = command.extractString(CommuneConstants.NAME);
-            this.name = name;
-            changes.put(CommuneConstants.NAME, name);
+        if (command.isChangeAsString(CommuneConstants.NAME_EN, this.nameEn)) {
+            final var nameEn = command.extractString(CommuneConstants.NAME_EN);
+            this.nameEn = nameEn;
+            changes.put(CommuneConstants.NAME_EN, nameEn);
+        }
+        if (command.isChangeAsString(CommuneConstants.NAME_KM, this.nameKm)) {
+            final var nameKm = command.extractString(CommuneConstants.NAME_KM);
+            this.nameKm = nameKm;
+            changes.put(CommuneConstants.NAME_KM, nameKm);
+        }
+        if (command.isChangeAsString(CommuneConstants.NAME_ZH, this.nameZh)) {
+            final var nameZh = command.extractString(CommuneConstants.NAME_ZH);
+            this.nameZh = nameZh;
+            changes.put(CommuneConstants.NAME_ZH, nameZh);
         }
         if (command.isChangeAsString(CommuneConstants.POSTAL_CODE, this.postalCode)) {
             final var postalCode = command.extractString(CommuneConstants.POSTAL_CODE);

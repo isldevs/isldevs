@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.service;
+package com.base.portfolio.location.province.dto.village.service;
 
 
 import com.base.core.command.data.JsonCommand;
-import com.base.portfolio.location.village.dto.VillageDTO;
+import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 

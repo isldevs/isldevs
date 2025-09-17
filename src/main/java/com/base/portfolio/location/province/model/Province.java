@@ -43,8 +43,14 @@ public class Province extends CustomAbstractAuditable {
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "name_en", nullable = false)
+    private String nameEn;
+
+    @Column(name = "name_km", nullable = false)
+    private String nameKm;
+
+    @Column(name = "name_zh", nullable = false)
+    private String nameZh;
 
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
@@ -56,11 +62,15 @@ public class Province extends CustomAbstractAuditable {
     }
 
     public Province(final String type,
-                    final String name,
+                    final String nameEn,
+                    final String nameKm,
+                    final String nameZh,
                     final String postalCode,
                     final Set<District> districts) {
         this.type = type;
-        this.name = name;
+        this.nameEn = nameEn;
+        this.nameKm = nameKm;
+        this.nameZh = nameZh;
         this.postalCode = postalCode;
         this.districts = districts;
         if (this.districts != null && !this.districts.isEmpty()) {
@@ -71,11 +81,13 @@ public class Province extends CustomAbstractAuditable {
     public static Province fromJson(JsonCommand command) {
 
         final var type = command.extractString(ProvinceConstants.TYPE);
-        final var name = command.extractString(ProvinceConstants.NAME);
+        final var nameEn = command.extractString(ProvinceConstants.NAME_EN);
+        final var nameKm = command.extractString(ProvinceConstants.NAME_KM);
+        final var nameZh = command.extractString(ProvinceConstants.NAME_ZH);
         final var postalCode = command.extractString(ProvinceConstants.POSTAL_CODE);
         final Set<District> districts = command.extractArrayAs(ProvinceConstants.DISTRICT, District.class);
 
-        return new Province(type, name, postalCode, districts);
+        return new Province(type, nameEn, nameKm, nameZh, postalCode, districts);
     }
 
     public Map<String, Object> changed(JsonCommand command) {
@@ -87,10 +99,20 @@ public class Province extends CustomAbstractAuditable {
             this.type = type;
             changes.put(ProvinceConstants.TYPE, type);
         }
-        if (command.isChangeAsString(ProvinceConstants.NAME, this.name)) {
-            final var name = command.extractString(ProvinceConstants.NAME);
-            this.name = name;
-            changes.put(ProvinceConstants.NAME, name);
+        if (command.isChangeAsString(ProvinceConstants.NAME_EN, this.nameEn)) {
+            final var nameEn = command.extractString(ProvinceConstants.NAME_EN);
+            this.nameEn = nameEn;
+            changes.put(ProvinceConstants.NAME_EN, nameEn);
+        }
+        if (command.isChangeAsString(ProvinceConstants.NAME_KM, this.nameKm)) {
+            final var nameKm = command.extractString(ProvinceConstants.NAME_KM);
+            this.nameKm = nameKm;
+            changes.put(ProvinceConstants.NAME_KM, nameKm);
+        }
+        if (command.isChangeAsString(ProvinceConstants.NAME_ZH, this.nameZh)) {
+            final var nameZh = command.extractString(ProvinceConstants.NAME_ZH);
+            this.nameZh = nameZh;
+            changes.put(ProvinceConstants.NAME_ZH, nameZh);
         }
         if (command.isChangeAsString(ProvinceConstants.POSTAL_CODE, this.postalCode)) {
             final var postalCode = command.extractString(ProvinceConstants.POSTAL_CODE);

@@ -42,7 +42,8 @@ public class DistrictDataValidation {
 
     public void create(String json) {
 
-        final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, DistrictConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
@@ -53,8 +54,14 @@ public class DistrictDataValidation {
         final var type = this.jsonHelper.extractString(DistrictConstants.TYPE, jsonElement);
         validator.parameter(DistrictConstants.TYPE, type).isString().notEmpty().maxLength(50);
 
-        final var name = this.jsonHelper.extractString(DistrictConstants.NAME, jsonElement);
-        validator.parameter(DistrictConstants.NAME, name).isString().notEmpty().maxLength(100);
+        final var nameEn = this.jsonHelper.extractString(DistrictConstants.NAME_EN, jsonElement);
+        validator.parameter(DistrictConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+
+        final var nameKm = this.jsonHelper.extractString(DistrictConstants.NAME_KM, jsonElement);
+        validator.parameter(DistrictConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+
+        final var nameZh = this.jsonHelper.extractString(DistrictConstants.NAME_ZH, jsonElement);
+        validator.parameter(DistrictConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
 
         final var postalCode = this.jsonHelper.extractString(DistrictConstants.POSTAL_CODE, jsonElement);
         validator.parameter(DistrictConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
@@ -66,7 +73,8 @@ public class DistrictDataValidation {
     }
 
     public void update(String json) {
-        final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final var typeOfMap = new TypeToken<Map<String, Object>>() {
+        }.getType();
         this.jsonHelper.unsupportedParameters(typeOfMap, json, DistrictConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
@@ -79,9 +87,17 @@ public class DistrictDataValidation {
             final var type = this.jsonHelper.extractString(DistrictConstants.TYPE, jsonElement);
             validator.parameter(DistrictConstants.TYPE, type).isString().notEmpty().maxLength(50);
         }
-        if (this.jsonHelper.parameterExists(DistrictConstants.NAME, jsonElement)) {
-            final var name = this.jsonHelper.extractString(DistrictConstants.NAME, jsonElement);
-            validator.parameter(DistrictConstants.NAME, name).isString().notEmpty().maxLength(100);
+        if (this.jsonHelper.parameterExists(DistrictConstants.NAME_EN, jsonElement)) {
+            final var nameEn = this.jsonHelper.extractString(DistrictConstants.NAME_EN, jsonElement);
+            validator.parameter(DistrictConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(DistrictConstants.NAME_KM, jsonElement)) {
+            final var nameKm = this.jsonHelper.extractString(DistrictConstants.NAME_KM, jsonElement);
+            validator.parameter(DistrictConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(DistrictConstants.NAME_ZH, jsonElement)) {
+            final var nameZh = this.jsonHelper.extractString(DistrictConstants.NAME_ZH, jsonElement);
+            validator.parameter(DistrictConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
         }
         if (this.jsonHelper.parameterExists(DistrictConstants.POSTAL_CODE, jsonElement)) {
             final var postalCode = this.jsonHelper.extractString(DistrictConstants.POSTAL_CODE, jsonElement);

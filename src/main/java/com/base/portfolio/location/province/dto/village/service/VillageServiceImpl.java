@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.service;
+package com.base.portfolio.location.province.dto.village.service;
 
 
 import com.base.core.command.data.JsonCommand;
@@ -22,11 +22,11 @@ import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
 import com.base.portfolio.location.commune.model.Commune;
 import com.base.portfolio.location.commune.repository.CommuneRepository;
-import com.base.portfolio.location.village.controller.VillageConstants;
-import com.base.portfolio.location.village.dto.VillageDTO;
-import com.base.portfolio.location.village.model.Village;
-import com.base.portfolio.location.village.repository.VillageRepository;
-import com.base.portfolio.location.village.validation.VillageDataValidation;
+import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
+import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
+import com.base.portfolio.location.province.dto.village.model.Village;
+import com.base.portfolio.location.province.dto.village.repository.VillageRepository;
+import com.base.portfolio.location.province.dto.village.validation.VillageDataValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -141,9 +141,8 @@ public class VillageServiceImpl implements VillageService {
     public Page<VillageDTO> listVillages(Integer page, Integer size, String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""
-                    SELECT v.id, v.commune_id, v.name, v.postal_code,
-                        c.name as commune_name, c.type as commune_type, c.postal_code as commune_postal_code
-                    """);
+                SELECT v.id, v.commune_id, v.name_en, v.name_km, v.name_zh, v.postal_code
+            """);
 
             StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM village v ");
 
@@ -152,45 +151,45 @@ public class VillageServiceImpl implements VillageService {
 
             if (search != null && !search.isEmpty()) {
                 sqlBuilder.append("""
-                        , GREATEST(s.name_sim, s.postal_sim) AS max_similarity
-                        FROM commune c
-                        LEFT JOIN village d ON c.village_id = d.id
-                        CROSS JOIN LATERAL (
-                            SELECT
-                                similarity(?, c.name) as name_sim,
-                                similarity(?, c.postal_code) as postal_sim
-                        ) s
-                        WHERE s.name_sim >= ? OR s.postal_sim >= ?
-                        ORDER BY max_similarity DESC
-                        """);
+                    , GREATEST(s.name_en_sim, s.name_km_sim, s.name_zh_sim, s.type_sim, s.postal_sim) AS max_similarity
+                    FROM village v
+                    CROSS JOIN LATERAL (
+                        SELECT
+                            similarity(?, v.name_en) as name_en_sim,
+                            similarity(?, v.name_km) as name_km_sim,
+                            similarity(?, v.name_zh) as name_zh_sim,
+                            similarity(?, v.postal_code) as postal_sim
+                    ) s
+                    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
+                    ORDER BY max_similarity DESC
+                """);
 
                 countSqlBuilder.append("""
-                        CROSS JOIN LATERAL (
-                            SELECT
-                                similarity(?, c.name) as name_sim,
-                                similarity(?, c.postal_code) as postal_sim
-                        ) s
-                        WHERE s.name_sim >= ? OR s.postal_sim >= ?
-                        """);
+                    CROSS JOIN LATERAL (
+                        SELECT
+                            similarity(?, v.name_en) as name_en_sim,
+                            similarity(?, v.name_km) as name_km_sim,
+                            similarity(?, v.name_zh) as name_zh_sim,
+                            similarity(?, v.postal_code) as postal_sim
+                    ) s
+                    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
+                """);
 
                 double threshold = 0.2;
-                IntStream.range(0, 3).forEach(i -> {
+                IntStream.range(0, 3).forEach(_ -> {
                     params.add(search);
                     countParams.add(search);
                 });
-                IntStream.range(0, 3).forEach(i -> {
+                IntStream.range(0, 3).forEach(_ -> {
                     params.add(threshold);
                     countParams.add(threshold);
                 });
 
             } else {
                 sqlBuilder.append("""
-                        FROM village v
-                        LEFT JOIN commune c ON v.commune_id = c.id
-                        ORDER BY v.name ASC
-                        """);
-
-                countSqlBuilder.append(" WHERE 1=1");
+                    FROM village v
+                    ORDER BY v.id ASC
+                """);
             }
 
             final String sql = sqlBuilder.toString();
@@ -214,6 +213,7 @@ public class VillageServiceImpl implements VillageService {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ErrorException("msg.internal.error", "Error fetching villages list", e);
         }
     }
@@ -222,7 +222,9 @@ public class VillageServiceImpl implements VillageService {
         return VillageDTO.builder()
                 .id(rs.getLong("id"))
                 .communeId(rs.getLong("commune_id"))
-                .name(rs.getString("name"))
+                .nameEn(rs.getString("name_en"))
+                .nameKm(rs.getString("name_km"))
+                .nameZh(rs.getString("name_zh"))
                 .postalCode(rs.getString("postal_code"))
                 .build();
     }

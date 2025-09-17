@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.controller;
+package com.base.portfolio.location.province.dto.village.controller;
 
 
 import java.util.Arrays;
@@ -31,8 +31,10 @@ public class VillageConstants {
     public static final String ID = "id";
     public static final String COMMUNE = "communeId";
     public static final String TYPE = "type";
-    public static final String NAME = "name";
+    public static final String NAME_EN = "nameEn";
+    public static final String NAME_KM = "nameKm";
+    public static final String NAME_ZH = "nameZh";
     public static final String POSTAL_CODE = "postalCode";
 
-    public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ID, COMMUNE, TYPE, NAME, POSTAL_CODE));
+    public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ID, COMMUNE, TYPE, NAME_EN, NAME_KM, NAME_ZH, POSTAL_CODE));
 }

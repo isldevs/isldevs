@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.handler;
+package com.base.portfolio.location.province.dto.village.handler;
+
 
 import com.base.core.annotation.CommandType;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
-import com.base.portfolio.location.village.controller.VillageConstants;
-import com.base.portfolio.location.village.service.VillageService;
+import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
+import com.base.portfolio.location.province.dto.village.service.VillageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,18 +32,18 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@CommandType(action = "UPDATE", entity = VillageConstants.PERMISSION)
-public class UpdateVillageHandlerProcessing implements CommandHandlerProcessing {
+@CommandType(action = "DELETE", entity = VillageConstants.PERMISSION)
+public class DeleteVillageHandlerProcessing implements CommandHandlerProcessing {
 
     private final VillageService service;
 
     @Autowired
-    public UpdateVillageHandlerProcessing(VillageService service) {
+    public DeleteVillageHandlerProcessing(VillageService service) {
         this.service = service;
     }
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateVillage(command.getId(), command);
+        return this.service.deleteVillage(command.getId());
     }
 }

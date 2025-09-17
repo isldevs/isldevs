@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.dto;
+package com.base.portfolio.location.province.dto.village.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +32,12 @@ public class VillageDTO {
 
     private Long id;
     private Long communeId;
-    private String name;
+    @JsonProperty("nameEn")
+    private String nameEn;
+    @JsonProperty("nameKm")
+    private String nameKm;
+    @JsonProperty("nameZh")
+    private String nameZh;
     @JsonProperty("postalCode")
     private String postalCode;
 

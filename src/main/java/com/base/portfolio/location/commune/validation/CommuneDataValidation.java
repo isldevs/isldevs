@@ -53,8 +53,14 @@ public class CommuneDataValidation {
         final var type = this.jsonHelper.extractString(CommuneConstants.TYPE, jsonElement);
         validator.parameter(CommuneConstants.TYPE, type).isString().notEmpty().maxLength(50);
 
-        final var name = this.jsonHelper.extractString(CommuneConstants.NAME, jsonElement);
-        validator.parameter(CommuneConstants.NAME, name).isString().notEmpty().maxLength(100);
+        final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN, jsonElement);
+        validator.parameter(CommuneConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+
+        final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM, jsonElement);
+        validator.parameter(CommuneConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+
+        final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH, jsonElement);
+        validator.parameter(CommuneConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
 
         final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE, jsonElement);
         validator.parameter(CommuneConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
@@ -74,9 +80,17 @@ public class CommuneDataValidation {
             final var type = this.jsonHelper.extractString(CommuneConstants.TYPE, jsonElement);
             validator.parameter(CommuneConstants.TYPE, type).isString().notEmpty().maxLength(50);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.NAME, jsonElement)) {
-            final var name = this.jsonHelper.extractString(CommuneConstants.NAME, jsonElement);
-            validator.parameter(CommuneConstants.NAME, name).isString().notEmpty().maxLength(100);
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_EN, jsonElement)) {
+            final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN, jsonElement);
+            validator.parameter(CommuneConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_KM, jsonElement)) {
+            final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM, jsonElement);
+            validator.parameter(CommuneConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_ZH, jsonElement)) {
+            final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH, jsonElement);
+            validator.parameter(CommuneConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
         }
         if (this.jsonHelper.parameterExists(CommuneConstants.POSTAL_CODE, jsonElement)) {
             final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE, jsonElement);

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.controller;
+package com.base.portfolio.location.province.dto.village.controller;
 
 import com.base.core.command.service.LogService;
 import com.base.core.pageable.PageableHateoasAssembler;
 import com.base.core.serializer.JsonSerializerImpl;
-import com.base.portfolio.location.village.dto.VillageDTO;
-import com.base.portfolio.location.village.handler.VillageCommandHandler;
-import com.base.portfolio.location.village.service.VillageService;
+import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
+import com.base.portfolio.location.province.dto.village.handler.VillageCommandHandler;
+import com.base.portfolio.location.province.dto.village.service.VillageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

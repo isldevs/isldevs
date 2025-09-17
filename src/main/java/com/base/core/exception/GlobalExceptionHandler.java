@@ -19,8 +19,10 @@ package com.base.core.exception;
 import com.base.config.security.service.SecurityContext;
 import com.base.core.data.ErrorData;
 import com.base.portfolio.file.controller.FileConstants;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,6 +103,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ErrorData> handleGenericException(IOException ex, Locale locale) {
         var localizedMessage  = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), locale);
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
+    public ResponseEntity<ErrorData> invalidDataAccessResourceUsageException(InvalidDataAccessResourceUsageException ex, Locale locale) {
+        var localizedMessage  = messageSource.getMessage("msg.internal.error", null, ex.getMessage(), locale);
         return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, localizedMessage, ex.getMessage(), null);
     }
 

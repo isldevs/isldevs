@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.village.validation;
+package com.base.portfolio.location.province.dto.village.validation;
 
 import com.base.config.serialization.JsonHelper;
 import com.base.core.exception.ApiDataValidator;
-import com.base.portfolio.location.village.controller.VillageConstants;
+import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,8 +53,14 @@ public class VillageDataValidation {
         final var type = this.jsonHelper.extractString(VillageConstants.TYPE, jsonElement);
         validator.parameter(VillageConstants.TYPE, type).isString().notEmpty().maxLength(50);
 
-        final var name = this.jsonHelper.extractString(VillageConstants.NAME, jsonElement);
-        validator.parameter(VillageConstants.NAME, name).isString().notEmpty().maxLength(100);
+        final var nameEn = this.jsonHelper.extractString(VillageConstants.NAME_EN, jsonElement);
+        validator.parameter(VillageConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+
+        final var nameKm = this.jsonHelper.extractString(VillageConstants.NAME_KM, jsonElement);
+        validator.parameter(VillageConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+
+        final var nameZh = this.jsonHelper.extractString(VillageConstants.NAME_ZH, jsonElement);
+        validator.parameter(VillageConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
 
         final var postalCode = this.jsonHelper.extractString(VillageConstants.POSTAL_CODE, jsonElement);
         validator.parameter(VillageConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
@@ -74,9 +80,17 @@ public class VillageDataValidation {
             final var type = this.jsonHelper.extractString(VillageConstants.TYPE, jsonElement);
             validator.parameter(VillageConstants.TYPE, type).isString().notEmpty().maxLength(50);
         }
-        if (this.jsonHelper.parameterExists(VillageConstants.NAME, jsonElement)) {
-            final var name = this.jsonHelper.extractString(VillageConstants.NAME, jsonElement);
-            validator.parameter(VillageConstants.NAME, name).isString().notEmpty().maxLength(100);
+        if (this.jsonHelper.parameterExists(VillageConstants.NAME_EN, jsonElement)) {
+            final var nameEn = this.jsonHelper.extractString(VillageConstants.NAME_EN, jsonElement);
+            validator.parameter(VillageConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(VillageConstants.NAME_KM, jsonElement)) {
+            final var nameKm = this.jsonHelper.extractString(VillageConstants.NAME_KM, jsonElement);
+            validator.parameter(VillageConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+        }
+        if (this.jsonHelper.parameterExists(VillageConstants.NAME_ZH, jsonElement)) {
+            final var nameZh = this.jsonHelper.extractString(VillageConstants.NAME_ZH, jsonElement);
+            validator.parameter(VillageConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
         }
         if (this.jsonHelper.parameterExists(VillageConstants.POSTAL_CODE, jsonElement)) {
             final var postalCode = this.jsonHelper.extractString(VillageConstants.POSTAL_CODE, jsonElement);

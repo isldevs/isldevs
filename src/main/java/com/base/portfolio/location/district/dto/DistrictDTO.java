@@ -36,7 +36,12 @@ public class DistrictDTO {
     private Long id;
     private Long provinceId;
     private String type;
-    private String name;
+    @JsonProperty("nameEn")
+    private String nameEn;
+    @JsonProperty("nameKm")
+    private String nameKm;
+    @JsonProperty("nameZh")
+    private String nameZh;
     @JsonProperty("postalCode")
     private String postalCode;
     private List<CommuneDTO> communes;

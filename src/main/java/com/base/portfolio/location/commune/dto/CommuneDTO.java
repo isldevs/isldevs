@@ -15,9 +15,12 @@
  */
 package com.base.portfolio.location.commune.dto;
 
+import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+
+import java.util.List;
 
 /**
  * @author YISivlay
@@ -33,9 +36,15 @@ public class CommuneDTO {
     private Long id;
     private Long districtId;
     private String type;
-    private String name;
+    @JsonProperty("nameEn")
+    private String nameEn;
+    @JsonProperty("nameKm")
+    private String nameKm;
+    @JsonProperty("nameZh")
+    private String nameZh;
     @JsonProperty("postalCode")
     private String postalCode;
+    private List<VillageDTO> villages;
 
 
 }

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author YISivlay
@@ -35,10 +35,15 @@ public class ProvinceDTO {
 
     private Long id;
     private String type;
-    private String name;
+    @JsonProperty("nameEn")
+    private String nameEn;
+    @JsonProperty("nameKm")
+    private String nameKm;
+    @JsonProperty("nameZh")
+    private String nameZh;
     @JsonProperty("postalCode")
     private String postalCode;
-    private Set<DistrictDTO> districts;
+    private List<DistrictDTO> districts;
 
 
 }
