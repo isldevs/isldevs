@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.service;
+package com.base.portfolio.location.village.service;
 
 
 import com.base.core.command.data.JsonCommand;
@@ -22,11 +22,11 @@ import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
 import com.base.portfolio.location.commune.model.Commune;
 import com.base.portfolio.location.commune.repository.CommuneRepository;
-import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
-import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
-import com.base.portfolio.location.province.dto.village.model.Village;
-import com.base.portfolio.location.province.dto.village.repository.VillageRepository;
-import com.base.portfolio.location.province.dto.village.validation.VillageDataValidation;
+import com.base.portfolio.location.village.controller.VillageConstants;
+import com.base.portfolio.location.village.dto.VillageDTO;
+import com.base.portfolio.location.village.model.Village;
+import com.base.portfolio.location.village.repository.VillageRepository;
+import com.base.portfolio.location.village.validation.VillageDataValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

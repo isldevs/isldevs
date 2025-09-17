@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.validation;
+package com.base.portfolio.location.village.validation;
 
 import com.base.config.serialization.JsonHelper;
 import com.base.core.exception.ApiDataValidator;
-import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
+import com.base.portfolio.location.village.controller.VillageConstants;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

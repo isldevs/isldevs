@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.controller;
+package com.base.portfolio.location.village.controller;
 
 
 import java.util.Arrays;

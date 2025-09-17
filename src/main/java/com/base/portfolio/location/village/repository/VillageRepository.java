@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.repository;
+package com.base.portfolio.location.village.repository;
 
 
-import com.base.portfolio.location.province.dto.village.model.Village;
+import com.base.portfolio.location.village.model.Village;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

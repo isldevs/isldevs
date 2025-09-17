@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.handler;
+package com.base.portfolio.location.village.handler;
 
 import com.base.core.command.data.CommandBuilder;
-import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
+import com.base.portfolio.location.village.controller.VillageConstants;
 
 /**
  * @author YISivlay

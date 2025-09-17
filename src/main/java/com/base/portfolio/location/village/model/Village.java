@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.portfolio.location.province.dto.village.model;
+package com.base.portfolio.location.village.model;
 
 
 import com.base.core.auditable.CustomAbstractAuditable;
 import com.base.core.command.data.JsonCommand;
 import com.base.portfolio.location.commune.model.Commune;
-import com.base.portfolio.location.province.dto.village.controller.VillageConstants;
+import com.base.portfolio.location.village.controller.VillageConstants;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

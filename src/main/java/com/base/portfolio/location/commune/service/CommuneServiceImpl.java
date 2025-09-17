@@ -27,7 +27,7 @@ import com.base.portfolio.location.commune.repository.CommuneRepository;
 import com.base.portfolio.location.commune.validation.CommuneDataValidation;
 import com.base.portfolio.location.district.model.District;
 import com.base.portfolio.location.district.repository.DistrictRepository;
-import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
+import com.base.portfolio.location.village.dto.VillageDTO;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;

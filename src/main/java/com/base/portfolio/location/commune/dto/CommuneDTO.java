@@ -15,7 +15,7 @@
  */
 package com.base.portfolio.location.commune.dto;
 
-import com.base.portfolio.location.province.dto.village.dto.VillageDTO;
+import com.base.portfolio.location.village.dto.VillageDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
