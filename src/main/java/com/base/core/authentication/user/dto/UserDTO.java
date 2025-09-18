@@ -20,7 +20,6 @@ import com.base.core.authentication.user.model.User;
 import com.base.core.exception.NotFoundException;
 import com.base.portfolio.file.repository.FileUtils;
 import com.base.portfolio.file.service.FileService;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,14 +35,8 @@ public class UserDTO {
     private String email;
     private Set<String> roles;
     private boolean enabled;
-
-    @JsonProperty("accountNonExpired")
     private boolean accountNonExpired;
-
-    @JsonProperty("accountNonLocked")
     private boolean accountNonLocked;
-
-    @JsonProperty("credentialsNonExpired")
     private boolean credentialsNonExpired;
     private String profile;
 

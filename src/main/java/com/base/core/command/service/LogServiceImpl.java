@@ -20,7 +20,6 @@ import com.base.core.annotation.CommandTypeProvider;
 import com.base.core.authentication.user.model.User;
 import com.base.core.command.data.Command;
 import com.base.core.command.data.JsonCommand;
-import com.base.core.command.data.LogData;
 import com.base.core.command.model.Logs;
 import com.base.core.command.repository.LogRepository;
 import com.base.core.serializer.JsonDelegator;

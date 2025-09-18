@@ -15,14 +15,11 @@
  */
 package com.base.portfolio.file.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 /**
  * @author YISivlay
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record FileDTO(Long id,
                       String entity,

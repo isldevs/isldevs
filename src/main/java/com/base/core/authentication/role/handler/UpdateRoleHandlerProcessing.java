@@ -20,7 +20,6 @@ import com.base.core.annotation.CommandType;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.role.service.RoleService;
 import com.base.core.command.data.JsonCommand;
-import com.base.core.command.data.LogData;
 import com.base.core.command.service.CommandHandlerProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = "users", key = "#page + '-' + #size + '-' + #search")
     public Page<UserDTO> listUsers(Integer page, Integer size, String search) {
-        Specification<User> specification = (root, query, sp) -> {
+        Specification<User> specification = (root, _, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isBlank()) {
                 predicates.add(sp.like(sp.lower(root.get("username")), "%" + search.toLowerCase() + "%"));

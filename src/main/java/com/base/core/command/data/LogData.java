@@ -50,7 +50,7 @@ public class LogData implements Serializable {
 
     public static class Builder {
 
-        private Map<String, Object> claims = new LinkedHashMap<>();
+        private final Map<String, Object> claims = new LinkedHashMap<>();
 
         public Builder() {
         }

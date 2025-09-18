@@ -19,7 +19,6 @@ package com.base.core.authentication.user.handler;
 import com.base.core.annotation.CommandType;
 import com.base.core.authentication.user.controller.UserConstants;
 import com.base.core.authentication.user.service.UserService;
-import com.base.core.command.data.LogData;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import org.springframework.beans.factory.annotation.Autowired;

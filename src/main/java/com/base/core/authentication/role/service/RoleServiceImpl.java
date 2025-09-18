@@ -141,7 +141,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Cacheable(value = "roles", key = "#page + '-' + #size + '-' + #search")
     public Page<RoleDTO> listRoles(Integer page, Integer size, String search) {
-        Specification<Role> specification = (root, query, sp) -> {
+        Specification<Role> specification = (root, _, sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
                 predicates.add(sp.like(root.get("name"), "%" + search.toLowerCase() + "%"));

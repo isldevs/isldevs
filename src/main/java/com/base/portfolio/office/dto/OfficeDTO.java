@@ -15,9 +15,6 @@
  */
 package com.base.portfolio.office.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -28,29 +25,16 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OfficeDTO {
 
     private Long id;
     private OfficeDTO parent;
     private String decorated;
-
-    @JsonProperty("nameEn")
     private String nameEn;
-
-    @JsonProperty("nameKm")
     private String nameKm;
-
-    @JsonProperty("nameZh")
     private String nameZh;
-
-    @JsonProperty("hierarchyEn")
     private String hierarchyEn;
-
-    @JsonProperty("hierarchyKm")
     private String hierarchyKm;
-
-    @JsonProperty("hierarchyZh")
     private String hierarchyZh;
     private String profile;
 

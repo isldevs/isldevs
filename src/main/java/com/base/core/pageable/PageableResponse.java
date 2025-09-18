@@ -17,8 +17,6 @@ package com.base.core.pageable;
 
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,24 +34,16 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PageableResponse<T> {
 
-    @JsonProperty("embedded")
     private EmbeddedContent<T> embedded;
-
-    @JsonProperty("links")
     private Map<String, Link> links;
-
-    @JsonProperty("page")
     private PageMetadata page;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class EmbeddedContent<T> {
 
         @JsonIgnore
@@ -68,7 +58,7 @@ public class PageableResponse<T> {
         }
 
         @JsonAnySetter
-        public void setDynamicProperties(String key, List<T> value) {
+        public void setDynamicProperties(List<T> value) {
             this.content = value;
         }
     }
@@ -77,13 +67,10 @@ public class PageableResponse<T> {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class PageMetadata {
 
         private Integer size;
-        @JsonProperty("totalElements")
         private Long totalElements;
-        @JsonProperty("totalPages")
         private Integer totalPages;
         private Integer number;
 

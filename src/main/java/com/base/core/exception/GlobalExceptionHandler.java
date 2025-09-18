@@ -19,7 +19,6 @@ package com.base.core.exception;
 import com.base.config.security.service.SecurityContext;
 import com.base.core.data.ErrorData;
 import com.base.portfolio.file.controller.FileConstants;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -37,7 +36,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -28,7 +28,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.Link;
+
+import java.text.SimpleDateFormat;
 
 /**
  * @author YISivlay
@@ -41,15 +44,11 @@ public class JsonConfig {
         return builder -> {
             builder.serializers(new PageableResponseSerializer());
             builder.serializers(new PageableJsonSerializer());
-            builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-            builder.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
-            builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
         };
     }
 
     @Bean
+    @Primary
     @SuppressWarnings("unchecked")
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -58,8 +57,12 @@ public class JsonConfig {
         module.addSerializer((Class<PageableResponse<?>>)(Class<?>) PageableResponse.class, new PageableResponseSerializer());
         module.addSerializer(Link.class, new PageableJsonSerializer());
         mapper.registerModule(module);
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        mapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
 
         return mapper;
     }

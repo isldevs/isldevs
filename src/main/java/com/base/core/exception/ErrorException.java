@@ -20,9 +20,6 @@ import org.springframework.http.HttpStatus;
 /**
  * @author YISivlay
  */
-/**
- * @author YISivlay
- */
 public class ErrorException extends RuntimeException {
 
     private final Object[] args;

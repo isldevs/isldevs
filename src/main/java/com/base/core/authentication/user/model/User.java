@@ -308,8 +308,7 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User)) return false;
-        User user = (User) o;
+        if (!(o instanceof User user)) return false;
         return this.getId() != null && this.getId().equals(user.getId());
     }
 

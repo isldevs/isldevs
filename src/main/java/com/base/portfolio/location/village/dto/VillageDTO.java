@@ -15,8 +15,6 @@
  */
 package com.base.portfolio.location.village.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -27,18 +25,13 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VillageDTO {
 
     private Long id;
     private Long communeId;
-    @JsonProperty("nameEn")
     private String nameEn;
-    @JsonProperty("nameKm")
     private String nameKm;
-    @JsonProperty("nameZh")
     private String nameZh;
-    @JsonProperty("postalCode")
     private String postalCode;
 
 
