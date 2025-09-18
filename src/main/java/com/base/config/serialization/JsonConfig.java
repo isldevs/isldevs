@@ -17,19 +17,15 @@ package com.base.config.serialization;
 
 
 import com.base.core.pageable.PageableJsonSerializer;
-import com.base.core.pageable.PageableResponse;
 import com.base.core.pageable.PageableResponseSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.hateoas.Link;
 
 import java.text.SimpleDateFormat;
 
@@ -42,29 +38,19 @@ public class JsonConfig {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> {
-            builder.serializers(new PageableResponseSerializer());
-            builder.serializers(new PageableJsonSerializer());
+
+            SimpleModule module = new SimpleModule();
+            module.addSerializer(new PageableResponseSerializer());
+            module.addSerializer(new PageableJsonSerializer());
+            builder.modules(module);
+
+            builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
+            builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+            builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+            builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
+            builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
         };
-    }
-
-    @Bean
-    @Primary
-    @SuppressWarnings("unchecked")
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        SimpleModule module = new SimpleModule();
-        module.addSerializer((Class<PageableResponse<?>>)(Class<?>) PageableResponse.class, new PageableResponseSerializer());
-        module.addSerializer(Link.class, new PageableJsonSerializer());
-        mapper.registerModule(module);
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        mapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
-
-        return mapper;
     }
 
 }

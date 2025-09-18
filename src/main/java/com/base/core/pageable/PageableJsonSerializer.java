@@ -17,8 +17,8 @@ package com.base.core.pageable;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.hateoas.Link;
 
 import java.io.IOException;
@@ -26,7 +26,11 @@ import java.io.IOException;
 /**
  * @author YISivlay
  */
-public class PageableJsonSerializer extends JsonSerializer<Link> {
+public class PageableJsonSerializer extends StdSerializer<Link> {
+
+    public PageableJsonSerializer() {
+        super(Link.class);
+    }
 
     @Override
     public void serialize(Link link, JsonGenerator generator, SerializerProvider serializerProvider) throws IOException {

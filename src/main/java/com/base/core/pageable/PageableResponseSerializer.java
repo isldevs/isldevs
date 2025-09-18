@@ -17,8 +17,8 @@ package com.base.core.pageable;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,29 +26,33 @@ import java.util.List;
 /**
  * @author YISivlay
  */
-public class PageableResponseSerializer extends JsonSerializer<PageableResponse<?>> {
+public class PageableResponseSerializer extends StdSerializer<PageableResponse> {
+
+    public PageableResponseSerializer() {
+        super(PageableResponse.class);
+    }
 
     @Override
-    public void serialize(PageableResponse<?> response, JsonGenerator generator, SerializerProvider serializerProvider) throws IOException {
-        generator.writeStartObject();
+    public void serialize(PageableResponse pageableResponse, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        jsonGenerator.writeStartObject();
 
-        generator.writeObjectFieldStart("embedded");
-        if (response.getEmbedded() != null && response.getEmbedded().getContent() != null) {
-            List<?> content = response.getEmbedded().getContent();
+        jsonGenerator.writeObjectFieldStart("embedded");
+        if (pageableResponse.getEmbedded() != null && pageableResponse.getEmbedded().getContent() != null) {
+            List<?> content = pageableResponse.getEmbedded().getContent();
             if (!content.isEmpty()) {
-                generator.writeObjectField("contents", content);
+                jsonGenerator.writeObjectField("contents", content);
             }
         }
-        generator.writeEndObject();
+        jsonGenerator.writeEndObject();
 
-        if (response.getLinks() != null) {
-            generator.writeObjectField("links", response.getLinks());
+        if (pageableResponse.getLinks() != null) {
+            jsonGenerator.writeObjectField("links", pageableResponse.getLinks());
         }
 
-        if (response.getPage() != null) {
-            generator.writeObjectField("page", response.getPage());
+        if (pageableResponse.getPage() != null) {
+            jsonGenerator.writeObjectField("page", pageableResponse.getPage());
         }
 
-        generator.writeEndObject();
+        jsonGenerator.writeEndObject();
     }
 }
