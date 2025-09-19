@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -59,6 +60,20 @@ public class KeyIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCo
                         .map(GrantedAuthority::getAuthority)
                         .filter(f -> !f.startsWith("ROLE_"))
                         .toList();
+
+                if ("m2m".equalsIgnoreCase(context.getPrincipal().getName())) {
+                    roles = new ArrayList<>();
+                    roles.add("ROLE_M2M");
+
+                    authorities = new ArrayList<>();
+                    authorities.add("INTERNAL");
+                } else if ("microservice".equalsIgnoreCase(context.getPrincipal().getName())) {
+                    roles = new ArrayList<>();
+                    roles.add("ROLE_S2S");
+
+                    authorities = new ArrayList<>();
+                    authorities.add("EXTERNAL");
+                }
 
                 context.getClaims().claim("roles", roles);
                 context.getClaims().claim("authorities", authorities);
