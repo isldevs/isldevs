@@ -25,13 +25,14 @@ The core features include:
 - Login with GitHub, Google, Facebook, and centralized user principal mapping (convert external providers to internal user model)
 - Automatic token exchange and persistence with Spring Security
 
-## ⚙️ Requirement
-- Java 17+
-- Spring Boot 3.5.x
+## ⚙️ Requirements
+- Java 21 (toolchain configured in Gradle)
+- Spring Boot 3.5.4
 - Spring Authorization Server 1.5.x
-- PostgreSQL/MySQL (pluggable via JDBC)
-- Tomcat 10.1.x (embedded with Spring Boot 3.5.x)
-- Gradle build system
+- PostgreSQL/MySQL (via JDBC; dev profile uses PostgreSQL)
+- Tomcat 10.1.39 (embedded; version forced via Gradle resolution strategy)
+- Gradle (Wrapper included)
+- Optional: GraalVM for native image builds
 
 ## ⚙️ Installing
 Build isldevs from the source and install dependencies:
@@ -168,7 +169,7 @@ spring.env.file=classpath:config/.dev
 ```
 
 ### Development
-resources/config/.dev
+application-dev.properties
 ```
 DB_URL=jdbc:{youurl}://localhost:{port}}/db
 DB_USERNAME=youruser
@@ -194,7 +195,7 @@ REDIS_PASSWORD=password
 ```
 
 ### Production
-resources/config/.prod
+application-prod.properties
 ```
 DB_URL=jdbc:{youurl}://localhost:{port}}/db
 DB_USERNAME=youruser
@@ -551,3 +552,115 @@ Dependency locking is enabled via dependencyLocking in build.gradle.
 ./gradlew dependencyUpdates
 ```
 💡 The gradle.lockfile is intentionally located at the project root, following Gradle's standard behavior.
+
+
+---
+
+## 🧰 Stack & Tooling (detected)
+- Language: Java 21
+- Build: Gradle (Wrapper included)
+- Frameworks:
+  - Spring Boot 3.5.4
+  - Spring Web, Spring MVC (embedded Tomcat 10.1.39)
+  - Spring Security + Spring Authorization Server 1.5.x
+  - Spring Data JPA (Hibernate)
+  - Thymeleaf (templates configured under classpath:templates)
+  - Optional: Spring Data Redis (disabled by default)
+  - Flyway (database migrations)
+- Database: PostgreSQL by default in dev profile (JDBC). MySQL possible with driver swap.
+- Native image: GraalVM Native Build Tools plugin
+- Packaging: Bootable JAR and WAR (war plugin enabled)
+
+## ▶️ Entry Points
+- Main class: `com.base.ISLDevsApplication`
+- Spring profile: default `dev` (see `src/main/resources/application.properties`)
+- Web server: Embedded Tomcat (forced to 10.1.39 in Gradle)
+
+## 🚀 How to Run
+- Build and run with the dev profile:
+  - ./gradlew clean build
+  - ./gradlew bootRun -Pspring.profiles.active=dev
+- Switch to prod profile:
+  - ./gradlew bootRun -Pspring.profiles.active=prod
+- Run as JAR after build:
+  - java -Dspring.profiles.active=dev -jar build/libs/isldevs-0.0.1-SNAPSHOT.jar
+- Run as WAR (if deploying to external container):
+  - Produce WAR via: ./gradlew clean build
+  - Deploy generated WAR to a Servlet 6.0+ compatible container (Tomcat 10.1+)
+
+## 🔧 Useful Gradle Tasks (scripts)
+- Application
+  - ./gradlew bootRun — run the app
+  - ./gradlew build — compile and package
+  - ./gradlew test — run unit tests
+- Code quality
+  - ./gradlew spotlessApply — format code
+  - ./gradlew dependencyUpdates — check dependency versions
+- Database (Flyway)
+  - ./gradlew flywayInfo
+  - ./gradlew flywayMigrate
+  - ./gradlew flywayClean  # caution: destructive
+- Native Image (GraalVM)
+  - ./gradlew nativeCompile  # produces native binary (requires GraalVM toolchain)
+
+## 🔐 Environment Variables
+You can configure the application via Spring properties files or environment variables.
+
+- Profiles
+  - SPRING_PROFILES_ACTIVE=dev|prod (default is dev in application.properties)
+
+- Database (Spring’s standard variables)
+  - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/isldevs_db
+  - SPRING_DATASOURCE_USERNAME=postgres
+  - SPRING_DATASOURCE_PASSWORD=secret
+  - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+
+- HikariCP tuning (optional)
+  - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=15
+  - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+  - SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=30000
+  - SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=600000
+  - SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1800000
+
+- OAuth2 / Security
+  - SPRING_SECURITY_OAUTH2_ISSUER_URI=https://localhost:8443/api/v1
+  - JWT key locations can be set via properties (see `application-dev.properties`):
+    - jwt.key.public=classpath:key.public
+    - jwt.key.private=classpath:key.private
+
+- TODO: Social login client IDs/secrets for GitHub/Google/Facebook should be documented with exact property names once configured.
+- NOTE: A custom `DB_*` variable approach is described earlier in this README; consider unifying on Spring’s standard env names. TODO: consolidate configuration docs.
+
+## 🧪 Tests
+- Run all tests: ./gradlew test
+- Run with debug logs: ./gradlew test --info
+- Run a single test class (example): ./gradlew test --tests "com.base.SomeTestClass"
+
+## 🗂️ Project Structure (abridged)
+```
+/ (project root)
+├─ build.gradle
+├─ settings.gradle
+├─ gradlew / gradlew.bat
+├─ gradle/
+├─ src/
+│  ├─ main/
+│  │  ├─ java/com/base/
+│  │  │  ├─ ISLDevsApplication.java
+│  │  │  ├─ config/**  (security, global config, etc.)
+│  │  │  └─ ...
+│  │  └─ resources/
+│  │     ├─ application.properties
+│  │     ├─ application-dev.properties
+│  │     ├─ application-pord.properties
+│  │     ├─ templates/  (Thymeleaf)
+│  │     └─ db/ (Flyway)
+│  └─ test/
+│     └─ java/ (tests)
+├─ README.md
+└─ LICENSE_HEADER
+```
+
+## 📄 License
+- Source files include Apache License 2.0 headers.
+- TODO: Add a top-level LICENSE file (Apache-2.0) to match headers and clarify licensing.
