@@ -15,10 +15,10 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 configurations {
@@ -61,6 +61,7 @@ graalvmNative {
                     '--verbose',
                     '--no-fallback',
                     '--enable-url-protocols=http,https',
+                    '--enable-native-access=ALL-UNNAMED',
                     '--initialize-at-build-time=org.springframework.util.unit.DataSize',
                     '--report-unsupported-elements-at-runtime',
                     '--allow-incomplete-classpath',
@@ -230,10 +231,13 @@ sourceSets {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.fork = true
     options.encoding = 'UTF-8'
-    options.compilerArgs += "--enable-preview"
-    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US'])
+    options.fork = true
+    options.forkOptions.jvmArgs.addAll([
+            '-Duser.language=en',
+            '-Duser.country=US',
+            '--enable-preview'
+    ])
     options.compilerArgs += [
             '-parameters',
             '-Xlint:unchecked',
@@ -250,7 +254,9 @@ tasks.withType(JavaExec).configureEach {
 }
 
 tasks.withType(Test).configureEach {
-    jvmArgs += "--enable-preview"
+    jvmArgs += [
+            "--enable-preview"
+    ]
     useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
     maxHeapSize = '2G'
