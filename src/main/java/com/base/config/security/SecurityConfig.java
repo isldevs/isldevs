@@ -92,7 +92,7 @@ import java.util.stream.Stream;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.issuer-uri}")
+    @Value("${spring.security.oauth2.issuer-uri:http://localhost:8080}")
     private String issuerUri;
 
     private final GlobalConfig config;
