@@ -1,38 +1,30 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework:spring-webflux:6.2.10'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.security:spring-security-core'
-    implementation 'org.springframework.security:spring-security-cas'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.5.1'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.integration:spring-integration-core'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-hateoas:3.3.3'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation("org.springframework.boot:spring-boot-starter-actuator:3.5.4")
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'org.flywaydb:flyway-core:9.22.3'
-    implementation 'io.github.cdimascio:dotenv-java:3.2.0'
-    implementation 'com.nimbusds:nimbus-jose-jwt:10.4.2'
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.7'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.12.7'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.7'
-    implementation 'org.modelmapper:modelmapper:3.2.4'
-    implementation 'com.google.code.gson:gson:2.13.1'
-    implementation 'org.mapstruct:mapstruct:1.6.3'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-    annotationProcessor 'org.projectlombok:lombok:1.18.42'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    implementation libs.bundles.spring.boot.web
+    implementation libs.spring.boot.starter.thymeleaf
+    implementation libs.spring.boot.starter.oauth2.client
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.data.redis
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.bundles.spring.security
+    implementation libs.spring.webflux
+    implementation libs.spring.integration.core
+    implementation libs.flyway.core
+    implementation libs.bundles.mapping
+    implementation libs.dotenv.java
+    implementation libs.commons.lang3
+    implementation libs.nimbus.jose.jwt
+    implementation libs.caffeine
+    implementation libs.jackson.databind
+    implementation libs.bundles.jwt
 
-    compileOnly 'org.projectlombok:lombok:1.18.42'
-    runtimeOnly 'org.postgresql:postgresql'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    developmentOnly libs.spring.boot.devtools
+    runtimeOnly libs.postgresql
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    annotationProcessor libs.lombok.mapstruct.binding
+    annotationProcessor libs.mapstruct.processor
+
+    testImplementation libs.bundles.testing
+    testRuntimeOnly libs.junit.platform.launcher
 }

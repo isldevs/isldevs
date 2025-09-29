@@ -1,13 +1,21 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
-    id 'java'
-    id 'war'
-    id 'com.diffplug.spotless' version '7.2.1'
-    id 'org.springframework.boot' version '3.5.4'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.graalvm.buildtools.native' version '0.10.5'
-    id "org.flywaydb.flyway" version "9.22.3"
-    id "com.github.hierynomus.license" version "0.16.1"
-    id 'com.github.ben-manes.versions' version '0.51.0'
+    id("java")
+    id("war")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.dependency.management)
+    alias(libs.plugins.graalvm.native)
+    alias(libs.plugins.flyway)
+    alias(libs.plugins.license)
+    alias(libs.plugins.versions)
+    alias(libs.plugins.spotless)
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
 }
 
 group = 'com.base'
@@ -35,6 +43,12 @@ configurations.configureEach {
         force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
         cacheChangingModulesFor 10, 'minutes'
         cacheDynamicVersionsFor 10, 'minutes'
+
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.apache.logging.log4j' && details.requested.name.startsWith('log4j-')) {
+                details.useVersion '2.24.3'
+            }
+        }
     }
 }
 
@@ -285,6 +299,21 @@ war {
                 !file.name.contains('spring-boot-starter-undertow')
     }
 }
+
+abstract class HeavyComputation extends DefaultTask {
+    @TaskAction
+    void run() {
+        logger.lifecycle(heavyWork())
+    }
+    String heavyWork() {
+        logger.lifecycle("Start heavy work")
+        Thread.sleep(5000)
+        logger.lifecycle("Finish heavy work")
+        return "Heavy computation result"
+    }
+}
+
+tasks.register("heavy-computation", HeavyComputation)
 
 tasks.named('assemble') {
     dependsOn bootWar, bootJar

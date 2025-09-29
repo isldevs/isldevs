@@ -1,0 +1,78 @@
+[versions]
+spring-boot = "3.5.4"
+spring-integration-core = "6.5.1"
+webflux = "6.2.11"
+spring-security = "6.5.2"
+oauth2-authorization-server = "1.5.1"
+postgresql = "42.7.5"
+hateoas = "3.3.3"
+actuator = "3.5.4"
+data-jpa = "3.5.4"
+validation = "3.5.4"
+web = "3.5.4"
+thymeleaf = "3.5.4"
+oauth2-client = "3.5.4"
+data-redis = "3.5.4"
+flyway-core = "9.22.3"
+dotenv-java = "3.2.0"
+commons-lang3 = "3.18.0"
+modelmapper = "3.2.4"
+gson = "2.13.1"
+mapstruct = "1.6.3"
+caffeine = "3.2.2"
+nimbus-jose-jwt = "10.4.2"
+jjwt = "0.12.7"
+lombok = "1.18.42"
+lombok-mapstruct-binding = "0.2.0"
+junit-platform = "1.12.2"
+
+[libraries]
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "web" }
+spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "thymeleaf" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client", version.ref = "oauth2-client" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "data-jpa" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "validation" }
+spring-boot-starter-hateoas = { module = "org.springframework.boot:spring-boot-starter-hateoas", version.ref = "hateoas" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "data-redis" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "actuator" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
+spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "webflux" }
+spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
+spring-security-cas = { module = "org.springframework.security:spring-security-cas", version.ref = "spring-security" }
+spring-security-oauth2-authorization-server = { module = "org.springframework.security:spring-security-oauth2-authorization-server", version.ref = "oauth2-authorization-server" }
+spring-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring-security" }
+spring-integration-core = { module = "org.springframework.integration:spring-integration-core", version.ref = "spring-integration-core" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-core" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql"}
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+dotenv-java = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv-java" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+modelmapper = { module = "org.modelmapper:modelmapper", version.ref = "modelmapper" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+lombok-mapstruct-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "lombok-mapstruct-binding" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbus-jose-jwt" }
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+dependency-management = { id = "io.spring.dependency-management", version = "1.1.7" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version = "0.10.5" }
+flyway = { id = "org.flywaydb.flyway", version = "9.22.3" }
+license = { id = "com.github.hierynomus.license", version = "0.16.1" }
+versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
+spotless = { id = "com.diffplug.spotless", version = "7.2.1" }
+
+[bundles]
+spring-boot-web = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-hateoas"]
+spring-security = ["spring-security-core", "spring-security-cas", "spring-security-oauth2-authorization-server"]
+jwt = ["jjwt-api", "jjwt-impl", "jjwt-jackson"]
+mapping = ["modelmapper", "mapstruct", "gson"]
+testing = ["spring-boot-starter-test", "spring-security-test", "junit-platform-launcher"]
