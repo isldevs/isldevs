@@ -1,42 +1,35 @@
 [versions]
-spring-boot = "3.5.4"
-spring-integration-core = "6.5.1"
+spring-boot = "3.5.6"
+spring-security = "6.5.5"
+oauth2-authorization-server = "1.5.2"
+spring-integration-core = "6.5.2"
 webflux = "6.2.11"
-spring-security = "6.5.2"
-oauth2-authorization-server = "1.5.1"
 postgresql = "42.7.5"
-hateoas = "3.3.3"
-actuator = "3.5.4"
-data-jpa = "3.5.4"
-validation = "3.5.4"
-web = "3.5.4"
-thymeleaf = "3.5.4"
-oauth2-client = "3.5.4"
-data-redis = "3.5.4"
 flyway-core = "9.22.3"
+jackson-databind = "2.20.0"
 dotenv-java = "3.2.0"
-commons-lang3 = "3.18.0"
+commons-lang3 = "3.19.0"
 modelmapper = "3.2.4"
-gson = "2.13.1"
+gson = "2.13.2"
 mapstruct = "1.6.3"
 caffeine = "3.2.2"
-nimbus-jose-jwt = "10.4.2"
-jjwt = "0.12.7"
+nimbus-jose-jwt = "10.5"
+jjwt = "0.13.0"
 lombok = "1.18.42"
 lombok-mapstruct-binding = "0.2.0"
-junit-platform = "1.12.2"
+junit-platform = "1.13.4"
 
 [libraries]
-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "web" }
-spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "thymeleaf" }
-spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client", version.ref = "oauth2-client" }
-spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "data-jpa" }
-spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "validation" }
-spring-boot-starter-hateoas = { module = "org.springframework.boot:spring-boot-starter-hateoas", version.ref = "hateoas" }
-spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "data-redis" }
-spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "actuator" }
-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
-spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }
+spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "spring-boot" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client", version.ref = "spring-boot" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+spring-boot-starter-hateoas = { module = "org.springframework.boot:spring-boot-starter-hateoas", version.ref = "spring-boot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools", version.ref = "spring-boot" }
 spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "webflux" }
 spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
 spring-security-cas = { module = "org.springframework.security:spring-security-cas", version.ref = "spring-security" }
@@ -45,7 +38,7 @@ spring-security-test = { module = "org.springframework.security:spring-security-
 spring-integration-core = { module = "org.springframework.integration:spring-integration-core", version.ref = "spring-integration-core" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-core" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql"}
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 dotenv-java = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv-java" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 modelmapper = { module = "org.modelmapper:modelmapper", version.ref = "modelmapper" }
