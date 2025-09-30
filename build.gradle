@@ -1,5 +1,3 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 plugins {
     id("java")
     id("war")
@@ -12,6 +10,7 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)
@@ -19,23 +18,17 @@ dependencyManagement {
 }
 
 group = 'com.base'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
-    }
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-    developmentOnly {
-        extendsFrom runtimeOnly
-    }
+    compileOnly { extendsFrom annotationProcessor }
+    developmentOnly { extendsFrom runtimeOnly }
 }
 
 configurations.configureEach {
@@ -49,6 +42,48 @@ configurations.configureEach {
                 details.useVersion '2.24.3'
             }
         }
+    }
+}
+
+def loadEnvironment() {
+    def env = new Properties()
+    def activeProfile = findProperty("spring.profiles.active") ?: "dev"
+
+    def profilePropsFile = file("src/main/resources/application-${activeProfile}.properties")
+    if (profilePropsFile.exists()) profilePropsFile.withInputStream { env.load(it) }
+
+    def defaultPropsFile = file("src/main/resources/application.properties")
+    if (defaultPropsFile.exists()) defaultPropsFile.withInputStream { stream ->
+        def defaultProps = new Properties()
+        defaultProps.load(stream)
+        defaultProps.each { key, value -> if (!env.containsKey(key)) env.setProperty(key, value) }
+    }
+
+    def envFile = file(".env")
+    if (envFile.exists()) envFile.withInputStream { env.load(it) }
+
+    System.getenv().each { key, value ->
+        if (key.startsWith('DB_') || key.startsWith('SPRING_')) env.setProperty(key, value)
+    }
+
+    return env
+}
+
+def env = loadEnvironment()
+def activeProfile = findProperty("spring.profiles.active") ?: "dev"
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+        java.srcDirs = ['src/test/java']
+        resources.srcDirs = ['src/test/resources']
     }
 }
 
@@ -90,48 +125,6 @@ graalvmNative {
     }
 }
 
-def loadEnvironment() {
-    def env = new Properties()
-    def activeProfile = findProperty("spring.profiles.active") ?: "dev"
-    def profilePropsFile = file("src/main/resources/application-${activeProfile}.properties")
-    if (profilePropsFile.exists()) {
-        profilePropsFile.withInputStream { stream ->
-            env.load(stream)
-        }
-        logger.info("Loaded properties from: ${profilePropsFile.name}")
-    }
-    def defaultPropsFile = file("src/main/resources/application.properties")
-    if (defaultPropsFile.exists()) {
-        defaultPropsFile.withInputStream { stream ->
-            def defaultProps = new Properties()
-            defaultProps.load(stream)
-            defaultProps.each { key, value ->
-                if (!env.containsKey(key)) {
-                    env.setProperty(key, value)
-                }
-            }
-        }
-        logger.info("Loaded properties from: ${defaultPropsFile.name}")
-    }
-    def envFile = file(".env")
-    if (envFile.exists()) {
-        envFile.withInputStream { stream ->
-            env.load(stream)
-        }
-        logger.info("Loaded environment from: .env")
-    }
-    System.getenv().each { key, value ->
-        if (key.startsWith('DB_') || key.startsWith('SPRING_')) {
-            env.setProperty(key, value)
-        }
-    }
-
-    return env
-}
-
-def env = loadEnvironment()
-def activeProfile = findProperty("spring.profiles.active") ?: "dev"
-
 dependencyUpdates {
     rejectVersionIf {
         isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
@@ -162,23 +155,19 @@ compileJava {
     options.forkOptions.jvmArgs = ['-Duser.language=en', '-Duser.country=US']
 }
 
-flyway {
-
-    def propsFile = file("src/main/resources/application-${activeProfile}.properties")
-    def properties = new Properties()
-
-    if (propsFile.exists()) {
-        propsFile.withInputStream { properties.load(it) }
-    }
-
-    url = properties.getProperty('spring.datasource.url') ?: env.getProperty('DB_URL') ?: System.getenv('DB_URL') ?: "jdbc:postgresql://localhost:5432/isl_devs"
-    user = properties.getProperty('spring.datasource.username') ?: env.getProperty('DB_USERNAME') ?: System.getenv('DB_USERNAME') ?: "postgres"
-    password = properties.getProperty('spring.datasource.password') ?: env.getProperty('DB_PASSWORD') ?: System.getenv('DB_PASSWORD') ?: "password"
-    locations = ['classpath:db/migration']
-    baselineOnMigrate = true
-    validateMigrationNaming = true
-    cleanDisabled = false
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.fork = true
+    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US', '--enable-preview'])
+    options.compilerArgs += [
+            '-parameters', '-Xlint:-unchecked', '-Xlint:deprecation', '--enable-preview',
+            '-Amapstruct.suppressGeneratorTimestamp=true', '-Amapstruct.verbose=false'
+    ]
 }
+
+tasks.withType(JavaExec).configureEach { jvmArgs += "--enable-preview" }
+
+springBoot { mainClass = "com.base.ISLDevsApplication" }
 
 bootRun {
     environment env
@@ -190,9 +179,7 @@ bootRun {
     ]
     systemProperties = System.properties
     sourceResources sourceSets.main
-    if (activeProfile == 'dev') {
-        classpath = sourceSets.main.runtimeClasspath + configurations.developmentOnly
-    }
+    if (activeProfile == 'dev') classpath = sourceSets.main.runtimeClasspath + configurations.developmentOnly
 }
 
 bootWar {
@@ -205,7 +192,7 @@ bootWar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-JDK': System.getProperty('java.version'),
                 'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Spring-Boot-Version': '3.5.4'
+                'Spring-Boot-Version': SpringBootPlugin.BOM_COORDINATES.split(":")[2]
         )
     }
 }
@@ -220,258 +207,97 @@ bootJar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-JDK': System.getProperty('java.version'),
                 'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Spring-Boot-Version': '3.5.4'
+                'Spring-Boot-Version': SpringBootPlugin.BOM_COORDINATES.split(":")[2]
         )
     }
 }
 
-sourceSets {
-    main {
-        output.resourcesDir = file("$buildDir/classes/java/main")
-        java {
-            if (activeProfile != "dev") {
-                exclude '**/TomcatSSLConfig.java'
-            }
-        }
-    }
-    test {
-        output.resourcesDir = file("$buildDir/classes/java/test")
-        java {
-            if (activeProfile != "dev") {
-                exclude '**/test/**'
-            }
-        }
-    }
-}
+abstract class GenerateTestClasses extends DefaultTask {
+    @InputDirectory
+    abstract DirectoryProperty getMainJavaDir()
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    options.fork = true
-    options.forkOptions.jvmArgs.addAll([
-            '-Duser.language=en',
-            '-Duser.country=US',
-            '--enable-preview'
-    ])
-    options.compilerArgs += [
-            '-parameters',
-            '-Xlint:unchecked',
-            '-Xlint:deprecation',
-            '--enable-preview',
-            '-parameters',
-            '-Amapstruct.suppressGeneratorTimestamp=true',
-            '-Amapstruct.verbose=false'
-    ]
-}
+    @OutputDirectory
+    abstract DirectoryProperty getTestJavaDir()
 
-tasks.withType(JavaExec).configureEach {
-    jvmArgs += "--enable-preview"
-}
-
-tasks.withType(Test).configureEach {
-    jvmArgs += [
-            "--enable-preview"
-    ]
-    useJUnitPlatform()
-    systemProperty 'spring.profiles.active', 'test'
-    maxHeapSize = '2G'
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = "full"
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-    }
-
-    filter {
-        includeTestsMatching "*Test"
-        includeTestsMatching "*Tests"
-    }
-}
-
-war {
-    enabled = true
-    archiveClassifier = ''
-    classpath = classpath.filter { file ->
-        !file.name.contains('spring-boot-starter-tomcat') &&
-                !file.name.contains('spring-boot-starter-jetty') &&
-                !file.name.contains('spring-boot-starter-undertow')
-    }
-}
-
-abstract class HeavyComputation extends DefaultTask {
     @TaskAction
-    void run() {
-        logger.lifecycle(heavyWork())
-    }
-    String heavyWork() {
-        logger.lifecycle("Start heavy work")
-        Thread.sleep(5000)
-        logger.lifecycle("Finish heavy work")
-        return "Heavy computation result"
+    void generate() {
+        def mainJavaDirFile = mainJavaDir.get().asFile
+        def testJavaDirFile = testJavaDir.get().asFile
+
+        mainJavaDirFile.eachFileRecurse { File sourceFile ->
+            if (sourceFile.name.endsWith(".java") &&
+                    !sourceFile.name.endsWith("Test.java") &&
+                    !sourceFile.name.endsWith("Tests.java") &&
+                    !sourceFile.name.endsWith("Application.java") &&
+                    sourceFile.name != "package-info.java") {
+
+                def relativePath = mainJavaDirFile.toPath().relativize(sourceFile.parentFile.toPath())
+                def packageName = relativePath.toString().replace(File.separator, '.')
+
+                def testFile = new File(testJavaDirFile,
+                        relativePath.resolve(sourceFile.name.replace('.java', 'Tests.java')).toString()
+                )
+
+                if (!testFile.exists()) {
+                    testFile.parentFile.mkdirs()
+                    testFile.text = """\
+                        |package ${packageName};
+                        |
+                        |import org.junit.jupiter.api.Test;
+                        |import static org.junit.jupiter.api.Assertions.*;
+                        |
+                        |class ${sourceFile.name.replace('.java', '')}Tests {
+                        |
+                        |    @Test
+                        |    void contextLoads() {
+                        |    }
+                        |}
+                        |""".stripMargin()
+                }
+            }
+        }
     }
 }
 
-tasks.register("heavy-computation", HeavyComputation)
-
-tasks.named('assemble') {
-    dependsOn bootWar, bootJar
-}
-
-tasks.named('build') {
-    dependsOn 'test', 'spotlessCheck', 'licenseMain'
+tasks.register('generateTestClasses', GenerateTestClasses) {
+    group = 'Verification'
+    description = 'Generates test class scaffolds'
+    mainJavaDir.set(layout.projectDirectory.dir("src/main/java"))
+    testJavaDir.set(layout.projectDirectory.dir("src/test/java"))
 }
 
 license {
-    header = rootProject.file('LICENSE_HEADER')
+    header = rootProject.file('LICENSE')
     strictCheck = true
-    skipExistingHeaders = true
+    skipExistingHeaders = false
     mapping {
         java = 'SLASHSTAR_STYLE'
+        kt = 'SLASHSTAR_STYLE'
+        groovy = 'SLASHSTAR_STYLE'
     }
     excludes([
-            '**/build/**',
-            '**/generated/**',
-            '**/target/**',
-            '**/out/**',
-            '**/bin/**',
-            '**/aot*/**',
-            '**/*__Generated.java',
-            '**/org/springframework/**',
-            '**/*.properties',
-            '**/*.yml',
-            '**/*.yaml',
-            '**/*.json',
-            '**/*.xml',
-            '**/*.sql',
-            '**/*.p12',
-            '**/*.jks',
-            '**/*.keystore',
-            '**/*.dev',
-            '**/*.prod',
-            '**/*.sh',
-            '**/*.bat',
-            '**/*.jar',
-            '**/*.war',
-            '**/*.md',
-            '**/*.txt',
-            '**/*.html',
-            '**/*.private',
-            '**/*.public',
-            '**/gradlew*',
-            '**/gradle/wrapper/**',
-            '**/*Tests.java',
-            '**/*Test.java',
-            '**/.dev',
-            '**/.prod',
-            '**/.env',
-            '**/aot*/**',
-            '**/*__Generated.java',
-            '**/org/springframework/**'
+            '**/build/**', '**/aotSources/**', '**/generated/**', '**/target/**', '**/out/**', '**/bin/**',
+            '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**', '**/*.properties',
+            '**/*.yml', '**/*.yaml', '**/*.json', '**/*.xml', '**/*.sql', '**/*.p12', '**/*.jks',
+            '**/*.keystore', '**/*.dev', '**/*.prod', '**/*.sh', '**/*.bat', '**/*.jar',
+            '**/*.war', '**/*.md', '**/*.txt', '**/*.html', '**/*.private', '**/*.public',
+            '**/gradlew*', '**/gradle/wrapper/**', '**/*Tests.java', '**/*Test.java',
+            '**/.dev', '**/.prod', '**/.env', '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**'
     ])
 }
 
-tasks.named('licenseMain') {
-    mustRunAfter tasks.named('compileAotJava')
-}
-
-tasks.named('licenseTest') {
-    mustRunAfter tasks.named('compileAotJava')
-}
-
-licenseFormatTest {
-    dependsOn 'generateTestClasses'
-}
-
-tasks.named('licenseAot') {
+tasks.matching { it.name.contains("Aot") || it.name.contains("aot") }.configureEach {
     enabled = false
 }
 
-tasks.named('licenseAotTest') {
-    enabled = false
-}
-
-licenseTest {
-    dependsOn 'generateTestClasses'
-}
-
-processTestAot {
-    logging.captureStandardOutput(LogLevel.ERROR)
-}
-
-processAot {
-    enabled = false
-}
-
-tasks.named('processResources') {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
-tasks.register('generateTestClasses') {
-    group = 'Verification'
-    description = 'Generates test class scaffolds'
-
-    inputs.dir(layout.projectDirectory.dir('src/main/java'))
-    outputs.dir(layout.projectDirectory.dir('src/test/java'))
-
-    doLast {
-        def mainJavaDir = file('src/main/java')
-
-        fileTree(mainJavaDir).matching {
-            include '**/*.java'
-            exclude '**/*Test.java', '**/*Tests.java', '**/package-info.java', '**/*Application.java'
-        }.each { sourceFile ->
-            def testFile = file(sourceFile.path
-                    .replace('main/java', 'test/java')
-                    .replace('.java', 'Tests.java'))
-
-            if (!testFile.exists()) {
-                testFile.parentFile.mkdirs()
-
-                // Correct package name calculation
-                def packageName = mainJavaDir.toPath()
-                        .relativize(sourceFile.parentFile.toPath())
-                        .toString()
-                        .replace(File.separator, '.')
-
-                testFile.text = """\
-                    |package ${packageName};
-                    |
-                    |import org.junit.jupiter.api.Test;
-                    |import static org.junit.jupiter.api.Assertions.*;
-                    |
-                    |class ${sourceFile.name.replace('.java', '')}Tests {
-                    |
-                    |    @Test
-                    |    void contextLoads() {
-                    |    }
-                    |}
-                    |""".stripMargin()
-            }
-        }
-    }
-}
-
-compileTestJava {
-    dependsOn(tasks.named('generateTestClasses'))
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += [
-            '-Xlint:-unchecked',
-            '-Xlint:-deprecation',
-            '-Xlint:-processing'
-    ]
-    options.encoding = 'UTF-8'
-}
-
-tasks.withType(AbstractArchiveTask).configureEach {
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
-}
+tasks.named("licenseMain") { dependsOn tasks.named("generateTestClasses") }
+tasks.named("licenseTest") { dependsOn tasks.named("generateTestClasses") }
+tasks.named("licenseFormatTest") { dependsOn tasks.named("generateTestClasses") }
+tasks.named("compileTestJava") { dependsOn tasks.named("generateTestClasses") }
+tasks.named("processAot") { dependsOn tasks.named("compileJava") }
 
 tasks.named('test', Test) {
+    dependsOn tasks.named('generateTestClasses')
     useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
     maxHeapSize = '1G'
@@ -479,12 +305,10 @@ tasks.named('test', Test) {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
     }
-    filter {
-        includeTestsMatching "*Test"
-        includeTestsMatching "*Tests"
-    }
-    dependsOn(tasks.named('generateTestClasses'))
     if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
         exclude('**/test/**')
     }
 }
+
+tasks.named('build') { dependsOn 'test', 'spotlessCheck', 'licenseMain' }
+tasks.named('assemble') { dependsOn bootWar, bootJar }

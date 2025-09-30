@@ -17,7 +17,6 @@ nimbus-jose-jwt = "10.5"
 jjwt = "0.13.0"
 lombok = "1.18.42"
 lombok-mapstruct-binding = "0.2.0"
-junit-platform = "1.13.4"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
@@ -52,20 +51,19 @@ jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
 jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dependency-management = { id = "io.spring.dependency-management", version = "1.1.7" }
-graalvm-native = { id = "org.graalvm.buildtools.native", version = "0.10.5" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version = "0.11.1" }
 flyway = { id = "org.flywaydb.flyway", version = "9.22.3" }
 license = { id = "com.github.hierynomus.license", version = "0.16.1" }
-versions = { id = "com.github.ben-manes.versions", version = "0.51.0" }
-spotless = { id = "com.diffplug.spotless", version = "7.2.1" }
+versions = { id = "com.github.ben-manes.versions", version = "0.53.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
 
 [bundles]
 spring-boot-web = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-hateoas"]
 spring-security = ["spring-security-core", "spring-security-cas", "spring-security-oauth2-authorization-server"]
 jwt = ["jjwt-api", "jjwt-impl", "jjwt-jackson"]
 mapping = ["modelmapper", "mapstruct", "gson"]
-testing = ["spring-boot-starter-test", "spring-security-test", "junit-platform-launcher"]
+testing = ["spring-boot-starter-test", "spring-security-test"]

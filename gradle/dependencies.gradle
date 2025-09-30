@@ -26,5 +26,4 @@ dependencies {
     annotationProcessor libs.mapstruct.processor
 
     testImplementation libs.bundles.testing
-    testRuntimeOnly libs.junit.platform.launcher
 }

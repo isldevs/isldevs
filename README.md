@@ -26,8 +26,8 @@ The core features include:
 - Automatic token exchange and persistence with Spring Security
 
 ## ⚙️ Requirements
-- Java 21 (toolchain configured in Gradle)
-- Spring Boot 3.5.4
+- Java 25 (toolchain configured in Gradle)
+- Spring Boot 3.5.6
 - Spring Authorization Server 1.5.x
 - PostgreSQL/MySQL (via JDBC; dev profile uses PostgreSQL)
 - Tomcat 10.1.39 (embedded; version forced via Gradle resolution strategy)
@@ -557,10 +557,10 @@ Dependency locking is enabled via dependencyLocking in build.gradle.
 ---
 
 ## 🧰 Stack & Tooling (detected)
-- Language: Java 21
+- Language: Java 25
 - Build: Gradle (Wrapper included)
 - Frameworks:
-  - Spring Boot 3.5.4
+  - Spring Boot 3.5.6
   - Spring Web, Spring MVC (embedded Tomcat 10.1.39)
   - Spring Security + Spring Authorization Server 1.5.x
   - Spring Data JPA (Hibernate)
