@@ -5,4 +5,10 @@ pluginManagement {
     }
 }
 
+buildCache {
+    local {
+        enabled = true
+    }
+}
+
 rootProject.name = 'isldevs'
