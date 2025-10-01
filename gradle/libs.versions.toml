@@ -4,6 +4,12 @@ spring-security = "6.5.5"
 oauth2-authorization-server = "1.5.2"
 spring-integration-core = "6.5.2"
 webflux = "6.2.11"
+dependency-management = "1.1.7"
+graalvm-native = "0.11.1"
+flyway = "9.22.3"
+license = "0.16.1"
+versions = "0.53.0"
+spotless = "8.0.0"
 postgresql = "42.7.5"
 flyway-core = "9.22.3"
 jackson-databind = "2.20.0"
@@ -17,6 +23,9 @@ nimbus-jose-jwt = "10.5"
 jjwt = "0.13.0"
 lombok = "1.18.42"
 lombok-mapstruct-binding = "0.2.0"
+assertj-core = "3.27.6"
+junit = "5.14.0"
+mockito = "5.20.0"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
@@ -27,14 +36,13 @@ spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
 spring-boot-starter-hateoas = { module = "org.springframework.boot:spring-boot-starter-hateoas", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools", version.ref = "spring-boot" }
 spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "webflux" }
 spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
 spring-security-cas = { module = "org.springframework.security:spring-security-cas", version.ref = "spring-security" }
 spring-security-oauth2-authorization-server = { module = "org.springframework.security:spring-security-oauth2-authorization-server", version.ref = "oauth2-authorization-server" }
-spring-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring-security" }
 spring-integration-core = { module = "org.springframework.integration:spring-integration-core", version.ref = "spring-integration-core" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-core" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql"}
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
@@ -51,19 +59,24 @@ jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
 jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj-core"}
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit"}
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito"}
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
-dependency-management = { id = "io.spring.dependency-management", version = "1.1.7" }
-graalvm-native = { id = "org.graalvm.buildtools.native", version = "0.11.1" }
-flyway = { id = "org.flywaydb.flyway", version = "9.22.3" }
-license = { id = "com.github.hierynomus.license", version = "0.16.1" }
-versions = { id = "com.github.ben-manes.versions", version = "0.53.0" }
-spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
+dependency-management = { id = "io.spring.dependency-management", version.ref = "dependency-management" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native" }
+flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+license = { id = "com.github.hierynomus.license", version.ref = "license" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 [bundles]
 spring-boot-web = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-hateoas"]
 spring-security = ["spring-security-core", "spring-security-cas", "spring-security-oauth2-authorization-server"]
 jwt = ["jjwt-api", "jjwt-impl", "jjwt-jackson"]
 mapping = ["modelmapper", "mapstruct", "gson"]
-testing = ["spring-boot-starter-test", "spring-security-test"]
+mockito = ["mockito-core", "mockito-junit-jupiter"]
+spring-test = ["spring-boot-starter-test", "assertj-core"]

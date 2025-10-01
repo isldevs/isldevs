@@ -1,6 +1,6 @@
 plugins {
-    id("java")
-    id("war")
+    id('java-library')
+    id('war')
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.dependency.management)
     alias(libs.plugins.graalvm.native)
@@ -30,6 +30,8 @@ configurations {
     compileOnly { extendsFrom annotationProcessor }
     developmentOnly { extendsFrom runtimeOnly }
 }
+
+apply from: 'gradle/dependencies.gradle'
 
 configurations.configureEach {
     resolutionStrategy {
@@ -82,8 +84,12 @@ sourceSets {
         }
     }
     test {
-        java.srcDirs = ['src/test/java']
-        resources.srcDirs = ['src/test/resources']
+        java {
+            srcDirs = ['src/test/java']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
     }
 }
 
@@ -92,8 +98,6 @@ repositories {
     maven { url = 'https://repo.spring.io/milestone/' }
     maven { url = uri("https://raw.githubusercontent.com/graalvm/native-build-tools/snapshots") }
 }
-
-apply from: 'gradle/dependencies.gradle'
 
 dependencyLocking {
     lockAllConfigurations()
@@ -143,6 +147,7 @@ static boolean isNonStable(String version) {
 
 compileJava {
     def isDev = activeProfile in 'dev'
+    options.release = 25
     options.compilerArgs += [
             '-Amapstruct.suppressGeneratorTimestamp=true',
             '-Amapstruct.suppressGeneratorVersionInfoComment=true',
@@ -151,8 +156,20 @@ compileJava {
             '--enable-preview'
     ]
     options.encoding = 'UTF-8'
+    options.incremental = true
     options.fork = true
+    options.failOnError = false
     options.forkOptions.jvmArgs = ['-Duser.language=en', '-Duser.country=US']
+}
+
+tasks.register('configureJavadoc') {
+    doLast {
+        javadoc {
+            options.doclet = 'org.asciidoctor.javadoc.Asciidoclet'
+            options.docletpath = configurations.asciidoclet.files.toList()
+            options.encoding = 'UTF-8'
+        }
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -290,15 +307,22 @@ tasks.matching { it.name.contains("Aot") || it.name.contains("aot") }.configureE
     enabled = false
 }
 
-tasks.named("licenseMain") { dependsOn tasks.named("generateTestClasses") }
-tasks.named("licenseTest") { dependsOn tasks.named("generateTestClasses") }
-tasks.named("licenseFormatTest") { dependsOn tasks.named("generateTestClasses") }
+tasks.named("licenseMain") {
+    dependsOn tasks.named("generateTestClasses")
+}
+tasks.named("licenseTest") {
+    dependsOn tasks.named("generateTestClasses")
+}
+tasks.named("licenseFormatTest") {
+    dependsOn tasks.named("generateTestClasses")
+}
 tasks.named("compileTestJava") { dependsOn tasks.named("generateTestClasses") }
 tasks.named("processAot") { dependsOn tasks.named("compileJava") }
 
 tasks.named('test', Test) {
     dependsOn tasks.named('generateTestClasses')
     useJUnitPlatform()
+    jvmArgs += "--enable-preview"
     systemProperty 'spring.profiles.active', 'test'
     maxHeapSize = '1G'
     testLogging {
