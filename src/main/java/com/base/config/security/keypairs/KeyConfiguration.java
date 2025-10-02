@@ -18,10 +18,12 @@ package com.base.config.security.keypairs;
 import com.base.config.GlobalConfig;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import java.sql.Timestamp;
+import java.util.Comparator;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -33,59 +35,56 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.token.*;
 
-import java.sql.Timestamp;
-import java.util.Comparator;
-import java.util.UUID;
-
 /**
  * @author YISivlay
  */
 @Configuration
 public class KeyConfiguration {
 
-    private final Logger logger = LoggerFactory.getLogger(KeyConfiguration.class);
+  private final Logger logger = LoggerFactory.getLogger(KeyConfiguration.class);
 
-    private final GlobalConfig config;
+  private final GlobalConfig config;
 
-    @Autowired
-    public KeyConfiguration(final GlobalConfig config) {
-        this.config = config;
-    }
+  @Autowired
+  public KeyConfiguration(final GlobalConfig config) {
+    this.config = config;
+  }
 
-    @Bean
-    TextEncryptor textEncryptor() {
-        return Encryptors.text(config.getJwtPassword(), config.getJwtSalt());
-    }
+  @Bean
+  TextEncryptor textEncryptor() {
+    return Encryptors.text(config.getJwtPassword(), config.getJwtSalt());
+  }
 
-    @Bean
-    NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> customJWKSource) {
-        return new NimbusJwtEncoder(customJWKSource);
-    }
+  @Bean
+  NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> customJWKSource) {
+    return new NimbusJwtEncoder(customJWKSource);
+  }
 
-    @Bean
-    OAuth2TokenGenerator<OAuth2Token> tokenGenerator(JwtEncoder encoder,
-                                                     OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
-        var generator = new JwtGenerator(encoder);
-        generator.setJwtCustomizer(customTokenCustomizer);
-        return new DelegatingOAuth2TokenGenerator(generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
-    }
+  @Bean
+  OAuth2TokenGenerator<OAuth2Token> tokenGenerator(
+      JwtEncoder encoder, OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
+    var generator = new JwtGenerator(encoder);
+    generator.setJwtCustomizer(customTokenCustomizer);
+    return new DelegatingOAuth2TokenGenerator(
+        generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
+  }
 
-    @Bean
-    ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairRepository repository) {
-        return _ -> {
-            var existingKey = repository.findKeyPairs().stream()
-                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+  @Bean
+  ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(
+      RSAKeyPairRepository repository) {
+    return _ -> {
+      var existingKey =
+          repository.findKeyPairs().stream()
+              .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
 
-            if (existingKey.isEmpty()) {
-                var keys = new Keys();
-                var keyPair = keys.generateKeyPair(
-                        UUID.randomUUID().toString(),
-                        new Timestamp(System.currentTimeMillis())
-                );
-                repository.save(keyPair);
-                logger.info("Initial RSA Key created at startup");
-            }
-        };
-    }
-
+      if (existingKey.isEmpty()) {
+        var keys = new Keys();
+        var keyPair =
+            keys.generateKeyPair(
+                UUID.randomUUID().toString(), new Timestamp(System.currentTimeMillis()));
+        repository.save(keyPair);
+        logger.info("Initial RSA Key created at startup");
+      }
+    };
+  }
 }

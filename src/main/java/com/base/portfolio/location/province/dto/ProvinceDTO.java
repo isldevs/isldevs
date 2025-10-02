@@ -16,9 +16,8 @@
 package com.base.portfolio.location.province.dto;
 
 import com.base.portfolio.location.district.dto.DistrictDTO;
-import lombok.*;
-
 import java.util.List;
+import lombok.*;
 
 /**
  * @author YISivlay
@@ -30,13 +29,11 @@ import java.util.List;
 @NoArgsConstructor
 public class ProvinceDTO {
 
-    private Long id;
-    private String type;
-    private String nameEn;
-    private String nameKm;
-    private String nameZh;
-    private String postalCode;
-    private List<DistrictDTO> districts;
-
-
+  private Long id;
+  private String type;
+  private String nameEn;
+  private String nameKm;
+  private String nameZh;
+  private String postalCode;
+  private List<DistrictDTO> districts;
 }

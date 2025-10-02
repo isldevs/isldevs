@@ -15,31 +15,29 @@
  */
 package com.base.portfolio.location.commune.service;
 
-
 import com.base.core.command.data.JsonCommand;
 import com.base.portfolio.location.commune.dto.CommuneDTO;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
  */
 public interface CommuneService {
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_COMMUNE')")
-    Map<String, Object> createCommune(JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_COMMUNE')")
+  Map<String, Object> createCommune(JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_COMMUNE')")
-    Map<String, Object> updateCommune(Long id, JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_COMMUNE')")
+  Map<String, Object> updateCommune(Long id, JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_COMMUNE')")
-    Map<String, Object> deleteCommune(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_COMMUNE')")
+  Map<String, Object> deleteCommune(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
-    CommuneDTO getCommuneById(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
+  CommuneDTO getCommuneById(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
-    Page<CommuneDTO> listCommunes(Integer page, Integer size, String search);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
+  Page<CommuneDTO> listCommunes(Integer page, Integer size, String search);
 }

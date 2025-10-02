@@ -15,17 +15,15 @@
  */
 package com.base.portfolio.location.province.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.location.province.controller.ProvinceConstants;
 import com.base.portfolio.location.province.service.ProvinceService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "UPDATE", entity = ProvinceConstants.PERMISSION)
 public class UpdateProvinceHandlerProcessing implements CommandHandlerProcessing {
 
-    private final ProvinceService service;
+  private final ProvinceService service;
 
-    @Autowired
-    public UpdateProvinceHandlerProcessing(ProvinceService service) {
-        this.service = service;
-    }
+  @Autowired
+  public UpdateProvinceHandlerProcessing(ProvinceService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateProvince(command.getId(), command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.updateProvince(command.getId(), command);
+  }
 }

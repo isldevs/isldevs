@@ -15,7 +15,8 @@
  */
 package com.base.config;
 
-
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
@@ -23,28 +24,27 @@ import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomi
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 /**
  * @author YISivlay
  */
 @Configuration
 public class VirtualThreadConfig {
 
-    final Logger logger = LoggerFactory.getLogger(VirtualThreadConfig.class);
+  final Logger logger = LoggerFactory.getLogger(VirtualThreadConfig.class);
 
-    @Bean(value = TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
-    public Executor applicationTaskExecutor() {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        logger.info("Virtual thread per task executor, available processors: {}, will scale dynamically base on workload", availableProcessors);
-        return Executors.newVirtualThreadPerTaskExecutor();
-    }
+  @Bean(value = TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+  public Executor applicationTaskExecutor() {
+    int availableProcessors = Runtime.getRuntime().availableProcessors();
+    logger.info(
+        "Virtual thread per task executor, available processors: {}, will scale dynamically base on workload",
+        availableProcessors);
+    return Executors.newVirtualThreadPerTaskExecutor();
+  }
 
-    @Bean
-    public TomcatProtocolHandlerCustomizer<?> tomcatVirtualThreadExecutor() {
-        logger.info("Tomcat will handle requests with virtual thread per task model");
-        return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-    }
-
+  @Bean
+  public TomcatProtocolHandlerCustomizer<?> tomcatVirtualThreadExecutor() {
+    logger.info("Tomcat will handle requests with virtual thread per task model");
+    return protocolHandler ->
+        protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+  }
 }

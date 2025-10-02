@@ -16,16 +16,16 @@
 package com.base.core.authentication.user.repository;
 
 import com.base.core.authentication.user.model.Authority;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
  * @author YISivlay
  */
 @Repository
-public interface AuthorityRepository extends JpaRepository<Authority, Long>, JpaSpecificationExecutor<Authority> {
-    Optional<Authority> findByAuthority(String authority);
+public interface AuthorityRepository
+    extends JpaRepository<Authority, Long>, JpaSpecificationExecutor<Authority> {
+  Optional<Authority> findByAuthority(String authority);
 }

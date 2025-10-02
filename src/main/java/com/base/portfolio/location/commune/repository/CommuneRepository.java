@@ -15,7 +15,6 @@
  */
 package com.base.portfolio.location.commune.repository;
 
-
 import com.base.portfolio.location.commune.model.Commune;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,6 +24,5 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface CommuneRepository extends JpaRepository<Commune, Long>, JpaSpecificationExecutor<Commune> {
-
-}
+public interface CommuneRepository
+    extends JpaRepository<Commune, Long>, JpaSpecificationExecutor<Commune> {}

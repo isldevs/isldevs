@@ -15,12 +15,10 @@
  */
 package com.base.config.serialization;
 
-
 /**
  * @author YISivlay
  */
 public interface ToApiJsonSerializer<T> {
 
-    String serialize(Object object);
-
+  String serialize(Object object);
 }

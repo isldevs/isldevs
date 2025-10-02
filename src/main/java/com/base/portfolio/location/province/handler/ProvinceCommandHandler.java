@@ -15,7 +15,6 @@
  */
 package com.base.portfolio.location.province.handler;
 
-
 import com.base.core.command.data.CommandBuilder;
 import com.base.portfolio.location.province.controller.ProvinceConstants;
 
@@ -24,23 +23,23 @@ import com.base.portfolio.location.province.controller.ProvinceConstants;
  */
 public class ProvinceCommandHandler extends CommandBuilder {
 
-    public CommandBuilder create() {
-        return this.action("CREATE")
-                .entity(ProvinceConstants.PERMISSION)
-                .href(ProvinceConstants.API_PATH);
-    }
+  public CommandBuilder create() {
+    return this.action("CREATE")
+        .entity(ProvinceConstants.PERMISSION)
+        .href(ProvinceConstants.API_PATH);
+  }
 
-    public CommandBuilder update(final Long id) {
-        return this.action("UPDATE")
-                .entity(ProvinceConstants.PERMISSION)
-                .id(id)
-                .href(ProvinceConstants.API_PATH + "/" + id);
-    }
+  public CommandBuilder update(final Long id) {
+    return this.action("UPDATE")
+        .entity(ProvinceConstants.PERMISSION)
+        .id(id)
+        .href(ProvinceConstants.API_PATH + "/" + id);
+  }
 
-    public CommandBuilder delete(final Long id) {
-        return this.action("DELETE")
-                .entity(ProvinceConstants.PERMISSION)
-                .id(id)
-                .href(ProvinceConstants.API_PATH + "/" + id);
-    }
+  public CommandBuilder delete(final Long id) {
+    return this.action("DELETE")
+        .entity(ProvinceConstants.PERMISSION)
+        .id(id)
+        .href(ProvinceConstants.API_PATH + "/" + id);
+  }
 }

@@ -15,17 +15,15 @@
  */
 package com.base.core.pageable;
 
-
 import com.fasterxml.jackson.annotation.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.Link;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -36,44 +34,41 @@ import java.util.Map;
 @AllArgsConstructor
 public class PageableResponse<T> {
 
-    private EmbeddedContent<T> embedded;
-    private Map<String, Link> links;
-    private PageMetadata page;
+  private EmbeddedContent<T> embedded;
+  private Map<String, Link> links;
+  private PageMetadata page;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EmbeddedContent<T> {
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class EmbeddedContent<T> {
 
-        @JsonIgnore
-        private List<T> content;
+    @JsonIgnore private List<T> content;
 
-        @JsonAnyGetter
-        public Map<String, List<T>> getDynamicPropertyName() {
-            if (content == null || content.isEmpty()) {
-                return Collections.emptyMap();
-            }
-            return Map.of("contents", content);
-        }
-
-        @JsonAnySetter
-        public void setDynamicProperties(List<T> value) {
-            this.content = value;
-        }
+    @JsonAnyGetter
+    public Map<String, List<T>> getDynamicPropertyName() {
+      if (content == null || content.isEmpty()) {
+        return Collections.emptyMap();
+      }
+      return Map.of("contents", content);
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PageMetadata {
-
-        private Integer size;
-        private Long totalElements;
-        private Integer totalPages;
-        private Integer number;
-
+    @JsonAnySetter
+    public void setDynamicProperties(List<T> value) {
+      this.content = value;
     }
+  }
 
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class PageMetadata {
+
+    private Integer size;
+    private Long totalElements;
+    private Integer totalPages;
+    private Integer number;
+  }
 }

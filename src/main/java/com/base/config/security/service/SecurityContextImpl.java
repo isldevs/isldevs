@@ -32,56 +32,61 @@ import org.springframework.stereotype.Service;
 @Service
 public class SecurityContextImpl implements SecurityContext {
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-    @Override
-    public User authenticatedUser() {
-        org.springframework.security.core.context.SecurityContext context = SecurityContextHolder.getContext();
-        if (context == null || context.getAuthentication() == null || context.getAuthentication().getPrincipal() == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unauthenticated user.", null));
-        }
-        Object principal = context.getAuthentication().getPrincipal();
-        if (principal instanceof User user) {
-            return user;
-        } else if (principal instanceof Jwt jwt) {
-            String username = jwt.getClaimAsString("sub");
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new OAuth2AuthenticationException(
-                            new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "User not found: " + username, null)
-                    ));
-        } else {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unsupported principal type.", null));
-        }
+  @Override
+  public User authenticatedUser() {
+    org.springframework.security.core.context.SecurityContext context =
+        SecurityContextHolder.getContext();
+    if (context == null
+        || context.getAuthentication() == null
+        || context.getAuthentication().getPrincipal() == null) {
+      throw new OAuth2AuthenticationException(
+          new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unauthenticated user.", null));
     }
-
-    @Override
-    public boolean isAdmin() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return false;
-            }
-            return authentication.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        } catch (Exception e) {
-            return false;
-        }
+    Object principal = context.getAuthentication().getPrincipal();
+    if (principal instanceof User user) {
+      return user;
+    } else if (principal instanceof Jwt jwt) {
+      String username = jwt.getClaimAsString("sub");
+      return userRepository
+          .findByUsername(username)
+          .orElseThrow(
+              () ->
+                  new OAuth2AuthenticationException(
+                      new OAuth2Error(
+                          OAuth2ErrorCodes.INVALID_TOKEN, "User not found: " + username, null)));
+    } else {
+      throw new OAuth2AuthenticationException(
+          new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Unsupported principal type.", null));
     }
+  }
 
-    public String getCurrentUsername() {
-        var context = SecurityContextHolder.getContext();
-        if (context == null || context.getAuthentication() == null) {
-            return "system";
-        }
-        return context.getAuthentication().getName();
+  @Override
+  public boolean isAdmin() {
+    try {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      if (authentication == null || !authentication.isAuthenticated()) {
+        return false;
+      }
+      return authentication.getAuthorities().stream()
+          .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+    } catch (Exception e) {
+      return false;
     }
+  }
 
-    @Override
-    public boolean hasAuthority(String authority) {
-        User user = this.authenticatedUser();
-        return user.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(authority));
+  public String getCurrentUsername() {
+    var context = SecurityContextHolder.getContext();
+    if (context == null || context.getAuthentication() == null) {
+      return "system";
     }
+    return context.getAuthentication().getName();
+  }
 
+  @Override
+  public boolean hasAuthority(String authority) {
+    User user = this.authenticatedUser();
+    return user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(authority));
+  }
 }

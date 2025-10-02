@@ -16,9 +16,8 @@
 package com.base.portfolio.location.commune.dto;
 
 import com.base.portfolio.location.village.dto.VillageDTO;
-import lombok.*;
-
 import java.util.List;
+import lombok.*;
 
 /**
  * @author YISivlay
@@ -30,14 +29,12 @@ import java.util.List;
 @NoArgsConstructor
 public class CommuneDTO {
 
-    private Long id;
-    private Long districtId;
-    private String type;
-    private String nameEn;
-    private String nameKm;
-    private String nameZh;
-    private String postalCode;
-    private List<VillageDTO> villages;
-
-
+  private Long id;
+  private Long districtId;
+  private String type;
+  private String nameEn;
+  private String nameKm;
+  private String nameZh;
+  private String postalCode;
+  private List<VillageDTO> villages;
 }

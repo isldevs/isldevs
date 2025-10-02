@@ -15,32 +15,30 @@
  */
 package com.base.portfolio.file.service;
 
-
 import com.base.core.command.data.JsonCommand;
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import java.util.Map;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * @author YISivlay
  */
 public interface FileService {
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPLOAD_FILE')")
-    Map<String, Object> uploadFile(JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPLOAD_FILE')")
+  Map<String, Object> uploadFile(JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_FILE')")
-    Map<String, Object> delete(JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_FILE')")
+  Map<String, Object> delete(JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
-    Map<String, Object> fileURL(String entity, Long entityId);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
+  Map<String, Object> fileURL(String entity, Long entityId);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
-    Map<String, Object> fileBase64(String entity, Long entityId);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
+  Map<String, Object> fileBase64(String entity, Long entityId);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
-    Map<String, Object> fileByte(String entity, Long entityId);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
+  Map<String, Object> fileByte(String entity, Long entityId);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
-    Map<String, Object> fileInputStream(String entity, Long entityId);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_FILE')")
+  Map<String, Object> fileInputStream(String entity, Long entityId);
 }

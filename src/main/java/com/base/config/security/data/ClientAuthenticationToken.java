@@ -15,7 +15,6 @@
  */
 package com.base.config.security.data;
 
-
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
@@ -23,31 +22,31 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
  */
 public class ClientAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String clientId;
-    private final String clientAssertion;
+  private final String clientId;
+  private final String clientAssertion;
 
-    public ClientAuthenticationToken(String clientId, String clientAssertion) {
-        super(null);
-        this.clientId = clientId;
-        this.clientAssertion = clientAssertion;
-        setAuthenticated(false);
-    }
+  public ClientAuthenticationToken(String clientId, String clientAssertion) {
+    super(null);
+    this.clientId = clientId;
+    this.clientAssertion = clientAssertion;
+    setAuthenticated(false);
+  }
 
-    public String getClientId() {
-        return clientId;
-    }
+  public String getClientId() {
+    return clientId;
+  }
 
-    public String getClientAssertion() {
-        return clientAssertion;
-    }
+  public String getClientAssertion() {
+    return clientAssertion;
+  }
 
-    @Override
-    public Object getCredentials() {
-        return clientAssertion;
-    }
+  @Override
+  public Object getCredentials() {
+    return clientAssertion;
+  }
 
-    @Override
-    public Object getPrincipal() {
-        return clientId;
-    }
+  @Override
+  public Object getPrincipal() {
+    return clientId;
+  }
 }

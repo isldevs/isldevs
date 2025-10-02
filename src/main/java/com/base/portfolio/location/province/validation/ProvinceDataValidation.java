@@ -15,15 +15,13 @@
  */
 package com.base.portfolio.location.province.validation;
 
-
 import com.base.config.serialization.JsonHelper;
 import com.base.core.exception.ApiDataValidator;
 import com.base.portfolio.location.province.controller.ProvinceConstants;
 import com.google.gson.reflect.TypeToken;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -31,75 +29,84 @@ import java.util.Map;
 @Component
 public class ProvinceDataValidation {
 
-    private final JsonHelper jsonHelper;
-    private final ApiDataValidator validator;
+  private final JsonHelper jsonHelper;
+  private final ApiDataValidator validator;
 
-    @Autowired
-    public ProvinceDataValidation(final JsonHelper jsonHelper,
-                                  final ApiDataValidator validator) {
-        this.jsonHelper = jsonHelper;
-        this.validator = validator;
+  @Autowired
+  public ProvinceDataValidation(final JsonHelper jsonHelper, final ApiDataValidator validator) {
+    this.jsonHelper = jsonHelper;
+    this.validator = validator;
+  }
+
+  public void create(String json) {
+
+    final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.jsonHelper.unsupportedParameters(typeOfMap, json, ProvinceConstants.SUPPORTED_PARAMETERS);
+
+    final var jsonElement = this.jsonHelper.parse(json);
+
+    final var type = this.jsonHelper.extractString(ProvinceConstants.TYPE, jsonElement);
+    validator.parameter(ProvinceConstants.TYPE, type).isString().notEmpty().maxLength(50);
+
+    final var nameEn = this.jsonHelper.extractString(ProvinceConstants.NAME_EN, jsonElement);
+    validator.parameter(ProvinceConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
+
+    final var nameKm = this.jsonHelper.extractString(ProvinceConstants.NAME_KM, jsonElement);
+    validator.parameter(ProvinceConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+
+    final var nameZh = this.jsonHelper.extractString(ProvinceConstants.NAME_ZH, jsonElement);
+    validator.parameter(ProvinceConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
+
+    final var postalCode =
+        this.jsonHelper.extractString(ProvinceConstants.POSTAL_CODE, jsonElement);
+    validator
+        .parameter(ProvinceConstants.POSTAL_CODE, postalCode)
+        .isString()
+        .notEmpty()
+        .maxLength(50);
+
+    if (this.jsonHelper.parameterExists(ProvinceConstants.DISTRICT, jsonElement)) {
+      final var districts =
+          this.jsonHelper.extractArrayAsObject(ProvinceConstants.DISTRICT, jsonElement);
+      validator.parameter(ProvinceConstants.DISTRICT, districts).notEmptyCollection();
     }
+  }
 
-    public void create(String json) {
+  public void update(String json) {
+    final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    this.jsonHelper.unsupportedParameters(typeOfMap, json, ProvinceConstants.SUPPORTED_PARAMETERS);
 
-        final var typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap, json, ProvinceConstants.SUPPORTED_PARAMETERS);
+    final var jsonElement = this.jsonHelper.parse(json);
 
-        final var jsonElement = this.jsonHelper.parse(json);
-
-        final var type = this.jsonHelper.extractString(ProvinceConstants.TYPE, jsonElement);
-        validator.parameter(ProvinceConstants.TYPE, type).isString().notEmpty().maxLength(50);
-
-        final var nameEn = this.jsonHelper.extractString(ProvinceConstants.NAME_EN, jsonElement);
-        validator.parameter(ProvinceConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
-
-        final var nameKm = this.jsonHelper.extractString(ProvinceConstants.NAME_KM, jsonElement);
-        validator.parameter(ProvinceConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
-
-        final var nameZh = this.jsonHelper.extractString(ProvinceConstants.NAME_ZH, jsonElement);
-        validator.parameter(ProvinceConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
-
-        final var postalCode = this.jsonHelper.extractString(ProvinceConstants.POSTAL_CODE, jsonElement);
-        validator.parameter(ProvinceConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
-
-        if (this.jsonHelper.parameterExists(ProvinceConstants.DISTRICT, jsonElement)) {
-            final var districts = this.jsonHelper.extractArrayAsObject(ProvinceConstants.DISTRICT, jsonElement);
-            validator.parameter(ProvinceConstants.DISTRICT, districts).notEmptyCollection();
-        }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.TYPE, jsonElement)) {
+      final var type = this.jsonHelper.extractString(ProvinceConstants.TYPE, jsonElement);
+      validator.parameter(ProvinceConstants.TYPE, type).isString().notEmpty().maxLength(50);
     }
-
-    public void update(String json) {
-        final var typeOfMap = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap, json, ProvinceConstants.SUPPORTED_PARAMETERS);
-
-        final var jsonElement = this.jsonHelper.parse(json);
-
-        if (this.jsonHelper.parameterExists(ProvinceConstants.TYPE, jsonElement)) {
-            final var type = this.jsonHelper.extractString(ProvinceConstants.TYPE, jsonElement);
-            validator.parameter(ProvinceConstants.TYPE, type).isString().notEmpty().maxLength(50);
-        }
-        if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_EN, jsonElement)) {
-            final var nameEn = this.jsonHelper.extractString(ProvinceConstants.NAME_EN, jsonElement);
-            validator.parameter(ProvinceConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
-        }
-        if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_KM, jsonElement)) {
-            final var nameKm = this.jsonHelper.extractString(ProvinceConstants.NAME_KM, jsonElement);
-            validator.parameter(ProvinceConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
-        }
-        if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_ZH, jsonElement)) {
-            final var nameZh = this.jsonHelper.extractString(ProvinceConstants.NAME_ZH, jsonElement);
-            validator.parameter(ProvinceConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
-        }
-        if (this.jsonHelper.parameterExists(ProvinceConstants.POSTAL_CODE, jsonElement)) {
-            final var postalCode = this.jsonHelper.extractString(ProvinceConstants.POSTAL_CODE, jsonElement);
-            validator.parameter(ProvinceConstants.POSTAL_CODE, postalCode).isString().notEmpty().maxLength(50);
-        }
-        if (this.jsonHelper.parameterExists(ProvinceConstants.DISTRICT, jsonElement)) {
-            final var districts = this.jsonHelper.extractArrayAsObject(ProvinceConstants.DISTRICT, jsonElement);
-            validator.parameter(ProvinceConstants.DISTRICT, districts).notEmptyCollection();
-        }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_EN, jsonElement)) {
+      final var nameEn = this.jsonHelper.extractString(ProvinceConstants.NAME_EN, jsonElement);
+      validator.parameter(ProvinceConstants.NAME_EN, nameEn).isString().notEmpty().maxLength(100);
     }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_KM, jsonElement)) {
+      final var nameKm = this.jsonHelper.extractString(ProvinceConstants.NAME_KM, jsonElement);
+      validator.parameter(ProvinceConstants.NAME_KM, nameKm).isString().notEmpty().maxLength(100);
+    }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.NAME_ZH, jsonElement)) {
+      final var nameZh = this.jsonHelper.extractString(ProvinceConstants.NAME_ZH, jsonElement);
+      validator.parameter(ProvinceConstants.NAME_ZH, nameZh).isString().notEmpty().maxLength(100);
+    }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.POSTAL_CODE, jsonElement)) {
+      final var postalCode =
+          this.jsonHelper.extractString(ProvinceConstants.POSTAL_CODE, jsonElement);
+      validator
+          .parameter(ProvinceConstants.POSTAL_CODE, postalCode)
+          .isString()
+          .notEmpty()
+          .maxLength(50);
+    }
+    if (this.jsonHelper.parameterExists(ProvinceConstants.DISTRICT, jsonElement)) {
+      final var districts =
+          this.jsonHelper.extractArrayAsObject(ProvinceConstants.DISTRICT, jsonElement);
+      validator.parameter(ProvinceConstants.DISTRICT, districts).notEmptyCollection();
+    }
+  }
 }

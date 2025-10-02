@@ -15,17 +15,15 @@
  */
 package com.base.core.authentication.role.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.role.service.RoleService;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "UPDATE", entity = RoleConstants.PERMISSION)
 public class UpdateRoleHandlerProcessing implements CommandHandlerProcessing {
 
-    private final RoleService service;
+  private final RoleService service;
 
-    @Autowired
-    public UpdateRoleHandlerProcessing(RoleService service) {
-        this.service = service;
-    }
+  @Autowired
+  public UpdateRoleHandlerProcessing(RoleService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateRole(command.getId(), command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.updateRole(command.getId(), command);
+  }
 }

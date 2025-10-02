@@ -15,9 +15,7 @@
  */
 package com.base.portfolio.file.model;
 
-
 import com.base.core.exception.ErrorException;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -27,34 +25,35 @@ import java.util.stream.Collectors;
  * @author YISivlay
  */
 public enum StorageType {
+  FILE_SYSTEM("File system", 1),
+  S3("S3", 2),
+  MINIO("MinIO", 3);
 
-    FILE_SYSTEM("File system", 1), S3("S3", 2), MINIO("MinIO", 3);
+  private static final Map<Integer, StorageType> ENUM_MAP =
+      Collections.unmodifiableMap(
+          Arrays.stream(values()).collect(Collectors.toMap(StorageType::getValue, type -> type)));
 
-    private static final Map<Integer, StorageType> ENUM_MAP = Collections.unmodifiableMap(Arrays.stream(values())
-                    .collect(Collectors.toMap(StorageType::getValue, type -> type)));
+  private final String name;
+  private final int value;
 
-    private final String name;
-    private final int value;
+  StorageType(String name, int value) {
+    this.name = name;
+    this.value = value;
+  }
 
-    StorageType(String name, int value) {
-        this.name = name;
-        this.value = value;
+  public String getName() {
+    return name;
+  }
+
+  public int getValue() {
+    return value;
+  }
+
+  public static StorageType fromInt(int i) {
+    StorageType type = ENUM_MAP.get(i);
+    if (type == null) {
+      throw new ErrorException("msg.storage.type.invalid", i);
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public static StorageType fromInt(int i) {
-        StorageType type = ENUM_MAP.get(i);
-        if (type == null) {
-            throw new ErrorException("msg.storage.type.invalid", i);
-        }
-        return type;
-    }
+    return type;
+  }
 }
-

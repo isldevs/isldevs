@@ -15,7 +15,6 @@
  */
 package com.base.config.security;
 
-
 import com.base.config.security.converter.CustomJwtAuthenticationConverter;
 import com.base.config.security.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,101 +39,111 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 public class ResourceServerConfig {
 
-    private final JwtDecoder jwtDecoder;
-    private final SessionRegistry sessionRegistry;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final ClientRegistrationRepository clientRegistrationRepository;
-    private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
-    private final OAuth2UserServiceImpl oauth2UserService;
-    private final OidcUserServiceImpl oidcUserService;
-    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
-    private final CorsConfigurationSource corsConfigurationSource;
-    private final AccessTokenResponseClient accessTokenResponseClient;
+  private final JwtDecoder jwtDecoder;
+  private final SessionRegistry sessionRegistry;
+  private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+  private final ClientRegistrationRepository clientRegistrationRepository;
+  private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
+  private final OAuth2UserServiceImpl oauth2UserService;
+  private final OidcUserServiceImpl oidcUserService;
+  private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
+  private final CorsConfigurationSource corsConfigurationSource;
+  private final AccessTokenResponseClient accessTokenResponseClient;
 
-    @Autowired
-    public ResourceServerConfig(final JwtDecoder jwtDecoder,
-                                final SessionRegistry sessionRegistry,
-                                final CustomAuthenticationEntryPoint authenticationEntryPoint,
-                                final ClientRegistrationRepository clientRegistrationRepository,
-                                final OAuth2AuthorizedClientService oauth2AuthorizedClientService,
-                                final OAuth2UserServiceImpl oauth2UserService,
-                                final OidcUserServiceImpl oidcUserService,
-                                final AuthenticationSuccessHandlerImpl authenticationSuccessHandler,
-                                final CorsConfigurationSource corsConfigurationSource,
-                                final AccessTokenResponseClient accessTokenResponseClient) {
-        this.jwtDecoder = jwtDecoder;
-        this.sessionRegistry = sessionRegistry;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-        this.clientRegistrationRepository = clientRegistrationRepository;
-        this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
-        this.oauth2UserService = oauth2UserService;
-        this.oidcUserService = oidcUserService;
-        this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.corsConfigurationSource = corsConfigurationSource;
-        this.accessTokenResponseClient = accessTokenResponseClient;
-    }
+  @Autowired
+  public ResourceServerConfig(
+      final JwtDecoder jwtDecoder,
+      final SessionRegistry sessionRegistry,
+      final CustomAuthenticationEntryPoint authenticationEntryPoint,
+      final ClientRegistrationRepository clientRegistrationRepository,
+      final OAuth2AuthorizedClientService oauth2AuthorizedClientService,
+      final OAuth2UserServiceImpl oauth2UserService,
+      final OidcUserServiceImpl oidcUserService,
+      final AuthenticationSuccessHandlerImpl authenticationSuccessHandler,
+      final CorsConfigurationSource corsConfigurationSource,
+      final AccessTokenResponseClient accessTokenResponseClient) {
+    this.jwtDecoder = jwtDecoder;
+    this.sessionRegistry = sessionRegistry;
+    this.authenticationEntryPoint = authenticationEntryPoint;
+    this.clientRegistrationRepository = clientRegistrationRepository;
+    this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
+    this.oauth2UserService = oauth2UserService;
+    this.oidcUserService = oidcUserService;
+    this.authenticationSuccessHandler = authenticationSuccessHandler;
+    this.corsConfigurationSource = corsConfigurationSource;
+    this.accessTokenResponseClient = accessTokenResponseClient;
+  }
 
-    @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/oauth2/**",
-                                "/api/v1/device/**",
-                                "/css/**",
-                                "/js/**",
-                                "/api/v1/login/**",
-                                "/api/v1/error/**",
-                                "/api/v1/public/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/home", true)
-                        .successHandler(authenticationSuccessHandler)
-                        .permitAll()
-                )
-                .oauth2ResourceServer(
-                        oauth2 -> oauth2.jwt(jwt -> jwt
-                                        .decoder(jwtDecoder)
-                                        .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter())
-                                )
-                                .authenticationEntryPoint(authenticationEntryPoint)
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .clientRegistrationRepository(clientRegistrationRepository)
-                        .authorizedClientService(oauth2AuthorizedClientService)
-                        .tokenEndpoint(tokenEndpointConfig -> tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient))
-                        .userInfoEndpoint(userInfo -> userInfo
+  @Bean
+  @Order(2)
+  public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(
+                        "/api/v1/oauth2/**",
+                        "/api/v1/device/**",
+                        "/css/**",
+                        "/js/**",
+                        "/api/v1/login/**",
+                        "/api/v1/error/**",
+                        "/api/v1/public/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource))
+        .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        .httpBasic(Customizer.withDefaults())
+        .formLogin(
+            form ->
+                form.loginPage("/login")
+                    .defaultSuccessUrl("/home", true)
+                    .successHandler(authenticationSuccessHandler)
+                    .permitAll())
+        .oauth2ResourceServer(
+            oauth2 ->
+                oauth2
+                    .jwt(
+                        jwt ->
+                            jwt.decoder(jwtDecoder)
+                                .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter()))
+                    .authenticationEntryPoint(authenticationEntryPoint))
+        .oauth2Login(
+            oauth2 ->
+                oauth2
+                    .clientRegistrationRepository(clientRegistrationRepository)
+                    .authorizedClientService(oauth2AuthorizedClientService)
+                    .tokenEndpoint(
+                        tokenEndpointConfig ->
+                            tokenEndpointConfig.accessTokenResponseClient(
+                                accessTokenResponseClient))
+                    .userInfoEndpoint(
+                        userInfo ->
+                            userInfo
                                 .userService(oauth2UserService)
                                 .oidcUserService(oidcUserService))
-                        .successHandler(authenticationSuccessHandler)
-                        .loginPage("/login").permitAll()
-                        .defaultSuccessUrl("/home", true)
-                        .failureUrl("/login?error=true")
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation().migrateSession()
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(true)
-                        .sessionRegistry(sessionRegistry)
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .deleteCookies("JSESSIONID", "SESSION")
-                        .clearAuthentication(true)
-                        .invalidateHttpSession(true)
-                )
-                .headers(header -> header
-                        .cacheControl(HeadersConfigurer.CacheControlConfig::disable)
-                );
+                    .successHandler(authenticationSuccessHandler)
+                    .loginPage("/login")
+                    .permitAll()
+                    .defaultSuccessUrl("/home", true)
+                    .failureUrl("/login?error=true"))
+        .sessionManagement(
+            session ->
+                session
+                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .sessionFixation()
+                    .migrateSession()
+                    .maximumSessions(1)
+                    .maxSessionsPreventsLogin(true)
+                    .sessionRegistry(sessionRegistry))
+        .logout(
+            logout ->
+                logout
+                    .logoutUrl("/logout")
+                    .deleteCookies("JSESSIONID", "SESSION")
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true))
+        .headers(header -> header.cacheControl(HeadersConfigurer.CacheControlConfig::disable));
 
-        return http.build();
-    }
+    return http.build();
+  }
 }

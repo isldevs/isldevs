@@ -20,11 +20,10 @@ import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.location.commune.controller.CommuneConstants;
 import com.base.portfolio.location.commune.service.CommuneService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -34,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "UPDATE", entity = CommuneConstants.PERMISSION)
 public class UpdateCommuneHandlerProcessing implements CommandHandlerProcessing {
 
-    private final CommuneService service;
+  private final CommuneService service;
 
-    @Autowired
-    public UpdateCommuneHandlerProcessing(CommuneService service) {
-        this.service = service;
-    }
+  @Autowired
+  public UpdateCommuneHandlerProcessing(CommuneService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateCommune(command.getId(), command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.updateCommune(command.getId(), command);
+  }
 }

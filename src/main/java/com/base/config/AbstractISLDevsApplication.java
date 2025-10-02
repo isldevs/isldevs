@@ -15,7 +15,6 @@
  */
 package com.base.config;
 
-
 import com.base.config.datasource.DatasourceConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
@@ -42,16 +41,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableTransactionManagement
-@EnableAutoConfiguration(exclude = {
-        DataSourceAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        GsonAutoConfiguration.class,
-        JdbcTemplateAutoConfiguration.class,
-        LiquibaseAutoConfiguration.class})
+@EnableAutoConfiguration(
+    exclude = {
+      DataSourceAutoConfiguration.class,
+      HibernateJpaAutoConfiguration.class,
+      DataSourceTransactionManagerAutoConfiguration.class,
+      GsonAutoConfiguration.class,
+      JdbcTemplateAutoConfiguration.class,
+      LiquibaseAutoConfiguration.class
+    })
 @Import({DatasourceConfig.class})
 @ComponentScan(basePackages = {"com.base"})
 @EnableJpaRepositories(basePackages = {"com.base"})
 @IntegrationComponentScan(basePackages = {"com.base"})
-public abstract class AbstractISLDevsApplication {
-}
+public abstract class AbstractISLDevsApplication {}

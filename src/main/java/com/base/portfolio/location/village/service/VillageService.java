@@ -15,31 +15,29 @@
  */
 package com.base.portfolio.location.village.service;
 
-
 import com.base.core.command.data.JsonCommand;
 import com.base.portfolio.location.village.dto.VillageDTO;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
  */
 public interface VillageService {
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_VILLAGE')")
-    Map<String, Object> createVillage(JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_VILLAGE')")
+  Map<String, Object> createVillage(JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_VILLAGE')")
-    Map<String, Object> updateVillage(Long id, JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_VILLAGE')")
+  Map<String, Object> updateVillage(Long id, JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_VILLAGE')")
-    Map<String, Object> deleteVillage(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_VILLAGE')")
+  Map<String, Object> deleteVillage(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_VILLAGE')")
-    VillageDTO getVillageById(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_VILLAGE')")
+  VillageDTO getVillageById(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_VILLAGE')")
-    Page<VillageDTO> listVillages(Integer page, Integer size, String search);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_VILLAGE')")
+  Page<VillageDTO> listVillages(Integer page, Integer size, String search);
 }

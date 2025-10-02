@@ -20,7 +20,6 @@ import com.base.core.authentication.user.model.User;
 import com.base.core.exception.NotFoundException;
 import com.base.portfolio.file.repository.FileUtils;
 import com.base.portfolio.file.service.FileService;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +27,70 @@ import java.util.stream.Collectors;
  * @author YISivlay
  */
 public class UserDTO {
+
+  private Long id;
+  private String username;
+  private String name;
+  private String email;
+  private Set<String> roles;
+  private boolean enabled;
+  private boolean accountNonExpired;
+  private boolean accountNonLocked;
+  private boolean credentialsNonExpired;
+  private String profile;
+
+  protected UserDTO() {}
+
+  public UserDTO(Builder builder) {
+    this.id = builder.id;
+    this.username = builder.username;
+    this.name = builder.name;
+    this.email = builder.email;
+    this.roles = builder.roles;
+    this.enabled = builder.enabled;
+    this.accountNonExpired = builder.accountNonExpired;
+    this.accountNonLocked = builder.accountNonLocked;
+    this.credentialsNonExpired = builder.credentialsNonExpired;
+    this.profile = builder.profile;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static UserDTO toDTO(User user, FileService fileService) {
+    var roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+
+    return UserDTO.builder()
+        .id(user.getId())
+        .username(user.getUsername())
+        .name(user.getName())
+        .email(user.getEmail())
+        .roles(roleNames)
+        .enabled(user.isEnabled())
+        .accountNonExpired(user.isAccountNonExpired())
+        .accountNonLocked(user.isAccountNonLocked())
+        .credentialsNonExpired(user.isCredentialsNonExpired())
+        .profile(profile(fileService, user.getId()))
+        .build();
+  }
+
+  private static String profile(FileService fileService, Long id) {
+    if (fileService == null) {
+      return null;
+    }
+    String profile = null;
+    try {
+      profile =
+          fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file") != null
+              ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).toString()
+              : null;
+    } catch (NotFoundException ignored) {
+    }
+    return profile;
+  }
+
+  public static class Builder {
 
     private Long id;
     private String username;
@@ -40,186 +103,120 @@ public class UserDTO {
     private boolean credentialsNonExpired;
     private String profile;
 
-    protected UserDTO() {
+    public Builder() {}
+
+    public UserDTO build() {
+      return new UserDTO(this);
     }
 
-    public UserDTO(Builder builder) {
-        this.id = builder.id;
-        this.username = builder.username;
-        this.name = builder.name;
-        this.email = builder.email;
-        this.roles = builder.roles;
-        this.enabled = builder.enabled;
-        this.accountNonExpired = builder.accountNonExpired;
-        this.accountNonLocked = builder.accountNonLocked;
-        this.credentialsNonExpired = builder.credentialsNonExpired;
-        this.profile = builder.profile;
+    public Builder id(Long id) {
+      this.id = id;
+      return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder username(String username) {
+      this.username = username;
+      return this;
     }
 
-    public static UserDTO toDTO(User user, FileService fileService) {
-        var roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-
-        return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roles(roleNames)
-                .enabled(user.isEnabled())
-                .accountNonExpired(user.isAccountNonExpired())
-                .accountNonLocked(user.isAccountNonLocked())
-                .credentialsNonExpired(user.isCredentialsNonExpired())
-                .profile(profile(fileService, user.getId()))
-                .build();
+    public Builder name(String name) {
+      this.name = name;
+      return this;
     }
 
-    private static String profile(FileService fileService, Long id) {
-        if (fileService == null) {
-            return null;
-        }
-        String profile = null;
-        try {
-            profile = fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).get("file") != null
-                    ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id).toString()
-                    : null;
-        } catch (NotFoundException ignored) {}
-        return profile;
+    public Builder email(String email) {
+      this.email = email;
+      return this;
     }
 
-    public static class Builder {
-
-        private Long id;
-        private String username;
-        private String name;
-        private String email;
-        private Set<String> roles;
-        private boolean enabled;
-        private boolean accountNonExpired;
-        private boolean accountNonLocked;
-        private boolean credentialsNonExpired;
-        private String profile;
-
-        public Builder() {
-        }
-
-        public UserDTO build() {
-            return new UserDTO(this);
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder username(String username) {
-            this.username = username;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder roles(Set<String> roles) {
-            this.roles = roles;
-            return this;
-        }
-
-        public Builder authorities(Set<String> authorities) {
-            this.roles = authorities;
-            return this;
-        }
-
-        public Builder enabled(boolean enabled) {
-            this.enabled = enabled;
-            return this;
-        }
-
-        public Builder accountNonExpired(boolean accountNonExpired) {
-            this.accountNonExpired = accountNonExpired;
-            return this;
-        }
-
-        public Builder accountNonLocked(boolean accountNonLocked) {
-            this.accountNonLocked = accountNonLocked;
-            return this;
-        }
-
-        public Builder credentialsNonExpired(boolean credentialsNonExpired) {
-            this.credentialsNonExpired = credentialsNonExpired;
-            return this;
-        }
-
-        public Builder profile(String profile) {
-            this.profile = profile;
-            return this;
-        }
+    public Builder roles(Set<String> roles) {
+      this.roles = roles;
+      return this;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj != null && this.getClass() == obj.getClass()) {
-            UserDTO that = (UserDTO) obj;
-            return this.getId().equals(that.getId());
-        } else {
-            return false;
-        }
+    public Builder authorities(Set<String> authorities) {
+      this.roles = authorities;
+      return this;
     }
 
-    public int hashCode() {
-        return this.getId().hashCode();
+    public Builder enabled(boolean enabled) {
+      this.enabled = enabled;
+      return this;
     }
 
-    public Long getId() {
-        return id;
+    public Builder accountNonExpired(boolean accountNonExpired) {
+      this.accountNonExpired = accountNonExpired;
+      return this;
     }
 
-    public String getUsername() {
-        return username;
+    public Builder accountNonLocked(boolean accountNonLocked) {
+      this.accountNonLocked = accountNonLocked;
+      return this;
     }
 
-    public String getName() {
-        return name;
+    public Builder credentialsNonExpired(boolean credentialsNonExpired) {
+      this.credentialsNonExpired = credentialsNonExpired;
+      return this;
     }
 
-    public String getEmail() {
-        return email;
+    public Builder profile(String profile) {
+      this.profile = profile;
+      return this;
     }
+  }
 
-    public Set<String> getRoles() {
-        return roles;
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    } else if (obj != null && this.getClass() == obj.getClass()) {
+      UserDTO that = (UserDTO) obj;
+      return this.getId().equals(that.getId());
+    } else {
+      return false;
     }
+  }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+  public int hashCode() {
+    return this.getId().hashCode();
+  }
 
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
+  public String getUsername() {
+    return username;
+  }
 
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getProfile() {
-        return profile;
-    }
+  public String getEmail() {
+    return email;
+  }
+
+  public Set<String> getRoles() {
+    return roles;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public boolean isAccountNonExpired() {
+    return accountNonExpired;
+  }
+
+  public boolean isAccountNonLocked() {
+    return accountNonLocked;
+  }
+
+  public boolean isCredentialsNonExpired() {
+    return credentialsNonExpired;
+  }
+
+  public String getProfile() {
+    return profile;
+  }
 }

@@ -15,17 +15,15 @@
  */
 package com.base.portfolio.office.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.office.controller.OfficeConstants;
 import com.base.portfolio.office.service.OfficeService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "DELETE", entity = OfficeConstants.PERMISSION)
 public class DeleteOfficeHandlerProcessing implements CommandHandlerProcessing {
 
-    private final OfficeService service;
+  private final OfficeService service;
 
-    @Autowired
-    public DeleteOfficeHandlerProcessing(OfficeService service) {
-        this.service = service;
-    }
+  @Autowired
+  public DeleteOfficeHandlerProcessing(OfficeService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.deleteOffice(command.getId());
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.deleteOffice(command.getId());
+  }
 }

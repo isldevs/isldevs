@@ -22,41 +22,40 @@ import org.springframework.http.HttpStatus;
  */
 public class ErrorException extends RuntimeException {
 
-    private final Object[] args;
-    private final HttpStatus status;
-    private final String description;
+  private final Object[] args;
+  private final HttpStatus status;
+  private final String description;
 
-    public ErrorException(String msgCode, Object... args) {
-        super(msgCode);
-        this.status = HttpStatus.BAD_REQUEST;
-        this.args = args;
-        this.description = null;
-    }
+  public ErrorException(String msgCode, Object... args) {
+    super(msgCode);
+    this.status = HttpStatus.BAD_REQUEST;
+    this.args = args;
+    this.description = null;
+  }
 
-    public ErrorException(HttpStatus status, String msgCode, Object... args) {
-        super(msgCode);
-        this.status = status;
-        this.args = args;
-        this.description = null;
-    }
+  public ErrorException(HttpStatus status, String msgCode, Object... args) {
+    super(msgCode);
+    this.status = status;
+    this.args = args;
+    this.description = null;
+  }
 
-    public ErrorException(HttpStatus status, String msgCode, String description, Object... args) {
-        super(msgCode);
-        this.status = status;
-        this.args = args;
-        this.description = description;
-    }
+  public ErrorException(HttpStatus status, String msgCode, String description, Object... args) {
+    super(msgCode);
+    this.status = status;
+    this.args = args;
+    this.description = description;
+  }
 
-    public Object[] getArgs() {
-        return args;
-    }
+  public Object[] getArgs() {
+    return args;
+  }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
+  public HttpStatus getStatus() {
+    return status;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 }
-

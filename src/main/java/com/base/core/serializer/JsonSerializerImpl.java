@@ -15,7 +15,6 @@
  */
 package com.base.core.serializer;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,15 +24,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class JsonSerializerImpl<T> implements JsonSerializer<T> {
 
-    private final GsonSerializer serializer;
+  private final GsonSerializer serializer;
 
-    @Autowired
-    public JsonSerializerImpl(GsonSerializer serializer) {
-        this.serializer = serializer;
-    }
+  @Autowired
+  public JsonSerializerImpl(GsonSerializer serializer) {
+    this.serializer = serializer;
+  }
 
-    @Override
-    public String serialize(Object object) {
-        return this.serializer.serialize(object);
-    }
+  @Override
+  public String serialize(Object object) {
+    return this.serializer.serialize(object);
+  }
 }

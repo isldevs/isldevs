@@ -16,32 +16,33 @@
 package com.base.config.security.data;
 
 import com.base.config.security.keypairs.RSAKeyPairRepository;
+import java.util.Comparator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
-import java.util.Comparator;
-
 /**
  * @author YISivlay
  */
-public class ClientAssertionJwtDecoderFactory implements JwtDecoderFactory<ClientAuthenticationToken> {
+public class ClientAssertionJwtDecoderFactory
+    implements JwtDecoderFactory<ClientAuthenticationToken> {
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+  private final RSAKeyPairRepository rsaKeyPairRepository;
 
-    public ClientAssertionJwtDecoderFactory(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
-    }
+  public ClientAssertionJwtDecoderFactory(RSAKeyPairRepository rsaKeyPairRepository) {
+    this.rsaKeyPairRepository = rsaKeyPairRepository;
+  }
 
-    @Override
-    public JwtDecoder createDecoder(ClientAuthenticationToken context) {
+  @Override
+  public JwtDecoder createDecoder(ClientAuthenticationToken context) {
 
-        var key = rsaKeyPairRepository.findKeyPairs().stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-                .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
+    var key =
+        rsaKeyPairRepository.findKeyPairs().stream()
+            .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+            .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+            .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
 
-        return NimbusJwtDecoder.withPublicKey(key).build();
-    }
+    return NimbusJwtDecoder.withPublicKey(key).build();
+  }
 }

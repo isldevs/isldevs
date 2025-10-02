@@ -15,12 +15,11 @@
  */
 package com.base.core.authentication.role.dto;
 
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
 
 /**
  * @author YISivlay
@@ -31,8 +30,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class RoleDTO {
 
-    private Long id;
-    private String name;
-    private Set<String> authorities;
-
+  private Long id;
+  private String name;
+  private Set<String> authorities;
 }

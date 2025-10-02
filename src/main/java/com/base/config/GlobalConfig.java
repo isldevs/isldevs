@@ -15,45 +15,37 @@
  */
 package com.base.config;
 
-
 import com.base.core.configuration.model.Config;
 import com.base.core.configuration.repository.ConfigRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author YISivlay
  */
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Component
 public class GlobalConfig {
 
-    private final Map<String, String> configMap;
+  private final Map<String, String> configMap;
 
-    @Autowired
-    public GlobalConfig(ConfigRepository configRepository) {
-        List<Config> configs = configRepository.findAllByEnabled(true);
-        this.configMap = configs.stream()
-                .collect(Collectors.toMap(
-                        Config::getCode,
-                        Config::getValue
-                ));
-    }
+  @Autowired
+  public GlobalConfig(ConfigRepository configRepository) {
+    List<Config> configs = configRepository.findAllByEnabled(true);
+    this.configMap = configs.stream().collect(Collectors.toMap(Config::getCode, Config::getValue));
+  }
 
-    public String getJwtPassword() {
-        return configMap.getOrDefault("JWT_PASSWORD", null);
-    }
+  public String getJwtPassword() {
+    return configMap.getOrDefault("JWT_PASSWORD", null);
+  }
 
-    public String getJwtSalt() {
-        return configMap.getOrDefault("JWT_SALT", null);
-    }
+  public String getJwtSalt() {
+    return configMap.getOrDefault("JWT_SALT", null);
+  }
 
-    public String getConfigValue(String key) {
-        return configMap.getOrDefault(key, null);
-    }
+  public String getConfigValue(String key) {
+    return configMap.getOrDefault(key, null);
+  }
 }
-

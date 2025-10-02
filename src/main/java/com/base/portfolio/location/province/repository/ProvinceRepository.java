@@ -15,7 +15,6 @@
  */
 package com.base.portfolio.location.province.repository;
 
-
 import com.base.portfolio.location.province.model.Province;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,6 +24,5 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface ProvinceRepository extends JpaRepository<Province, Long>, JpaSpecificationExecutor<Province> {
-
-}
+public interface ProvinceRepository
+    extends JpaRepository<Province, Long>, JpaSpecificationExecutor<Province> {}

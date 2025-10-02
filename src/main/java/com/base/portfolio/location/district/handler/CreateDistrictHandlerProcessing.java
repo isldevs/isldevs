@@ -15,17 +15,15 @@
  */
 package com.base.portfolio.location.district.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.location.district.controller.DistrictConstants;
 import com.base.portfolio.location.district.service.DistrictService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "CREATE", entity = DistrictConstants.PERMISSION)
 public class CreateDistrictHandlerProcessing implements CommandHandlerProcessing {
 
-    private final DistrictService service;
+  private final DistrictService service;
 
-    @Autowired
-    public CreateDistrictHandlerProcessing(DistrictService service) {
-        this.service = service;
-    }
+  @Autowired
+  public CreateDistrictHandlerProcessing(DistrictService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.createDistrict(command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.createDistrict(command);
+  }
 }

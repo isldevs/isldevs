@@ -15,7 +15,6 @@
  */
 package com.base.config.serialization;
 
-
 import com.base.core.pageable.PageableJsonSerializer;
 import com.base.core.pageable.PageableResponseSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -23,11 +22,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.text.SimpleDateFormat;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.text.SimpleDateFormat;
 
 /**
  * @author YISivlay
@@ -35,22 +33,20 @@ import java.text.SimpleDateFormat;
 @Configuration
 public class JsonConfig {
 
-    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
-        return builder -> {
+  @Bean
+  public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+    return builder -> {
+      SimpleModule module = new SimpleModule();
+      module.addSerializer(new PageableResponseSerializer());
+      module.addSerializer(new PageableJsonSerializer());
+      builder.modules(module);
 
-            SimpleModule module = new SimpleModule();
-            module.addSerializer(new PageableResponseSerializer());
-            module.addSerializer(new PageableJsonSerializer());
-            builder.modules(module);
-
-            builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
-            builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-            builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
-            builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
-            builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
-        };
-    }
-
+      builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
+      builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+      builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+      builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+      builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
+      builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+    };
+  }
 }

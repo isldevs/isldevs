@@ -15,20 +15,19 @@
  */
 package com.base.core.exception;
 
-
 /**
  * @author YISivlay
  */
 public class NotFoundException extends RuntimeException {
 
-    private final Object[] args;
+  private final Object[] args;
 
-    public NotFoundException(String msgCode, Object... args) {
-        super(msgCode);
-        this.args = args;
-    }
+  public NotFoundException(String msgCode, Object... args) {
+    super(msgCode);
+    this.args = args;
+  }
 
-    public Object[] getArgs() {
-        return args;
-    }
+  public Object[] getArgs() {
+    return args;
+  }
 }

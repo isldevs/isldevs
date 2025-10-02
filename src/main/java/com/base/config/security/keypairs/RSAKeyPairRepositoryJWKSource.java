@@ -15,23 +15,17 @@
  */
 package com.base.config.security.keypairs;
 
-
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
-import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author YISivlay
@@ -39,26 +33,28 @@ import java.util.List;
 @Component(value = "customJWKSource")
 public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext> {
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+  private final RSAKeyPairRepository rsaKeyPairRepository;
 
-    @Autowired
-    public RSAKeyPairRepositoryJWKSource(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
-    }
+  @Autowired
+  public RSAKeyPairRepositoryJWKSource(RSAKeyPairRepository rsaKeyPairRepository) {
+    this.rsaKeyPairRepository = rsaKeyPairRepository;
+  }
 
-    @Override
-    public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext) throws KeySourceException {
-        return rsaKeyPairRepository.findKeyPairs().stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(keyPair -> {
-                    var rsaKey = new RSAKey.Builder(keyPair.publicKey())
-                            .privateKey(keyPair.privateKey())
-                            .keyID(keyPair.id())
-                            .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
-                            .build();
-                    return jwkSelector.select(new com.nimbusds.jose.jwk.JWKSet(rsaKey));
-                })
-                .orElse(Collections.emptyList());
-    }
-
+  @Override
+  public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext)
+      throws KeySourceException {
+    return rsaKeyPairRepository.findKeyPairs().stream()
+        .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+        .map(
+            keyPair -> {
+              var rsaKey =
+                  new RSAKey.Builder(keyPair.publicKey())
+                      .privateKey(keyPair.privateKey())
+                      .keyID(keyPair.id())
+                      .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
+                      .build();
+              return jwkSelector.select(new com.nimbusds.jose.jwk.JWKSet(rsaKey));
+            })
+        .orElse(Collections.emptyList());
+  }
 }

@@ -1,16 +1,16 @@
 plugins {
-    id('java-library')
+    id('java')
     id('war')
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.dependency.management)
     alias(libs.plugins.graalvm.native)
     alias(libs.plugins.flyway)
-    alias(libs.plugins.license)
     alias(libs.plugins.versions)
     alias(libs.plugins.spotless)
 }
 
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)
@@ -18,12 +18,9 @@ dependencyManagement {
 }
 
 group = 'com.base'
-version = '0.0.1'
 
 java {
     toolchain { languageVersion = JavaLanguageVersion.of(25) }
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
 }
 
 configurations {
@@ -71,7 +68,6 @@ def loadEnvironment() {
     return env
 }
 
-def env = loadEnvironment()
 def activeProfile = findProperty("spring.profiles.active") ?: "dev"
 
 sourceSets {
@@ -108,7 +104,7 @@ graalvmNative {
     toolchainDetection = false
     binaries {
         main {
-            imageName = "${project.name}"
+            imageName = project.name
             mainClass = "com.base.ISLDevsApplication"
             buildArgs.addAll([
                     '--verbose',
@@ -145,40 +141,22 @@ static boolean isNonStable(String version) {
     return !stableKeyword && !(version ==~ regex)
 }
 
-compileJava {
-    def isDev = activeProfile in 'dev'
-    options.release = 25
-    options.compilerArgs += [
-            '-Amapstruct.suppressGeneratorTimestamp=true',
-            '-Amapstruct.suppressGeneratorVersionInfoComment=true',
-            '-Amapstruct.defaultComponentModel=spring',
-            '-Amapstruct.verbose=' + (isDev),
-            '--enable-preview'
-    ]
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.release = 25
     options.incremental = true
     options.fork = true
     options.failOnError = false
     options.forkOptions.jvmArgs = ['-Duser.language=en', '-Duser.country=US']
-}
-
-tasks.register('configureJavadoc') {
-    doLast {
-        javadoc {
-            options.doclet = 'org.asciidoctor.javadoc.Asciidoclet'
-            options.docletpath = configurations.asciidoclet.files.toList()
-            options.encoding = 'UTF-8'
-        }
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    options.fork = true
-    options.forkOptions.jvmArgs.addAll(['-Duser.language=en', '-Duser.country=US', '--enable-preview'])
     options.compilerArgs += [
-            '-parameters', '-Xlint:-unchecked', '-Xlint:deprecation', '--enable-preview',
-            '-Amapstruct.suppressGeneratorTimestamp=true', '-Amapstruct.verbose=false'
+            "-parameters",
+            "-Xlint:-unchecked",
+            "-Xlint:deprecation",
+            "--enable-preview",
+            "-Amapstruct.suppressGeneratorTimestamp=true",
+            "-Amapstruct.suppressGeneratorVersionInfoComment=true",
+            "-Amapstruct.defaultComponentModel=spring",
+            "-Amapstruct.verbose=false"
     ]
 }
 
@@ -187,7 +165,7 @@ tasks.withType(JavaExec).configureEach { jvmArgs += "--enable-preview" }
 springBoot { mainClass = "com.base.ISLDevsApplication" }
 
 bootRun {
-    environment env
+    environment(loadEnvironment())
     jvmArgs = [
             "-Dspring.profiles.active=${activeProfile}",
             "-Dfile.encoding=UTF-8",
@@ -199,35 +177,16 @@ bootRun {
     if (activeProfile == 'dev') classpath = sourceSets.main.runtimeClasspath + configurations.developmentOnly
 }
 
-bootWar {
-    archiveClassifier = 'boot'
-    archiveFileName = "${project.name}.war"
-    manifest {
-        attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Built-By': System.getProperty('user.name'),
-                'Built-JDK': System.getProperty('java.version'),
-                'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Spring-Boot-Version': SpringBootPlugin.BOM_COORDINATES.split(":")[2]
-        )
-    }
+tasks.named("bootJar") {
+    archiveBaseName = "isldevs"
+    archiveClassifier = "standalone"
 }
-
-bootJar {
-    archiveFileName = "${project.name}.jar"
-    launchScript()
-    manifest {
-        attributes(
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Built-By': System.getProperty('user.name'),
-                'Built-JDK': System.getProperty('java.version'),
-                'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'Spring-Boot-Version': SpringBootPlugin.BOM_COORDINATES.split(":")[2]
-        )
-    }
+tasks.named("war") {
+    archiveBaseName = "isldevs"
+    archiveClassifier = "deploy"
 }
+tasks.named("bootWar") { enabled = false }
+tasks.named("jar") { enabled = false }
 
 abstract class GenerateTestClasses extends DefaultTask {
     @InputDirectory
@@ -283,48 +242,38 @@ tasks.register('generateTestClasses', GenerateTestClasses) {
     testJavaDir.set(layout.projectDirectory.dir("src/test/java"))
 }
 
-license {
-    header = rootProject.file('LICENSE')
-    strictCheck = true
-    skipExistingHeaders = false
-    mapping {
-        java = 'SLASHSTAR_STYLE'
-        kt = 'SLASHSTAR_STYLE'
-        groovy = 'SLASHSTAR_STYLE'
+spotless {
+    java {
+        target 'src/main/java/**/*.java'
+        licenseHeaderFile 'LICENSE', '(package|import|public|class|interface|enum)'
+        removeUnusedImports()
+        googleJavaFormat()
+
+        targetExclude([
+                '**/build/**', '**/aotSources/**', '**/generated/**', '**/target/**', '**/out/**', '**/bin/**',
+                '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**', '**/*.properties',
+                '**/*.yml', '**/*.yaml', '**/*.json', '**/*.xml', '**/*.sql', '**/*.p12', '**/*.jks',
+                '**/*.keystore', '**/*.dev', '**/*.prod', '**/*.sh', '**/*.bat', '**/*.jar',
+                '**/*.war', '**/*.md', '**/*.txt', '**/*.html', '**/*.private', '**/*.public',
+                '**/gradlew*', '**/gradle/wrapper/**', '**/*Tests.java', '**/*Test.java',
+                '**/.dev', '**/.prod', '**/.env', '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**'
+        ])
     }
-    excludes([
-            '**/build/**', '**/aotSources/**', '**/generated/**', '**/target/**', '**/out/**', '**/bin/**',
-            '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**', '**/*.properties',
-            '**/*.yml', '**/*.yaml', '**/*.json', '**/*.xml', '**/*.sql', '**/*.p12', '**/*.jks',
-            '**/*.keystore', '**/*.dev', '**/*.prod', '**/*.sh', '**/*.bat', '**/*.jar',
-            '**/*.war', '**/*.md', '**/*.txt', '**/*.html', '**/*.private', '**/*.public',
-            '**/gradlew*', '**/gradle/wrapper/**', '**/*Tests.java', '**/*Test.java',
-            '**/.dev', '**/.prod', '**/.env', '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**'
-    ])
 }
 
 tasks.matching { it.name.contains("Aot") || it.name.contains("aot") }.configureEach {
     enabled = false
 }
 
-tasks.named("licenseMain") {
-    dependsOn tasks.named("generateTestClasses")
-}
-tasks.named("licenseTest") {
-    dependsOn tasks.named("generateTestClasses")
-}
-tasks.named("licenseFormatTest") {
-    dependsOn tasks.named("generateTestClasses")
-}
 tasks.named("compileTestJava") { dependsOn tasks.named("generateTestClasses") }
 tasks.named("processAot") { dependsOn tasks.named("compileJava") }
 
 tasks.named('test', Test) {
-    dependsOn tasks.named('generateTestClasses')
+    environment(loadEnvironment())
     useJUnitPlatform()
     jvmArgs += "--enable-preview"
     systemProperty 'spring.profiles.active', 'test'
-    maxHeapSize = '1G'
+    maxHeapSize = '2G'
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
@@ -334,5 +283,5 @@ tasks.named('test', Test) {
     }
 }
 
-tasks.named('build') { dependsOn 'test', 'spotlessCheck', 'licenseMain' }
-tasks.named('assemble') { dependsOn bootWar, bootJar }
+tasks.named('build') { dependsOn 'test', 'spotlessCheck', 'generateTestClasses' }
+tasks.named('assemble') { dependsOn war, bootJar }

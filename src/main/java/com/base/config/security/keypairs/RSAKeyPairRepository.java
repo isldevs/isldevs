@@ -15,7 +15,6 @@
  */
 package com.base.config.security.keypairs;
 
-
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.sql.Timestamp;
@@ -26,10 +25,10 @@ import java.util.List;
  */
 public interface RSAKeyPairRepository {
 
-    List<RSAKeyPair> findKeyPairs();
+  List<RSAKeyPair> findKeyPairs();
 
-    void save(RSAKeyPair rsaKeyPair);
+  void save(RSAKeyPair rsaKeyPair);
 
-    record RSAKeyPair(String id, Timestamp created, RSAPublicKey publicKey, RSAPrivateKey privateKey) {
-    }
+  record RSAKeyPair(
+      String id, Timestamp created, RSAPublicKey publicKey, RSAPrivateKey privateKey) {}
 }

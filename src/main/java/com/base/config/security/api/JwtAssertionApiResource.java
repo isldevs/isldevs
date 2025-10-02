@@ -15,16 +15,14 @@
  */
 package com.base.config.security.api;
 
-
 import com.base.config.security.service.JwtAssertionGeneratorService;
 import com.nimbusds.jose.JOSEException;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -33,16 +31,16 @@ import java.util.Map;
 @RequestMapping("/jwt")
 public class JwtAssertionApiResource {
 
-    private final JwtAssertionGeneratorService service;
+  private final JwtAssertionGeneratorService service;
 
-    @Autowired
-    public JwtAssertionApiResource(JwtAssertionGeneratorService service) {
-        this.service = service;
-    }
+  @Autowired
+  public JwtAssertionApiResource(JwtAssertionGeneratorService service) {
+    this.service = service;
+  }
 
-    @GetMapping("/assertion")
-    public ResponseEntity<Map<String, String>> generate() throws JOSEException {
-        String assertion = service.generateClientAssertion();
-        return ResponseEntity.ok(Map.of("assertion", assertion));
-    }
+  @GetMapping("/assertion")
+  public ResponseEntity<Map<String, String>> generate() throws JOSEException {
+    String assertion = service.generateClientAssertion();
+    return ResponseEntity.ok(Map.of("assertion", assertion));
+  }
 }

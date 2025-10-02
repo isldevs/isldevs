@@ -23,22 +23,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class DeviceVerificationApiResource {
 
-    @GetMapping("/oauth2/device_verification")
-    public String deviceVerification(@RequestParam(value = "user_code", required = false) String userCode,
-                                     Model model) {
-        if (userCode == null) {
-            model.addAttribute("error", "Missing user_code");
-            return "error";
-        }
-
-        model.addAttribute("userCode", userCode);
-        return "oauth2/device-verification";
+  @GetMapping("/oauth2/device_verification")
+  public String deviceVerification(
+      @RequestParam(value = "user_code", required = false) String userCode, Model model) {
+    if (userCode == null) {
+      model.addAttribute("error", "Missing user_code");
+      return "error";
     }
 
-    @GetMapping("/device")
-    public String verificationSuccess(@RequestParam(value = "success", required = false) String success, Model model) {
-        model.addAttribute("message", "Device verification successful!");
-        return "oauth2/device-verification-success";
-    }
+    model.addAttribute("userCode", userCode);
+    return "oauth2/device-verification";
+  }
 
+  @GetMapping("/device")
+  public String verificationSuccess(
+      @RequestParam(value = "success", required = false) String success, Model model) {
+    model.addAttribute("message", "Device verification successful!");
+    return "oauth2/device-verification-success";
+  }
 }

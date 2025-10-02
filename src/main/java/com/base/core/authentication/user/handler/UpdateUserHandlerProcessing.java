@@ -15,17 +15,15 @@
  */
 package com.base.core.authentication.user.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.authentication.user.controller.UserConstants;
 import com.base.core.authentication.user.service.UserService;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "UPDATE", entity = UserConstants.PERMISSION)
 public class UpdateUserHandlerProcessing implements CommandHandlerProcessing {
 
-    private final UserService service;
+  private final UserService service;
 
-    @Autowired
-    public UpdateUserHandlerProcessing(UserService service) {
-        this.service = service;
-    }
+  @Autowired
+  public UpdateUserHandlerProcessing(UserService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateUser(command.getId(), command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.updateUser(command.getId(), command);
+  }
 }

@@ -19,11 +19,6 @@ import com.base.config.security.keypairs.RSAKeyPairRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Clock;
@@ -33,6 +28,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 /**
  * @author YISivlay
@@ -40,94 +39,91 @@ import java.util.function.Function;
 @Service
 public final class AuthenticationServiceImpl implements AuthenticationService {
 
-    private static final long EXPIRATION = 1000 * 60 * 15;
+  private static final long EXPIRATION = 1000 * 60 * 15;
 
-    private final Clock clock;
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+  private final Clock clock;
+  private final RSAKeyPairRepository rsaKeyPairRepository;
 
-    @Autowired
-    public AuthenticationServiceImpl(final Clock clock,
-                                     final RSAKeyPairRepository rsaKeyPairRepository) {
-        this.clock = clock;
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+  @Autowired
+  public AuthenticationServiceImpl(
+      final Clock clock, final RSAKeyPairRepository rsaKeyPairRepository) {
+    this.clock = clock;
+    this.rsaKeyPairRepository = rsaKeyPairRepository;
+  }
+
+  @Override
+  public String extractUsername(String token) {
+    return extractClaim(token, Claims::getSubject);
+  }
+
+  @Override
+  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    final Claims claims = extractAllClaims(token);
+    return claimsResolver.apply(claims);
+  }
+
+  @Override
+  public String generateToken(UserDetails userDetails) {
+    return generateToken(new HashMap<>(), userDetails);
+  }
+
+  @Override
+  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    return buildToken(extraClaims, userDetails, EXPIRATION);
+  }
+
+  @Override
+  public String buildToken(
+      Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    var authorities =
+        userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+    RSAPrivateKey privateKey =
+        rsaKeyPairRepository.findKeyPairs().stream()
+            .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+            .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+            .orElseThrow(
+                () -> new IllegalStateException("No RSA key pair found in the repository"));
+
+    return Jwts.builder()
+        .claims(extraClaims)
+        .subject(userDetails.getUsername())
+        .issuedAt(Date.from(Instant.now(clock)))
+        .expiration(Date.from(Instant.now(clock).plusSeconds(expiration)))
+        .claim("authorities", authorities)
+        .signWith(privateKey)
+        .compact();
+  }
+
+  @Override
+  public boolean isTokenValid(String token, UserDetails userDetails) {
+    final var username = extractUsername(token);
+    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+  }
+
+  @Override
+  public boolean isTokenExpired(String token) {
+    return extractExpiration(token).before(new Date());
+  }
+
+  @Override
+  public Date extractExpiration(String token) {
+    return extractClaim(token, Claims::getExpiration);
+  }
+
+  @Override
+  public Claims extractAllClaims(String token) {
+    try {
+      RSAPublicKey publicKey =
+          rsaKeyPairRepository.findKeyPairs().stream()
+              .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+              .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+              .orElseThrow(
+                  () -> new IllegalStateException("No RSA key pair found in the repository"));
+
+      return Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token).getPayload();
+    } catch (JwtException e) {
+      throw new RuntimeException("Invalid or expired JWT token", e);
     }
-
-    @Override
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    @Override
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-    @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    @Override
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, EXPIRATION);
-    }
-
-    @Override
-    public String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
-        var authorities = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-
-        RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs().stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
-                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
-
-        return Jwts
-                .builder()
-                .claims(extraClaims)
-                .subject(userDetails.getUsername())
-                .issuedAt(Date.from(Instant.now(clock)))
-                .expiration(Date.from(Instant.now(clock).plusSeconds(expiration)))
-                .claim("authorities", authorities)
-                .signWith(privateKey)
-                .compact();
-    }
-
-    @Override
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final var username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
-    @Override
-    public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    @Override
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    @Override
-    public Claims extractAllClaims(String token) {
-        try {
-            RSAPublicKey publicKey = rsaKeyPairRepository.findKeyPairs().stream()
-                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                    .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-                    .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
-
-            return Jwts
-                    .parser()
-                    .verifyWith(publicKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (JwtException e) {
-            throw new RuntimeException("Invalid or expired JWT token", e);
-        }
-    }
+  }
 }

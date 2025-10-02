@@ -25,18 +25,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
 
-    private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-    public DefaultToApiJsonSerializer() {
-        this.objectMapper = new ObjectMapper();
-    }
+  public DefaultToApiJsonSerializer() {
+    this.objectMapper = new ObjectMapper();
+  }
 
-    @Override
-    public String serialize(Object object) {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            return "{\"error\": \"Failed to serialize object: " + e.getMessage() + "\"}";
-        }
+  @Override
+  public String serialize(Object object) {
+    try {
+      return objectMapper.writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      return "{\"error\": \"Failed to serialize object: " + e.getMessage() + "\"}";
     }
+  }
 }

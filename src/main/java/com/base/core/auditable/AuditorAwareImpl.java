@@ -15,12 +15,10 @@
  */
 package com.base.core.auditable;
 
-
 import com.base.config.security.service.SecurityContextImpl;
+import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 /**
  * @author YISivlay
@@ -28,18 +26,18 @@ import java.util.Optional;
 @Component(value = "auditorProvider")
 public class AuditorAwareImpl implements AuditorAware<String> {
 
-    private final SecurityContextImpl securityContext;
+  private final SecurityContextImpl securityContext;
 
-    public AuditorAwareImpl(SecurityContextImpl securityContext) {
-        this.securityContext = securityContext;
-    }
+  public AuditorAwareImpl(SecurityContextImpl securityContext) {
+    this.securityContext = securityContext;
+  }
 
-    @Override
-    public Optional<String> getCurrentAuditor() {
-        try {
-            return Optional.of(securityContext.getCurrentUsername());
-        } catch (Exception ex) {
-            return Optional.of("system");
-        }
+  @Override
+  public Optional<String> getCurrentAuditor() {
+    try {
+      return Optional.of(securityContext.getCurrentUsername());
+    } catch (Exception ex) {
+      return Optional.of("system");
     }
+  }
 }

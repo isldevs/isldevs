@@ -15,7 +15,6 @@
  */
 package com.base.core.authentication.role.controller;
 
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,9 +23,10 @@ import java.util.HashSet;
  * @author YISivlay
  */
 public class RoleConstants {
-    public static final String API_PATH = "/roles";
-    public static final String PERMISSION = "ROLE";
-    public static final String NAME = "name";
-    public static final String AUTHORITIES = "authorities";
-    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(NAME, AUTHORITIES));
+  public static final String API_PATH = "/roles";
+  public static final String PERMISSION = "ROLE";
+  public static final String NAME = "name";
+  public static final String AUTHORITIES = "authorities";
+  public static final Collection<String> SUPPORTED_PARAMETER =
+      new HashSet<>(Arrays.asList(NAME, AUTHORITIES));
 }

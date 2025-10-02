@@ -15,14 +15,12 @@
  */
 package com.base.config.security.keypairs;
 
-
-import org.springframework.stereotype.Component;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.sql.Timestamp;
+import org.springframework.stereotype.Component;
 
 /**
  * @author YISivlay
@@ -30,21 +28,20 @@ import java.sql.Timestamp;
 @Component
 public class Keys {
 
-    public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
-        var keyPair = generateRsaKey();
-        var publicKey = (RSAPublicKey) keyPair.getPublic();
-        var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
-    }
+  public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
+    var keyPair = generateRsaKey();
+    var publicKey = (RSAPublicKey) keyPair.getPublic();
+    var privateKey = (RSAPrivateKey) keyPair.getPrivate();
+    return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
+  }
 
-    private KeyPair generateRsaKey() {
-        try {
-            var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
+  private KeyPair generateRsaKey() {
+    try {
+      var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+      keyPairGenerator.initialize(2048);
+      return keyPairGenerator.generateKeyPair();
+    } catch (Exception ex) {
+      throw new IllegalStateException(ex);
     }
-
+  }
 }

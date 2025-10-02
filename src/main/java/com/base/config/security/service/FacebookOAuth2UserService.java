@@ -15,7 +15,8 @@
  */
 package com.base.config.security.service;
 
-
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -24,46 +25,39 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author YISivlay
  */
 @Component
 public class FacebookOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+  private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = delegate.loadUser(userRequest);
+  @Override
+  public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    OAuth2User oauth2User = delegate.loadUser(userRequest);
 
-        var attributes = oauth2User.getAttributes();
-        var convertedAttributes = convertFacebookAttributes(attributes);
+    var attributes = oauth2User.getAttributes();
+    var convertedAttributes = convertFacebookAttributes(attributes);
 
-        return new DefaultOAuth2User(
-                oauth2User.getAuthorities(),
-                convertedAttributes,
-                "id"
-        );
+    return new DefaultOAuth2User(oauth2User.getAuthorities(), convertedAttributes, "id");
+  }
+
+  private Map<String, Object> convertFacebookAttributes(Map<String, Object> attributes) {
+    Map<String, Object> converted = new HashMap<>();
+
+    converted.put("id", attributes.get("id"));
+    converted.put("name", attributes.get("name"));
+    converted.put("email", attributes.get("email"));
+    converted.put("first_name", attributes.get("first_name"));
+    converted.put("last_name", attributes.get("last_name"));
+
+    if (attributes.get("picture") instanceof Map<?, ?> picture) {
+      if (picture.get("data") instanceof Map<?, ?> data) {
+        converted.put("picture", data.get("url"));
+      }
     }
 
-    private Map<String, Object> convertFacebookAttributes(Map<String, Object> attributes) {
-        Map<String, Object> converted = new HashMap<>();
-
-        converted.put("id", attributes.get("id"));
-        converted.put("name", attributes.get("name"));
-        converted.put("email", attributes.get("email"));
-        converted.put("first_name", attributes.get("first_name"));
-        converted.put("last_name", attributes.get("last_name"));
-
-        if (attributes.get("picture") instanceof Map<?, ?> picture) {
-            if (picture.get("data") instanceof Map<?, ?> data) {
-                converted.put("picture", data.get("url"));
-            }
-        }
-
-        return converted;
-    }
+    return converted;
+  }
 }

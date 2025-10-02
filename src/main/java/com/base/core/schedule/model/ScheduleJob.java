@@ -15,7 +15,6 @@
  */
 package com.base.core.schedule.model;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -28,51 +27,50 @@ import jakarta.persistence.Table;
 @Table(name = "scheduled_job")
 public class ScheduleJob {
 
-    @Id
-    @Column(name = "job_name")
-    private String jobName;
+  @Id
+  @Column(name = "job_name")
+  private String jobName;
 
-    @Column(name = "cron_expression", nullable = false)
-    private String cronExpression;
+  @Column(name = "cron_expression", nullable = false)
+  private String cronExpression;
 
-    @Column(name = "bean_name", nullable = false)
-    private String beanName;
+  @Column(name = "bean_name", nullable = false)
+  private String beanName;
 
-    @Column(nullable = false)
-    private boolean enabled;
+  @Column(nullable = false)
+  private boolean enabled;
 
-    protected ScheduleJob() {
-    }
+  protected ScheduleJob() {}
 
-    public String getJobName() {
-        return jobName;
-    }
+  public String getJobName() {
+    return jobName;
+  }
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
-    }
+  public void setJobName(String jobName) {
+    this.jobName = jobName;
+  }
 
-    public String getCronExpression() {
-        return cronExpression;
-    }
+  public String getCronExpression() {
+    return cronExpression;
+  }
 
-    public void setCronExpression(String cronExpression) {
-        this.cronExpression = cronExpression;
-    }
+  public void setCronExpression(String cronExpression) {
+    this.cronExpression = cronExpression;
+  }
 
-    public String getBeanName() {
-        return beanName;
-    }
+  public String getBeanName() {
+    return beanName;
+  }
 
-    public void setBeanName(String beanName) {
-        this.beanName = beanName;
-    }
+  public void setBeanName(String beanName) {
+    this.beanName = beanName;
+  }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 }

@@ -15,7 +15,6 @@
  */
 package com.base.portfolio.file.handler;
 
-
 import com.base.core.command.data.CommandBuilder;
 import com.base.portfolio.file.controller.FileConstants;
 
@@ -24,19 +23,19 @@ import com.base.portfolio.file.controller.FileConstants;
  */
 public class FileCommandHandler extends CommandBuilder {
 
-    public CommandBuilder upload(String entity, Long entityId) {
-        return this.action("UPLOAD")
-                .entity(FileConstants.PERMISSION)
-                .entityType(entity)
-                .entityId(entityId)
-                .href("/" + entity + "/" + entityId + "/files");
-    }
+  public CommandBuilder upload(String entity, Long entityId) {
+    return this.action("UPLOAD")
+        .entity(FileConstants.PERMISSION)
+        .entityType(entity)
+        .entityId(entityId)
+        .href("/" + entity + "/" + entityId + "/files");
+  }
 
-    public CommandBuilder delete(final String entity, final Long entityId) {
-        return this.action("DELETE")
-                .entity(FileConstants.PERMISSION)
-                .entityType(entity)
-                .entityId(entityId)
-                .href("/" + entity + "/" + entityId + "/files/");
-    }
+  public CommandBuilder delete(final String entity, final Long entityId) {
+    return this.action("DELETE")
+        .entity(FileConstants.PERMISSION)
+        .entityType(entity)
+        .entityId(entityId)
+        .href("/" + entity + "/" + entityId + "/files/");
+  }
 }

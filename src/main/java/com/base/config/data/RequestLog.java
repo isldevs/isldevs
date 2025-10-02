@@ -15,7 +15,6 @@
  */
 package com.base.config.data;
 
-
 import java.util.Map;
 
 /**
@@ -23,78 +22,78 @@ import java.util.Map;
  */
 public class RequestLog {
 
-    private final long startTime;
-    private final long stopTime;
-    private final String method;
-    private final String url;
-    private final Map<String, String[]> parameters;
+  private final long startTime;
+  private final long stopTime;
+  private final String method;
+  private final String url;
+  private final Map<String, String[]> parameters;
 
-    public RequestLog(Builder builder) {
-        this.startTime = builder.startTime;
-        this.stopTime = builder.stopTime;
-        this.method = builder.method;
-        this.url = builder.url;
-        this.parameters = builder.parameters;
+  public RequestLog(Builder builder) {
+    this.startTime = builder.startTime;
+    this.stopTime = builder.stopTime;
+    this.method = builder.method;
+    this.url = builder.url;
+    this.parameters = builder.parameters;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private long startTime;
+    private long stopTime;
+    private String method;
+    private String url;
+    private Map<String, String[]> parameters;
+
+    public RequestLog build() {
+      return new RequestLog(this);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Builder startTime(long startTime) {
+      this.startTime = startTime;
+      return this;
     }
 
-    public static class Builder {
-        private long startTime;
-        private long stopTime;
-        private String method;
-        private String url;
-        private Map<String, String[]> parameters;
-
-        public RequestLog build() {
-            return new RequestLog(this);
-        }
-
-        public Builder startTime(long startTime) {
-            this.startTime = startTime;
-            return this;
-        }
-
-        public Builder stopTime(long stopTime) {
-            this.stopTime = stopTime;
-            return this;
-        }
-
-        public Builder method(String method) {
-            this.method = method;
-            return this;
-        }
-
-        public Builder url(String url) {
-            this.url = url;
-            return this;
-        }
-
-        public Builder parameters(Map<String, String[]> parameters) {
-            this.parameters = parameters;
-            return this;
-        }
+    public Builder stopTime(long stopTime) {
+      this.stopTime = stopTime;
+      return this;
     }
 
-    public long getStartTime() {
-        return startTime;
+    public Builder method(String method) {
+      this.method = method;
+      return this;
     }
 
-    public long getStopTime() {
-        return stopTime;
+    public Builder url(String url) {
+      this.url = url;
+      return this;
     }
 
-    public String getMethod() {
-        return method;
+    public Builder parameters(Map<String, String[]> parameters) {
+      this.parameters = parameters;
+      return this;
     }
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public long getStartTime() {
+    return startTime;
+  }
 
-    public Map<String, String[]> getParameters() {
-        return parameters;
-    }
+  public long getStopTime() {
+    return stopTime;
+  }
+
+  public String getMethod() {
+    return method;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public Map<String, String[]> getParameters() {
+    return parameters;
+  }
 }

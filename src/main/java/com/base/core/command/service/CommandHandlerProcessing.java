@@ -15,9 +15,7 @@
  */
 package com.base.core.command.service;
 
-
 import com.base.core.command.data.JsonCommand;
-
 import java.util.Map;
 
 /**
@@ -25,6 +23,5 @@ import java.util.Map;
  */
 public interface CommandHandlerProcessing {
 
-    Map<String, Object> process(JsonCommand command);
-
+  Map<String, Object> process(JsonCommand command);
 }

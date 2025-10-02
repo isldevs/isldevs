@@ -15,18 +15,17 @@
  */
 package com.base.core.configuration.repository;
 
-
 import com.base.core.configuration.model.Config;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @author YISivlay
  */
 @Repository
-public interface ConfigRepository extends JpaRepository<Config, Long>, JpaSpecificationExecutor<Config> {
-    List<Config> findAllByEnabled(Boolean enabled);
+public interface ConfigRepository
+    extends JpaRepository<Config, Long>, JpaSpecificationExecutor<Config> {
+  List<Config> findAllByEnabled(Boolean enabled);
 }

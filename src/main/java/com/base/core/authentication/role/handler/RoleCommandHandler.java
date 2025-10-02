@@ -15,7 +15,6 @@
  */
 package com.base.core.authentication.role.handler;
 
-
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.command.data.CommandBuilder;
 
@@ -24,23 +23,21 @@ import com.base.core.command.data.CommandBuilder;
  */
 public class RoleCommandHandler extends CommandBuilder {
 
-    public CommandBuilder create() {
-        return this.action("CREATE")
-                .entity(RoleConstants.PERMISSION)
-                .href(RoleConstants.API_PATH);
-    }
+  public CommandBuilder create() {
+    return this.action("CREATE").entity(RoleConstants.PERMISSION).href(RoleConstants.API_PATH);
+  }
 
-    public CommandBuilder update(final Long id) {
-        return this.action("UPDATE")
-                .entity(RoleConstants.PERMISSION)
-                .id(id)
-                .href(RoleConstants.API_PATH + "/" + id);
-    }
+  public CommandBuilder update(final Long id) {
+    return this.action("UPDATE")
+        .entity(RoleConstants.PERMISSION)
+        .id(id)
+        .href(RoleConstants.API_PATH + "/" + id);
+  }
 
-    public CommandBuilder delete(final Long id) {
-        return this.action("DELETE")
-                .entity(RoleConstants.PERMISSION)
-                .id(id)
-                .href(RoleConstants.API_PATH + "/" + id);
-    }
+  public CommandBuilder delete(final Long id) {
+    return this.action("DELETE")
+        .entity(RoleConstants.PERMISSION)
+        .id(id)
+        .href(RoleConstants.API_PATH + "/" + id);
+  }
 }

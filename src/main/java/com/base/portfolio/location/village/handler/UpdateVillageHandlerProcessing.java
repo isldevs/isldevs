@@ -20,11 +20,10 @@ import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.location.village.controller.VillageConstants;
 import com.base.portfolio.location.village.service.VillageService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -34,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "UPDATE", entity = VillageConstants.PERMISSION)
 public class UpdateVillageHandlerProcessing implements CommandHandlerProcessing {
 
-    private final VillageService service;
+  private final VillageService service;
 
-    @Autowired
-    public UpdateVillageHandlerProcessing(VillageService service) {
-        this.service = service;
-    }
+  @Autowired
+  public UpdateVillageHandlerProcessing(VillageService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateVillage(command.getId(), command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.updateVillage(command.getId(), command);
+  }
 }

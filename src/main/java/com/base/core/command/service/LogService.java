@@ -15,14 +15,12 @@
  */
 package com.base.core.command.service;
 
-
 import com.base.core.command.data.Command;
-
 import java.util.Map;
 
 /**
  * @author YISivlay
  */
 public interface LogService {
-    Map<String, Object> log(Command command);
+  Map<String, Object> log(Command command);
 }

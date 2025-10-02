@@ -7,7 +7,6 @@ webflux = "6.2.11"
 dependency-management = "1.1.7"
 graalvm-native = "0.11.1"
 flyway = "9.22.3"
-license = "0.16.1"
 versions = "0.53.0"
 spotless = "8.0.0"
 postgresql = "42.7.5"
@@ -26,6 +25,7 @@ lombok-mapstruct-binding = "0.2.0"
 assertj-core = "3.27.6"
 junit = "5.14.0"
 mockito = "5.20.0"
+google-java-format = "1.28.0"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
@@ -63,13 +63,13 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj-cor
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit"}
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito"}
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "google-java-format" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dependency-management = { id = "io.spring.dependency-management", version.ref = "dependency-management" }
 graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
-license = { id = "com.github.hierynomus.license", version.ref = "license" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 

@@ -15,19 +15,18 @@
  */
 package com.base.portfolio.file.repository;
 
-
 import com.base.portfolio.file.model.File;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 /**
  * @author YISivlay
  */
 @Repository
 public interface FileRepository extends JpaRepository<File, Long>, JpaSpecificationExecutor<File> {
-    File findByEntityAndEntityId(String entity, Long entityId);
-    Optional<File> findByEntityAndEntityIdAndId(String entity, Long entityId, Long id);
+  File findByEntityAndEntityId(String entity, Long entityId);
+
+  Optional<File> findByEntityAndEntityIdAndId(String entity, Long entityId, Long id);
 }

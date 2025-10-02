@@ -15,7 +15,6 @@
  */
 package com.base.core.command.data;
 
-
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -23,49 +22,49 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class CommandBuilder {
 
-    private final Command.Builder delegate = Command.builder();
+  private final Command.Builder delegate = Command.builder();
 
-    public Command build() {
-        return delegate.build();
-    }
+  public Command build() {
+    return delegate.build();
+  }
 
-    public CommandBuilder id(Long id) {
-        delegate.id(id);
-        return this;
-    }
+  public CommandBuilder id(Long id) {
+    delegate.id(id);
+    return this;
+  }
 
-    public CommandBuilder action(String action) {
-        delegate.action(action);
-        return this;
-    }
+  public CommandBuilder action(String action) {
+    delegate.action(action);
+    return this;
+  }
 
-    public CommandBuilder entity(String entity) {
-        delegate.entity(entity);
-        return this;
-    }
+  public CommandBuilder entity(String entity) {
+    delegate.entity(entity);
+    return this;
+  }
 
-    public CommandBuilder entityType(String entityType) {
-        delegate.entityType(entityType);
-        return this;
-    }
+  public CommandBuilder entityType(String entityType) {
+    delegate.entityType(entityType);
+    return this;
+  }
 
-    public CommandBuilder entityId(Long entityId) {
-        delegate.entityId(entityId);
-        return this;
-    }
+  public CommandBuilder entityId(Long entityId) {
+    delegate.entityId(entityId);
+    return this;
+  }
 
-    public CommandBuilder href(String href) {
-        delegate.href(href);
-        return this;
-    }
+  public CommandBuilder href(String href) {
+    delegate.href(href);
+    return this;
+  }
 
-    public CommandBuilder json(String json) {
-        delegate.json(json);
-        return this;
-    }
+  public CommandBuilder json(String json) {
+    delegate.json(json);
+    return this;
+  }
 
-    public CommandBuilder file(MultipartFile file) {
-        delegate.file(file);
-        return this;
-    }
+  public CommandBuilder file(MultipartFile file) {
+    delegate.file(file);
+    return this;
+  }
 }

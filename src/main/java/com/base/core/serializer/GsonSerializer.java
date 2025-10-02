@@ -15,7 +15,6 @@
  */
 package com.base.core.serializer;
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.stereotype.Component;
@@ -26,19 +25,19 @@ import org.springframework.stereotype.Component;
 @Component
 public final class GsonSerializer {
 
-    private final Gson gson;
+  private final Gson gson;
 
-    public GsonSerializer() {
-        final GsonBuilder builder = new GsonBuilder();
-        this.gson = builder.create();
-    }
+  public GsonSerializer() {
+    final GsonBuilder builder = new GsonBuilder();
+    this.gson = builder.create();
+  }
 
-    public String serialize(Object object) {
-        String serialized = null;
-        final var json = this.gson.toJson(object);
-        if (!"null".equalsIgnoreCase(json)) {
-            serialized = json;
-        }
-        return serialized;
+  public String serialize(Object object) {
+    String serialized = null;
+    final var json = this.gson.toJson(object);
+    if (!"null".equalsIgnoreCase(json)) {
+      serialized = json;
     }
+    return serialized;
+  }
 }

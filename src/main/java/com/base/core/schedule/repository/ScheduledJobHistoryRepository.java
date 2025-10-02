@@ -21,5 +21,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * @author YISivlay
  */
-public interface ScheduledJobHistoryRepository extends JpaRepository<ScheduledJobHistory, Long> {
-}
+public interface ScheduledJobHistoryRepository extends JpaRepository<ScheduledJobHistory, Long> {}

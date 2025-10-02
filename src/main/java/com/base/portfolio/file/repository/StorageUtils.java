@@ -15,9 +15,7 @@
  */
 package com.base.portfolio.file.repository;
 
-
 import com.base.portfolio.file.model.StorageType;
-
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -26,23 +24,23 @@ import java.nio.file.Path;
  */
 public interface StorageUtils {
 
-    StorageType getStorageType();
+  StorageType getStorageType();
 
-    String writeFile(final InputStream inputStream,
-                     final Long entityId,
-                     final String entityName,
-                     final String imageName,
-                     final String oldFileName,
-                     final StorageRepository storageRepository);
+  String writeFile(
+      final InputStream inputStream,
+      final Long entityId,
+      final String entityName,
+      final String imageName,
+      final String oldFileName,
+      final StorageRepository storageRepository);
 
-    String readBase64(Path path);
+  String readBase64(Path path);
 
-    InputStream readInputStream(Path path);
+  InputStream readInputStream(Path path);
 
-    byte[] readByte(Path path);
+  byte[] readByte(Path path);
 
-    String readUrl(Path path);
+  String readUrl(Path path);
 
-    void deleteFile(Path path);
-
+  void deleteFile(Path path);
 }

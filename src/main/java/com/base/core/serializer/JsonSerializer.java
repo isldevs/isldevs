@@ -15,12 +15,10 @@
  */
 package com.base.core.serializer;
 
-
 /**
  * @author YISivlay
  */
 public interface JsonSerializer<T> {
 
-    String serialize(Object object);
-
+  String serialize(Object object);
 }

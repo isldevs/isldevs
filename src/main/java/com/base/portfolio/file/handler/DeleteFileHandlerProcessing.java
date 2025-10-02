@@ -15,17 +15,15 @@
  */
 package com.base.portfolio.file.handler;
 
-
 import com.base.core.annotation.CommandType;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.service.CommandHandlerProcessing;
 import com.base.portfolio.file.controller.FileConstants;
 import com.base.portfolio.file.service.FileService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
@@ -35,15 +33,15 @@ import java.util.Map;
 @CommandType(action = "DELETE", entity = FileConstants.PERMISSION)
 public class DeleteFileHandlerProcessing implements CommandHandlerProcessing {
 
-    private final FileService service;
+  private final FileService service;
 
-    @Autowired
-    public DeleteFileHandlerProcessing(FileService service) {
-        this.service = service;
-    }
+  @Autowired
+  public DeleteFileHandlerProcessing(FileService service) {
+    this.service = service;
+  }
 
-    @Override
-    public Map<String, Object> process(JsonCommand command) {
-        return this.service.delete(command);
-    }
+  @Override
+  public Map<String, Object> process(JsonCommand command) {
+    return this.service.delete(command);
+  }
 }

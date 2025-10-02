@@ -15,31 +15,29 @@
  */
 package com.base.portfolio.location.district.service;
 
-
 import com.base.core.command.data.JsonCommand;
 import com.base.portfolio.location.district.dto.DistrictDTO;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.Map;
 
 /**
  * @author YISivlay
  */
 public interface DistrictService {
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_DISTRICT')")
-    Map<String, Object> createDistrict(JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_DISTRICT')")
+  Map<String, Object> createDistrict(JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_DISTRICT')")
-    Map<String, Object> updateDistrict(Long id, JsonCommand command);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_DISTRICT')")
+  Map<String, Object> updateDistrict(Long id, JsonCommand command);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_DISTRICT')")
-    Map<String, Object> deleteDistrict(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_DISTRICT')")
+  Map<String, Object> deleteDistrict(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
-    DistrictDTO getDistrictById(Long id);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
+  DistrictDTO getDistrictById(Long id);
 
-    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
-    Page<DistrictDTO> listDistricts(Integer page, Integer size, String search);
+  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
+  Page<DistrictDTO> listDistricts(Integer page, Integer size, String search);
 }

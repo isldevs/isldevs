@@ -15,7 +15,6 @@
  */
 package com.base.config.cache;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -31,40 +30,49 @@ import org.springframework.stereotype.Component;
 @Component
 public class CacheMonitor {
 
-    private final Logger logger = LoggerFactory.getLogger(CacheMonitor.class);
+  private final Logger logger = LoggerFactory.getLogger(CacheMonitor.class);
 
-    private final CacheManager cacheManager;
-    private final RedisConnectionFactory redisConnectionFactory;
+  private final CacheManager cacheManager;
+  private final RedisConnectionFactory redisConnectionFactory;
 
-    public CacheMonitor(final CacheManager cacheManager,
-                        final ObjectProvider<RedisConnectionFactory> redisConnectionFactory) {
-        this.cacheManager = cacheManager;
-        this.redisConnectionFactory = redisConnectionFactory.getIfAvailable();
-    }
+  public CacheMonitor(
+      final CacheManager cacheManager,
+      final ObjectProvider<RedisConnectionFactory> redisConnectionFactory) {
+    this.cacheManager = cacheManager;
+    this.redisConnectionFactory = redisConnectionFactory.getIfAvailable();
+  }
 
-    @Scheduled(fixedRate = 60000)
-    public void logCacheStats() {
-        cacheManager.getCacheNames().forEach(name -> {
-            if (!CustomCaffeineCache.wasAccessed(name)) return;
-            var cache = cacheManager.getCache(name);
-            if (cache == null) return;
-            if (cache instanceof TransactionAwareCacheDecorator decorator) {
+  @Scheduled(fixedRate = 60000)
+  public void logCacheStats() {
+    cacheManager
+        .getCacheNames()
+        .forEach(
+            name -> {
+              if (!CustomCaffeineCache.wasAccessed(name)) return;
+              var cache = cacheManager.getCache(name);
+              if (cache == null) return;
+              if (cache instanceof TransactionAwareCacheDecorator decorator) {
                 cache = decorator.getTargetCache();
-            }
-            if (cache instanceof CustomCaffeineCache caffeineCache) {
+              }
+              if (cache instanceof CustomCaffeineCache caffeineCache) {
                 var hits = caffeineCache.getCacheHits();
                 var misses = caffeineCache.getDatabaseHits();
                 var total = hits + misses;
                 var hitRatio = total > 0 ? (double) hits / total : 1.0;
-                logger.info("Caffeine Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})", name, hitRatio * 100, hits, misses);
-            } else if (cache instanceof CustomRedisCache redisCache && redisConnectionFactory != null) {
+                logger.info(
+                    "Caffeine Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})",
+                    name, hitRatio * 100, hits, misses);
+              } else if (cache instanceof CustomRedisCache redisCache
+                  && redisConnectionFactory != null) {
                 var hits = redisCache.getCacheHits();
                 var misses = redisCache.getDatabaseHits();
                 var total = hits + misses;
                 var hitRatio = total > 0 ? (double) hits / total : 1.0;
-                logger.info("Redis Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})", name, hitRatio * 100, hits, misses);
-            }
-        });
-        CustomCaffeineCache.clearAccessed();
-    }
+                logger.info(
+                    "Redis Cache [{}] hit ratio: {}% (cache_hits={}, database_hits={})",
+                    name, hitRatio * 100, hits, misses);
+              }
+            });
+    CustomCaffeineCache.clearAccessed();
+  }
 }

@@ -15,7 +15,6 @@
  */
 package com.base.portfolio.location.village.repository;
 
-
 import com.base.portfolio.location.village.model.Village;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,6 +24,5 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface VillageRepository extends JpaRepository<Village, Long>, JpaSpecificationExecutor<Village> {
-
-}
+public interface VillageRepository
+    extends JpaRepository<Village, Long>, JpaSpecificationExecutor<Village> {}

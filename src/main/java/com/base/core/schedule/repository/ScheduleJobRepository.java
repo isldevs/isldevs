@@ -15,15 +15,13 @@
  */
 package com.base.core.schedule.repository;
 
-
 import com.base.core.schedule.model.ScheduleJob;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author YISivlay
  */
 public interface ScheduleJobRepository extends JpaRepository<ScheduleJob, String> {
-    Optional<ScheduleJob> findByJobName(String jobName);
+  Optional<ScheduleJob> findByJobName(String jobName);
 }
