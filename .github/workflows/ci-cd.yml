@@ -29,13 +29,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.0.0
 
-      - name: Build with Gradle
-        run: ./gradlew clean build --build-cache --no-daemon --scan
+      - name: Build JAR/WAR
+        run: ./gradlew clean assemble --build-cache --no-daemon --scan
 
       - name: Run Tests
-        run: ./gradlew test --build-cache
+        run: ./gradlew test --build-cache --no-daemon --scan
 
       - name: Upload JAR artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: isldevs-app
@@ -53,8 +54,10 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-        
+        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
+        with:
+          cache-disabled: 'true'
+
   #deploy:
   #  runs-on: ubuntu-latest
   #  needs: build
