@@ -26,18 +26,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface ProvinceService {
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_PROVINCE')")
-  Map<String, Object> createProvince(JsonCommand command);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_PROVINCE')")
+	Map<String, Object> createProvince(JsonCommand command);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_PROVINCE')")
-  Map<String, Object> updateProvince(Long id, JsonCommand command);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_PROVINCE')")
+	Map<String, Object> updateProvince(Long id, JsonCommand command);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_PROVINCE')")
-  Map<String, Object> deleteProvince(Long id);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_PROVINCE')")
+	Map<String, Object> deleteProvince(Long id);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_PROVINCE')")
-  ProvinceDTO getProvinceById(Long id);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_PROVINCE')")
+	ProvinceDTO getProvinceById(Long id);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_PROVINCE')")
-  Page<ProvinceDTO> listProvinces(Integer page, Integer size, String search);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_PROVINCE')")
+	Page<ProvinceDTO> listProvinces(Integer page, Integer size, String search);
+
 }

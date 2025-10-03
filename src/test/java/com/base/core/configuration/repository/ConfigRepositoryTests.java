@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigRepositoryTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

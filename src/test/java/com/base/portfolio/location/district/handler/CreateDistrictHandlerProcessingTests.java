@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 
 class CreateDistrictHandlerProcessingTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

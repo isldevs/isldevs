@@ -30,30 +30,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class RSAKeyPairRowMapper implements RowMapper<RSAKeyPairRepository.RSAKeyPair> {
 
-  private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
-  private final RSAPublicKeyConverter rsaPublicKeyConverter;
+	private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
 
-  @Autowired
-  public RSAKeyPairRowMapper(
-      RSAPrivateKeyConverter rsaPrivateKeyConverter, RSAPublicKeyConverter rsaPublicKeyConverter) {
-    this.rsaPrivateKeyConverter = rsaPrivateKeyConverter;
-    this.rsaPublicKeyConverter = rsaPublicKeyConverter;
-  }
+	private final RSAPublicKeyConverter rsaPublicKeyConverter;
 
-  @Override
-  public RSAKeyPairRepository.RSAKeyPair mapRow(ResultSet rs, int rowNum) throws SQLException {
-    try {
-      var id = rs.getString("id");
-      var created = rs.getTimestamp("created");
-      var privateKeyStr = rs.getString("private_key");
-      var publicKeyStr = rs.getString("public_key");
+	@Autowired
+	public RSAKeyPairRowMapper(RSAPrivateKeyConverter rsaPrivateKeyConverter,
+			RSAPublicKeyConverter rsaPublicKeyConverter) {
+		this.rsaPrivateKeyConverter = rsaPrivateKeyConverter;
+		this.rsaPublicKeyConverter = rsaPublicKeyConverter;
+	}
 
-      var privateKey = (RSAPrivateKey) rsaPrivateKeyConverter.convertFromString(privateKeyStr);
-      var publicKey = (RSAPublicKey) rsaPublicKeyConverter.convertFromString(publicKeyStr);
+	@Override
+	public RSAKeyPairRepository.RSAKeyPair mapRow(ResultSet rs, int rowNum) throws SQLException {
+		try {
+			var id = rs.getString("id");
+			var created = rs.getTimestamp("created");
+			var privateKeyStr = rs.getString("private_key");
+			var publicKeyStr = rs.getString("public_key");
 
-      return new RSAKeyPairRepository.RSAKeyPair(id, created, publicKey, privateKey);
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to map RSA key pair", e);
-    }
-  }
+			var privateKey = (RSAPrivateKey) rsaPrivateKeyConverter.convertFromString(privateKeyStr);
+			var publicKey = (RSAPublicKey) rsaPublicKeyConverter.convertFromString(publicKeyStr);
+
+			return new RSAKeyPairRepository.RSAKeyPair(id, created, publicKey, privateKey);
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Failed to map RSA key pair", e);
+		}
+	}
+
 }

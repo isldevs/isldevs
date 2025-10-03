@@ -25,10 +25,11 @@ import java.util.List;
  */
 public interface RSAKeyPairRepository {
 
-  List<RSAKeyPair> findKeyPairs();
+	List<RSAKeyPair> findKeyPairs();
 
-  void save(RSAKeyPair rsaKeyPair);
+	void save(RSAKeyPair rsaKeyPair);
 
-  record RSAKeyPair(
-      String id, Timestamp created, RSAPublicKey publicKey, RSAPrivateKey privateKey) {}
+	record RSAKeyPair(String id, Timestamp created, RSAPublicKey publicKey, RSAPrivateKey privateKey) {
+	}
+
 }

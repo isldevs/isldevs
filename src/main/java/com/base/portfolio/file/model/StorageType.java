@@ -25,35 +25,35 @@ import java.util.stream.Collectors;
  * @author YISivlay
  */
 public enum StorageType {
-  FILE_SYSTEM("File system", 1),
-  S3("S3", 2),
-  MINIO("MinIO", 3);
 
-  private static final Map<Integer, StorageType> ENUM_MAP =
-      Collections.unmodifiableMap(
-          Arrays.stream(values()).collect(Collectors.toMap(StorageType::getValue, type -> type)));
+	FILE_SYSTEM("File system", 1), S3("S3", 2), MINIO("MinIO", 3);
 
-  private final String name;
-  private final int value;
+	private static final Map<Integer, StorageType> ENUM_MAP = Collections
+		.unmodifiableMap(Arrays.stream(values()).collect(Collectors.toMap(StorageType::getValue, type -> type)));
 
-  StorageType(String name, int value) {
-    this.name = name;
-    this.value = value;
-  }
+	private final String name;
 
-  public String getName() {
-    return name;
-  }
+	private final int value;
 
-  public int getValue() {
-    return value;
-  }
+	StorageType(String name, int value) {
+		this.name = name;
+		this.value = value;
+	}
 
-  public static StorageType fromInt(int i) {
-    StorageType type = ENUM_MAP.get(i);
-    if (type == null) {
-      throw new ErrorException("msg.storage.type.invalid", i);
-    }
-    return type;
-  }
+	public String getName() {
+		return name;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public static StorageType fromInt(int i) {
+		StorageType type = ENUM_MAP.get(i);
+		if (type == null) {
+			throw new ErrorException("msg.storage.type.invalid", i);
+		}
+		return type;
+	}
+
 }

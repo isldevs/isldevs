@@ -28,33 +28,37 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-  @GetMapping("/home")
-  public String homePage(Model model, @AuthenticationPrincipal Object principal) {
-    if (principal instanceof OAuth2User oauth2User) {
-      String registrationId = "unknown";
-      if (oauth2User.getAttribute("sub") != null) {
-        registrationId = "google";
-        model.addAttribute("userName", oauth2User.getAttribute("name"));
-        model.addAttribute("userEmail", oauth2User.getAttribute("email"));
-      } else if (oauth2User.getAttribute("login") != null) {
-        registrationId = "github";
-        model.addAttribute("userName", oauth2User.getAttribute("name"));
-        model.addAttribute("userLogin", oauth2User.getAttribute("login"));
-      } else if (oauth2User.getAttribute("id") != null) {
-        registrationId = "facebook";
-        model.addAttribute("userName", oauth2User.getAttribute("name"));
-        model.addAttribute("userEmail", oauth2User.getAttribute("email"));
-        model.addAttribute("userPicture", oauth2User.getAttribute("picture"));
-      }
-      model.addAttribute("provider", registrationId);
-      model.addAttribute("authType", "oauth2");
+	@GetMapping("/home")
+	public String homePage(Model model, @AuthenticationPrincipal Object principal) {
+		if (principal instanceof OAuth2User oauth2User) {
+			String registrationId = "unknown";
+			if (oauth2User.getAttribute("sub") != null) {
+				registrationId = "google";
+				model.addAttribute("userName", oauth2User.getAttribute("name"));
+				model.addAttribute("userEmail", oauth2User.getAttribute("email"));
+			}
+			else if (oauth2User.getAttribute("login") != null) {
+				registrationId = "github";
+				model.addAttribute("userName", oauth2User.getAttribute("name"));
+				model.addAttribute("userLogin", oauth2User.getAttribute("login"));
+			}
+			else if (oauth2User.getAttribute("id") != null) {
+				registrationId = "facebook";
+				model.addAttribute("userName", oauth2User.getAttribute("name"));
+				model.addAttribute("userEmail", oauth2User.getAttribute("email"));
+				model.addAttribute("userPicture", oauth2User.getAttribute("picture"));
+			}
+			model.addAttribute("provider", registrationId);
+			model.addAttribute("authType", "oauth2");
 
-    } else if (principal instanceof UserDetails userDetails) {
-      model.addAttribute("userName", userDetails.getUsername());
-      model.addAttribute("authType", "form");
-      model.addAttribute("roles", userDetails.getAuthorities());
-    }
+		}
+		else if (principal instanceof UserDetails userDetails) {
+			model.addAttribute("userName", userDetails.getUsername());
+			model.addAttribute("authType", "form");
+			model.addAttribute("roles", userDetails.getAuthorities());
+		}
 
-    return "home";
-  }
+		return "home";
+	}
+
 }

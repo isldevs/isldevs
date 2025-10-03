@@ -33,47 +33,42 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-  private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-  @Autowired
-  public CustomUserDetailsService(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
+	@Autowired
+	public CustomUserDetailsService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
-  @Override
-  @Transactional
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    var user =
-        userRepository
-            .findByUsername(username)
-            .orElseThrow(
-                () -> new UsernameNotFoundException("User not found with username: " + username));
+	@Override
+	@Transactional
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		var user = userRepository.findByUsername(username)
+			.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-    var roles =
-        user.getRoles().stream()
-            .map(
-                role ->
-                    role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName())
-            .toArray(String[]::new);
+		var roles = user.getRoles()
+			.stream()
+			.map(role -> role.getName().startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName())
+			.toArray(String[]::new);
 
-    var authorities =
-        user.getRoles().stream()
-            .flatMap(role -> role.getAuthorities().stream())
-            .map(Authority::getAuthority)
-            .toArray(String[]::new);
+		var authorities = user.getRoles()
+			.stream()
+			.flatMap(role -> role.getAuthorities().stream())
+			.map(Authority::getAuthority)
+			.toArray(String[]::new);
 
-    var allAuthorities =
-        Arrays.stream(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-    Arrays.stream(authorities).map(SimpleGrantedAuthority::new).forEach(allAuthorities::add);
+		var allAuthorities = Arrays.stream(roles).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+		Arrays.stream(authorities).map(SimpleGrantedAuthority::new).forEach(allAuthorities::add);
 
-    return org.springframework.security.core.userdetails.User.builder()
-        .username(user.getUsername())
-        .password(user.getPassword())
-        .authorities(allAuthorities)
-        .accountExpired(!user.isAccountNonExpired())
-        .accountLocked(!user.isAccountNonLocked())
-        .credentialsExpired(!user.isCredentialsNonExpired())
-        .disabled(!user.isEnabled())
-        .build();
-  }
+		return org.springframework.security.core.userdetails.User.builder()
+			.username(user.getUsername())
+			.password(user.getPassword())
+			.authorities(allAuthorities)
+			.accountExpired(!user.isAccountNonExpired())
+			.accountLocked(!user.isAccountNonLocked())
+			.credentialsExpired(!user.isCredentialsNonExpired())
+			.disabled(!user.isEnabled())
+			.build();
+	}
+
 }

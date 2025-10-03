@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ScheduledJobHistoryRepositoryTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

@@ -25,7 +25,7 @@ assertj-core = "3.27.6"
 junit = "5.14.0"
 mockito = "5.20.0"
 netty = "4.2.6.Final"
-javaformat = "0.0.47"
+spring-javaformat = "0.0.47"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
@@ -69,7 +69,6 @@ netty-handler = { module = "io.netty:netty-handler", version.ref = "netty" }
 netty-resolver = { module = "io.netty:netty-resolver", version.ref = "netty" }
 netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
 netty-transport-native-unix-common = { module = "io.netty:netty-transport-native-unix-common", version.ref = "netty" }
-java-format = { module = "io.spring.javaformat:spring-javaformat-maven-plugin", version.ref = "javaformat" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
@@ -78,6 +77,7 @@ graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+spring-java-format = { id = "io.spring.javaformat", version.ref = "spring-javaformat" }
 
 [bundles]
 spring-boot-web = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-hateoas"]

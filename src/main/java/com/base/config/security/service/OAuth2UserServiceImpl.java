@@ -41,84 +41,90 @@ import org.springframework.stereotype.Component;
 @Component
 public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-  private final FacebookOAuth2UserService facebookOAuth2UserService;
-  private final UserRepository userRepository;
-  private final RoleRepository roleRepository;
-  private final PasswordEncoder passwordEncoder;
+	private final FacebookOAuth2UserService facebookOAuth2UserService;
 
-  @Autowired
-  public OAuth2UserServiceImpl(
-      final FacebookOAuth2UserService facebookOAuth2UserService,
-      final UserRepository userRepository,
-      final RoleRepository roleRepository,
-      final PasswordEncoder passwordEncoder) {
-    this.facebookOAuth2UserService = facebookOAuth2UserService;
-    this.userRepository = userRepository;
-    this.roleRepository = roleRepository;
-    this.passwordEncoder = passwordEncoder;
-  }
+	private final UserRepository userRepository;
 
-  @Override
-  public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    try {
-      String registrationId = userRequest.getClientRegistration().getRegistrationId().toLowerCase();
+	private final RoleRepository roleRepository;
 
-      OAuth2User oauth2User;
-      if ("facebook".equals(registrationId)) {
-        oauth2User = facebookOAuth2UserService.loadUser(userRequest);
-      } else {
-        oauth2User = new DefaultOAuth2UserService().loadUser(userRequest);
-      }
+	private final PasswordEncoder passwordEncoder;
 
-      Map<String, Object> attributes = oauth2User.getAttributes();
+	@Autowired
+	public OAuth2UserServiceImpl(final FacebookOAuth2UserService facebookOAuth2UserService,
+			final UserRepository userRepository, final RoleRepository roleRepository,
+			final PasswordEncoder passwordEncoder) {
+		this.facebookOAuth2UserService = facebookOAuth2UserService;
+		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-      String username = extractUsername(attributes, registrationId);
-      String fullName = (String) attributes.get("name");
-      String email = (String) attributes.get("email");
-      String avatarUrl = extractAvatarUrl(attributes, registrationId);
+	@Override
+	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+		try {
+			String registrationId = userRequest.getClientRegistration().getRegistrationId().toLowerCase();
 
-      User user = userRepository.findByUsername(username).orElse(null);
-      if (user == null) {
-        user =
-            User.builder()
-                .username(username)
-                .email(email)
-                .name(fullName)
-                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                .providerId(oauth2User.getName())
-                .provider(registrationId.toUpperCase())
-                .providerAvatarUrl(avatarUrl)
-                .roles(resolveRoles(new HashSet<>(Set.of("USER")), roleRepository))
-                .build();
-      } else {
-        user.setProviderAvatarUrl(avatarUrl);
-        if (fullName != null) user.setName(fullName);
-        if (email != null) user.setEmail(email);
-      }
+			OAuth2User oauth2User;
+			if ("facebook".equals(registrationId)) {
+				oauth2User = facebookOAuth2UserService.loadUser(userRequest);
+			}
+			else {
+				oauth2User = new DefaultOAuth2UserService().loadUser(userRequest);
+			}
 
-      userRepository.save(user);
+			Map<String, Object> attributes = oauth2User.getAttributes();
 
-      return oauth2User;
-    } catch (Exception e) {
-      throw new ErrorException(
-          HttpStatus.FORBIDDEN, "msg.internal.error", "OAuth2 user loading fails", e.getMessage());
-    }
-  }
+			String username = extractUsername(attributes, registrationId);
+			String fullName = (String) attributes.get("name");
+			String email = (String) attributes.get("email");
+			String avatarUrl = extractAvatarUrl(attributes, registrationId);
 
-  private String extractUsername(Map<String, Object> attributes, String provider) {
-    return switch (provider) {
-      case "github" -> (String) attributes.get("login");
-      case "google" -> (String) attributes.get("sub");
-      case "facebook" -> (String) attributes.get("id");
-      default -> UUID.randomUUID().toString();
-    };
-  }
+			User user = userRepository.findByUsername(username).orElse(null);
+			if (user == null) {
+				user = User.builder()
+					.username(username)
+					.email(email)
+					.name(fullName)
+					.password(passwordEncoder.encode(UUID.randomUUID().toString()))
+					.providerId(oauth2User.getName())
+					.provider(registrationId.toUpperCase())
+					.providerAvatarUrl(avatarUrl)
+					.roles(resolveRoles(new HashSet<>(Set.of("USER")), roleRepository))
+					.build();
+			}
+			else {
+				user.setProviderAvatarUrl(avatarUrl);
+				if (fullName != null)
+					user.setName(fullName);
+				if (email != null)
+					user.setEmail(email);
+			}
 
-  private String extractAvatarUrl(Map<String, Object> attributes, String provider) {
-    return switch (provider) {
-      case "github" -> (String) attributes.get("avatar_url");
-      case "google", "facebook" -> (String) attributes.get("picture");
-      default -> null;
-    };
-  }
+			userRepository.save(user);
+
+			return oauth2User;
+		}
+		catch (Exception e) {
+			throw new ErrorException(HttpStatus.FORBIDDEN, "msg.internal.error", "OAuth2 user loading fails",
+					e.getMessage());
+		}
+	}
+
+	private String extractUsername(Map<String, Object> attributes, String provider) {
+		return switch (provider) {
+			case "github" -> (String) attributes.get("login");
+			case "google" -> (String) attributes.get("sub");
+			case "facebook" -> (String) attributes.get("id");
+			default -> UUID.randomUUID().toString();
+		};
+	}
+
+	private String extractAvatarUrl(Map<String, Object> attributes, String provider) {
+		return switch (provider) {
+			case "github" -> (String) attributes.get("avatar_url");
+			case "google", "facebook" -> (String) attributes.get("picture");
+			default -> null;
+		};
+	}
+
 }

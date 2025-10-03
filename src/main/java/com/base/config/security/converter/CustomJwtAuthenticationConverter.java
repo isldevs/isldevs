@@ -28,100 +28,102 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 /**
  * @author YISivlay
  */
-public class CustomJwtAuthenticationConverter
-    implements Converter<Jwt, AbstractAuthenticationToken> {
+public class CustomJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-  private static final Logger log = LoggerFactory.getLogger(CustomJwtAuthenticationConverter.class);
+	private static final Logger log = LoggerFactory.getLogger(CustomJwtAuthenticationConverter.class);
 
-  private static final String ROLES_CLAIM = "roles";
-  private static final String AUTHORITIES_CLAIM = "authorities";
-  private static final String SCOPE_CLAIM = "scope";
-  private static final String SCOPES_CLAIM = "scopes";
-  private static final String CLIENT_ID = "client_id";
-  private static final String USER_ID = "user_id";
+	private static final String ROLES_CLAIM = "roles";
 
-  @Override
-  public AbstractAuthenticationToken convert(Jwt jwt) {
-    try {
-      Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
-      String principalName = getPrincipalName(jwt);
-      return new JwtAuthenticationToken(jwt, authorities, principalName);
-    } catch (Exception e) {
-      log.error("Failed to convert JWT to Authentication", e);
-      return new JwtAuthenticationToken(jwt, Collections.emptyList(), null);
-    }
-  }
+	private static final String AUTHORITIES_CLAIM = "authorities";
 
-  private String getPrincipalName(Jwt jwt) {
-    return Optional.ofNullable(jwt.getClaimAsString(USER_ID))
-        .or(() -> Optional.ofNullable(jwt.getClaimAsString(CLIENT_ID)))
-        .orElse(jwt.getSubject());
-  }
+	private static final String SCOPE_CLAIM = "scope";
 
-  private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-    Set<GrantedAuthority> authorities = new HashSet<>();
-    extractSimpleAuthorities(jwt, authorities);
-    extractRoles(jwt, authorities);
-    extractScopes(jwt, authorities);
-    return authorities;
-  }
+	private static final String SCOPES_CLAIM = "scopes";
 
-  private void extractSimpleAuthorities(Jwt jwt, Set<GrantedAuthority> authorities) {
-    try {
-      Object authoritiesClaim = jwt.getClaim(AUTHORITIES_CLAIM);
-      if (authoritiesClaim instanceof Collection) {
-        ((Collection<?>) authoritiesClaim)
-            .forEach(
-                authority -> {
-                  if (authority != null) {
-                    authorities.add(new SimpleGrantedAuthority(authority.toString()));
-                  }
-                });
-      }
-    } catch (Exception e) {
-      log.debug("No simple authorities claim found or error reading it");
-    }
-  }
+	private static final String CLIENT_ID = "client_id";
 
-  private void extractRoles(Jwt jwt, Set<GrantedAuthority> authorities) {
-    try {
-      Object rolesClaim = jwt.getClaim(ROLES_CLAIM);
-      if (rolesClaim instanceof Collection) {
-        ((Collection<?>) rolesClaim)
-            .forEach(
-                role -> {
-                  if (role != null) {
-                    String roleName =
-                        role.toString().startsWith("ROLE_") ? role.toString() : "ROLE_" + role;
-                    authorities.add(new SimpleGrantedAuthority(roleName));
-                  }
-                });
-      }
-    } catch (Exception e) {
-      log.debug("No roles claim found or error reading it");
-    }
-  }
+	private static final String USER_ID = "user_id";
 
-  private void extractScopes(Jwt jwt, Set<GrantedAuthority> authorities) {
-    try {
-      String scopeClaim = jwt.getClaimAsString(SCOPE_CLAIM);
-      if (scopeClaim != null && !scopeClaim.trim().isEmpty()) {
-        Arrays.stream(scopeClaim.split(" "))
-            .filter(scope -> !scope.trim().isEmpty())
-            .forEach(scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
-      }
-      Object scopesClaim = jwt.getClaim(SCOPES_CLAIM);
-      if (scopesClaim instanceof Collection) {
-        ((Collection<?>) scopesClaim)
-            .forEach(
-                scope -> {
-                  if (scope != null) {
-                    authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope));
-                  }
-                });
-      }
-    } catch (Exception e) {
-      log.debug("No scope/scopes claims found or error reading them");
-    }
-  }
+	@Override
+	public AbstractAuthenticationToken convert(Jwt jwt) {
+		try {
+			Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
+			String principalName = getPrincipalName(jwt);
+			return new JwtAuthenticationToken(jwt, authorities, principalName);
+		}
+		catch (Exception e) {
+			log.error("Failed to convert JWT to Authentication", e);
+			return new JwtAuthenticationToken(jwt, Collections.emptyList(), null);
+		}
+	}
+
+	private String getPrincipalName(Jwt jwt) {
+		return Optional.ofNullable(jwt.getClaimAsString(USER_ID))
+			.or(() -> Optional.ofNullable(jwt.getClaimAsString(CLIENT_ID)))
+			.orElse(jwt.getSubject());
+	}
+
+	private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
+		Set<GrantedAuthority> authorities = new HashSet<>();
+		extractSimpleAuthorities(jwt, authorities);
+		extractRoles(jwt, authorities);
+		extractScopes(jwt, authorities);
+		return authorities;
+	}
+
+	private void extractSimpleAuthorities(Jwt jwt, Set<GrantedAuthority> authorities) {
+		try {
+			Object authoritiesClaim = jwt.getClaim(AUTHORITIES_CLAIM);
+			if (authoritiesClaim instanceof Collection) {
+				((Collection<?>) authoritiesClaim).forEach(authority -> {
+					if (authority != null) {
+						authorities.add(new SimpleGrantedAuthority(authority.toString()));
+					}
+				});
+			}
+		}
+		catch (Exception e) {
+			log.debug("No simple authorities claim found or error reading it");
+		}
+	}
+
+	private void extractRoles(Jwt jwt, Set<GrantedAuthority> authorities) {
+		try {
+			Object rolesClaim = jwt.getClaim(ROLES_CLAIM);
+			if (rolesClaim instanceof Collection) {
+				((Collection<?>) rolesClaim).forEach(role -> {
+					if (role != null) {
+						String roleName = role.toString().startsWith("ROLE_") ? role.toString() : "ROLE_" + role;
+						authorities.add(new SimpleGrantedAuthority(roleName));
+					}
+				});
+			}
+		}
+		catch (Exception e) {
+			log.debug("No roles claim found or error reading it");
+		}
+	}
+
+	private void extractScopes(Jwt jwt, Set<GrantedAuthority> authorities) {
+		try {
+			String scopeClaim = jwt.getClaimAsString(SCOPE_CLAIM);
+			if (scopeClaim != null && !scopeClaim.trim().isEmpty()) {
+				Arrays.stream(scopeClaim.split(" "))
+					.filter(scope -> !scope.trim().isEmpty())
+					.forEach(scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
+			}
+			Object scopesClaim = jwt.getClaim(SCOPES_CLAIM);
+			if (scopesClaim instanceof Collection) {
+				((Collection<?>) scopesClaim).forEach(scope -> {
+					if (scope != null) {
+						authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope));
+					}
+				});
+			}
+		}
+		catch (Exception e) {
+			log.debug("No scope/scopes claims found or error reading them");
+		}
+	}
+
 }

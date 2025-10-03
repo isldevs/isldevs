@@ -29,15 +29,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DataInitializationConfig {
 
-  private final DataInitializationService dataInitializationService;
+	private final DataInitializationService dataInitializationService;
 
-  @Autowired
-  public DataInitializationConfig(DataInitializationService dataInitializationService) {
-    this.dataInitializationService = dataInitializationService;
-  }
+	@Autowired
+	public DataInitializationConfig(DataInitializationService dataInitializationService) {
+		this.dataInitializationService = dataInitializationService;
+	}
 
-  @Bean
-  public CommandLineRunner dataInitialization() {
-    return _ -> dataInitializationService.init();
-  }
+	@Bean
+	public CommandLineRunner dataInitialization() {
+		return _ -> dataInitializationService.init();
+	}
+
 }

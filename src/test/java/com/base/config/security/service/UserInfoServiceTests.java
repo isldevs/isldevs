@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserInfoServiceTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

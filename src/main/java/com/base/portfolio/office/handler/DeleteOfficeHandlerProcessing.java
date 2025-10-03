@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = OfficeConstants.PERMISSION)
 public class DeleteOfficeHandlerProcessing implements CommandHandlerProcessing {
 
-  private final OfficeService service;
+	private final OfficeService service;
 
-  @Autowired
-  public DeleteOfficeHandlerProcessing(OfficeService service) {
-    this.service = service;
-  }
+	@Autowired
+	public DeleteOfficeHandlerProcessing(OfficeService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.deleteOffice(command.getId());
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.deleteOffice(command.getId());
+	}
+
 }

@@ -27,20 +27,21 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface UserService {
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_USER')")
-  Map<String, Object> createUser(JsonCommand command);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_USER')")
+	Map<String, Object> createUser(JsonCommand command);
 
-  @Transactional(readOnly = true)
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_USER')")
-  UserDTO getUserById(Long id);
+	@Transactional(readOnly = true)
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_USER')")
+	UserDTO getUserById(Long id);
 
-  @Transactional(readOnly = true)
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_USER')")
-  Page<UserDTO> listUsers(Integer page, Integer size, String search);
+	@Transactional(readOnly = true)
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_USER')")
+	Page<UserDTO> listUsers(Integer page, Integer size, String search);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_USER')")
-  Map<String, Object> updateUser(Long id, JsonCommand command);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_USER')")
+	Map<String, Object> updateUser(Long id, JsonCommand command);
 
-  @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_USER')")
-  Map<String, Object> deleteUser(Long id);
+	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_USER')")
+	Map<String, Object> deleteUser(Long id);
+
 }

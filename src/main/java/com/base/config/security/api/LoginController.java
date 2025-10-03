@@ -28,88 +28,87 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoginController {
 
-  @GetMapping("/login")
-  public String loginPage(
-      Model model,
-      HttpServletRequest request,
-      @RequestParam(value = "error", required = false) Boolean error,
-      @RequestParam(value = "oauth2Error", required = false) String oauth2Error,
-      @RequestParam(value = "error_description", required = false) String errorDescription,
-      @RequestParam(value = "logout", required = false) String logout) {
-    handleAuthenticationResults(model, request, error, oauth2Error, errorDescription, logout);
-    return "login";
-  }
+	@GetMapping("/login")
+	public String loginPage(Model model, HttpServletRequest request,
+			@RequestParam(value = "error", required = false) Boolean error,
+			@RequestParam(value = "oauth2Error", required = false) String oauth2Error,
+			@RequestParam(value = "error_description", required = false) String errorDescription,
+			@RequestParam(value = "logout", required = false) String logout) {
+		handleAuthenticationResults(model, request, error, oauth2Error, errorDescription, logout);
+		return "login";
+	}
 
-  private void handleAuthenticationResults(
-      Model model,
-      HttpServletRequest request,
-      Boolean error,
-      String oauth2Error,
-      String errorDescription,
-      String logout) {
+	private void handleAuthenticationResults(Model model, HttpServletRequest request, Boolean error, String oauth2Error,
+			String errorDescription, String logout) {
 
-    HttpSession session = request.getSession();
-    if (logout != null) {
-      model.addAttribute("successMessage", "You have been logged out successfully.");
-    }
-    if (error != null) {
-      handleFormLoginError(model, session, error);
-    }
-    if (oauth2Error != null) {
-      handleOAuth2Error(model, errorDescription);
-    }
-    handleSessionErrors(model, session);
-    handleQueryStringErrors(model, request);
-  }
+		HttpSession session = request.getSession();
+		if (logout != null) {
+			model.addAttribute("successMessage", "You have been logged out successfully.");
+		}
+		if (error != null) {
+			handleFormLoginError(model, session, error);
+		}
+		if (oauth2Error != null) {
+			handleOAuth2Error(model, errorDescription);
+		}
+		handleSessionErrors(model, session);
+		handleQueryStringErrors(model, request);
+	}
 
-  private void handleFormLoginError(Model model, HttpSession session, Boolean error) {
-    if (error) {
-      Exception authException = (Exception) session.getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
-      if (authException != null) {
-        model.addAttribute("errorMessage", "Login failed: " + authException.getMessage());
-      } else {
-        model.addAttribute("errorMessage", "Invalid username or password.");
-      }
-    } else {
-      model.addAttribute("errorMessage", "Authentication error. Please try again.");
-    }
-  }
+	private void handleFormLoginError(Model model, HttpSession session, Boolean error) {
+		if (error) {
+			Exception authException = (Exception) session.getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+			if (authException != null) {
+				model.addAttribute("errorMessage", "Login failed: " + authException.getMessage());
+			}
+			else {
+				model.addAttribute("errorMessage", "Invalid username or password.");
+			}
+		}
+		else {
+			model.addAttribute("errorMessage", "Authentication error. Please try again.");
+		}
+	}
 
-  private void handleOAuth2Error(Model model, String errorDescription) {
-    if (errorDescription != null) {
-      model.addAttribute("errorMessage", "Social login error: " + errorDescription);
-    } else {
-      model.addAttribute("errorMessage", "Social authentication failed. Please try again.");
-    }
-  }
+	private void handleOAuth2Error(Model model, String errorDescription) {
+		if (errorDescription != null) {
+			model.addAttribute("errorMessage", "Social login error: " + errorDescription);
+		}
+		else {
+			model.addAttribute("errorMessage", "Social authentication failed. Please try again.");
+		}
+	}
 
-  private void handleSessionErrors(Model model, HttpSession session) {
-    String sessionError = (String) session.getAttribute("OAUTH2_ERROR");
-    if (sessionError != null) {
-      model.addAttribute("errorMessage", sessionError);
-      session.removeAttribute("OAUTH2_ERROR");
-    }
-  }
+	private void handleSessionErrors(Model model, HttpSession session) {
+		String sessionError = (String) session.getAttribute("OAUTH2_ERROR");
+		if (sessionError != null) {
+			model.addAttribute("errorMessage", sessionError);
+			session.removeAttribute("OAUTH2_ERROR");
+		}
+	}
 
-  private void handleQueryStringErrors(Model model, HttpServletRequest request) {
-    String queryString = request.getQueryString();
-    if (queryString != null) {
-      if (queryString.contains("error=access_denied")) {
-        model.addAttribute("errorMessage", "Access denied. Permission was not granted.");
-      } else if (queryString.contains("error=unauthorized_client")) {
-        model.addAttribute("errorMessage", "Client not authorized. Check OAuth configuration.");
-      } else if (queryString.contains("error=invalid_request")) {
-        model.addAttribute("errorMessage", "Invalid request. Please try again.");
-      }
-    }
-  }
+	private void handleQueryStringErrors(Model model, HttpServletRequest request) {
+		String queryString = request.getQueryString();
+		if (queryString != null) {
+			if (queryString.contains("error=access_denied")) {
+				model.addAttribute("errorMessage", "Access denied. Permission was not granted.");
+			}
+			else if (queryString.contains("error=unauthorized_client")) {
+				model.addAttribute("errorMessage", "Client not authorized. Check OAuth configuration.");
+			}
+			else if (queryString.contains("error=invalid_request")) {
+				model.addAttribute("errorMessage", "Invalid request. Please try again.");
+			}
+		}
+	}
 
-  @GetMapping("/login/clear")
-  public String clearErrors(HttpServletRequest request) {
-    HttpSession session = request.getSession();
-    session.removeAttribute("OAUTH2_ERROR");
-    session.removeAttribute("SPRING_SECURITY_LAST_EXCEPTION");
-    session.removeAttribute("WebAuthenticationDetails");
-    return "redirect:/login?cleared=true";
-  }
+	@GetMapping("/login/clear")
+	public String clearErrors(HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		session.removeAttribute("OAUTH2_ERROR");
+		session.removeAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+		session.removeAttribute("WebAuthenticationDetails");
+		return "redirect:/login?cleared=true";
+	}
+
 }

@@ -35,71 +35,58 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(ProvinceConstants.API_PATH)
 public class ProvinceController {
 
-  private final PageableHateoasAssembler pageable;
-  private final JsonSerializerImpl<ProvinceDTO> serializer;
-  private final ProvinceService service;
-  private final LogService logService;
+	private final PageableHateoasAssembler pageable;
 
-  @Autowired
-  public ProvinceController(
-      final PageableHateoasAssembler pageable,
-      final JsonSerializerImpl<ProvinceDTO> serializer,
-      final ProvinceService service,
-      final LogService logService) {
-    this.pageable = pageable;
-    this.serializer = serializer;
-    this.service = service;
-    this.logService = logService;
-  }
+	private final JsonSerializerImpl<ProvinceDTO> serializer;
 
-  @PostMapping(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String createProvince(@RequestBody String json) {
-    final var command = new ProvinceCommandHandler().create().json(json).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	private final ProvinceService service;
 
-  @PutMapping(
-      value = "{id}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String updateProvince(@RequestBody String json, @PathVariable Long id) {
-    final var command = new ProvinceCommandHandler().update(id).json(json).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	private final LogService logService;
 
-  @DeleteMapping(
-      value = "{id}",
-      consumes = APPLICATION_JSON_VALUE,
-      produces = APPLICATION_JSON_VALUE)
-  public String deleteProvince(@PathVariable Long id) {
-    final var command = new ProvinceCommandHandler().delete(id).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	@Autowired
+	public ProvinceController(final PageableHateoasAssembler pageable, final JsonSerializerImpl<ProvinceDTO> serializer,
+			final ProvinceService service, final LogService logService) {
+		this.pageable = pageable;
+		this.serializer = serializer;
+		this.service = service;
+		this.logService = logService;
+	}
 
-  @GetMapping(
-      value = "/{id}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String getProvince(@PathVariable Long id) {
-    var data = this.service.getProvinceById(id);
-    return this.serializer.serialize(data);
-  }
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String createProvince(@RequestBody String json) {
+		final var command = new ProvinceCommandHandler().create().json(json).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
 
-  @GetMapping(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> listOffices(
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer size,
-      @RequestParam(required = false) String search) {
-    var provinces = this.service.listProvinces(page, size, search);
-    var response =
-        (page == null || size == null) ? pageable.unpaged(provinces) : pageable.toModel(provinces);
-    return ResponseEntity.ok(response);
-  }
+	@PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String updateProvince(@RequestBody String json, @PathVariable Long id) {
+		final var command = new ProvinceCommandHandler().update(id).json(json).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
+
+	@DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	public String deleteProvince(@PathVariable Long id) {
+		final var command = new ProvinceCommandHandler().delete(id).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
+
+	@GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getProvince(@PathVariable Long id) {
+		var data = this.service.getProvinceById(id);
+		return this.serializer.serialize(data);
+	}
+
+	@GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> listOffices(@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size, @RequestParam(required = false) String search) {
+		var provinces = this.service.listProvinces(page, size, search);
+		var response = (page == null || size == null) ? pageable.unpaged(provinces) : pageable.toModel(provinces);
+		return ResponseEntity.ok(response);
+	}
+
 }

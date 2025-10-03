@@ -28,65 +28,67 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class JwtBearerAuthenticationToken extends AbstractAuthenticationToken {
 
-  private final String clientId;
-  private final String assertion;
-  private final Set<String> scopes;
-  private Object principal;
+	private final String clientId;
 
-  public JwtBearerAuthenticationToken(String clientId, String assertion) {
-    this(clientId, assertion, Collections.emptySet());
-  }
+	private final String assertion;
 
-  public JwtBearerAuthenticationToken(String clientId, String assertion, Set<String> scopes) {
-    super(null);
-    this.clientId = clientId;
-    this.assertion = assertion;
-    this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
-    this.setAuthenticated(false);
-    this.principal = clientId;
-  }
+	private final Set<String> scopes;
 
-  public JwtBearerAuthenticationToken(
-      Object principal, Set<String> scopes, Collection<? extends GrantedAuthority> authorities) {
-    super(authorities);
-    this.clientId = null;
-    this.assertion = null;
-    this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
-    this.setAuthenticated(true);
-    this.principal = principal;
-  }
+	private Object principal;
 
-  public String getClientId() {
-    return clientId;
-  }
+	public JwtBearerAuthenticationToken(String clientId, String assertion) {
+		this(clientId, assertion, Collections.emptySet());
+	}
 
-  public String getAssertion() {
-    return assertion;
-  }
+	public JwtBearerAuthenticationToken(String clientId, String assertion, Set<String> scopes) {
+		super(null);
+		this.clientId = clientId;
+		this.assertion = assertion;
+		this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
+		this.setAuthenticated(false);
+		this.principal = clientId;
+	}
 
-  public Set<String> getScopes() {
-    return scopes;
-  }
+	public JwtBearerAuthenticationToken(Object principal, Set<String> scopes,
+			Collection<? extends GrantedAuthority> authorities) {
+		super(authorities);
+		this.clientId = null;
+		this.assertion = null;
+		this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
+		this.setAuthenticated(true);
+		this.principal = principal;
+	}
 
-  @Override
-  public Object getCredentials() {
-    return assertion;
-  }
+	public String getClientId() {
+		return clientId;
+	}
 
-  @Override
-  public Object getPrincipal() {
-    return principal;
-  }
+	public String getAssertion() {
+		return assertion;
+	}
 
-  @Override
-  public Collection<GrantedAuthority> getAuthorities() {
-    // Convert scopes to authorities with prefix "SCOPE_"
-    if (super.getAuthorities() != null && !super.getAuthorities().isEmpty()) {
-      return super.getAuthorities();
-    }
+	public Set<String> getScopes() {
+		return scopes;
+	}
 
-    return scopes.stream()
-        .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
-        .collect(Collectors.toSet());
-  }
+	@Override
+	public Object getCredentials() {
+		return assertion;
+	}
+
+	@Override
+	public Object getPrincipal() {
+		return principal;
+	}
+
+	@Override
+	public Collection<GrantedAuthority> getAuthorities() {
+		// Convert scopes to authorities with prefix "SCOPE_"
+		if (super.getAuthorities() != null && !super.getAuthorities().isEmpty()) {
+			return super.getAuthorities();
+		}
+
+		return scopes.stream().map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope)).collect(Collectors.toSet());
+	}
+
 }

@@ -34,33 +34,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomTokenErrorResponseHandler implements AuthenticationFailureHandler {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
-  private final MessageSource messageSource;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public CustomTokenErrorResponseHandler(MessageSource messageSource) {
-    this.messageSource = messageSource;
-  }
+	private final MessageSource messageSource;
 
-  @Override
-  public void onAuthenticationFailure(
-      HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
-      throws IOException {
+	public CustomTokenErrorResponseHandler(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
-    Locale locale = request.getLocale();
-    String message =
-        messageSource.getMessage(
-            "msg.unauthorized.description", null, "Please login again.", locale);
+	@Override
+	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException exception) throws IOException {
 
-    ErrorData errorData =
-        ErrorData.builder()
-            .status(HttpStatus.UNAUTHORIZED.value())
-            .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-            .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-            .message(message)
-            .build();
+		Locale locale = request.getLocale();
+		String message = messageSource.getMessage("msg.unauthorized.description", null, "Please login again.", locale);
 
-    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    objectMapper.writeValue(response.getOutputStream(), errorData);
-  }
+		ErrorData errorData = ErrorData.builder()
+			.status(HttpStatus.UNAUTHORIZED.value())
+			.error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+			.description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+			.message(message)
+			.build();
+
+		response.setStatus(HttpStatus.UNAUTHORIZED.value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		objectMapper.writeValue(response.getOutputStream(), errorData);
+	}
+
 }

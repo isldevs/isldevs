@@ -34,62 +34,60 @@ import org.springframework.web.bind.annotation.*;
 @Scope("singleton")
 public class OfficeController {
 
-  private final PageableHateoasAssembler pageable;
-  private final JsonSerializerImpl<OfficeDTO> serializer;
-  private final OfficeService service;
-  private final LogService logService;
+	private final PageableHateoasAssembler pageable;
 
-  @Autowired
-  public OfficeController(
-      final PageableHateoasAssembler pageable,
-      final JsonSerializerImpl<OfficeDTO> serializer,
-      final OfficeService service,
-      final LogService logService) {
-    this.pageable = pageable;
-    this.serializer = serializer;
-    this.service = service;
-    this.logService = logService;
-  }
+	private final JsonSerializerImpl<OfficeDTO> serializer;
 
-  @PostMapping
-  public String createOffice(@RequestBody String json) {
+	private final OfficeService service;
 
-    final var command = new OfficeCommandHandler().create().json(json).build();
+	private final LogService logService;
 
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	@Autowired
+	public OfficeController(final PageableHateoasAssembler pageable, final JsonSerializerImpl<OfficeDTO> serializer,
+			final OfficeService service, final LogService logService) {
+		this.pageable = pageable;
+		this.serializer = serializer;
+		this.service = service;
+		this.logService = logService;
+	}
 
-  @PutMapping("/{id}")
-  public String updateOffice(@PathVariable Long id, @RequestBody String json) {
+	@PostMapping
+	public String createOffice(@RequestBody String json) {
 
-    final var command = new OfficeCommandHandler().update(id).json(json).build();
+		final var command = new OfficeCommandHandler().create().json(json).build();
 
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
 
-  @DeleteMapping("/{id}")
-  public String deleteOffice(@PathVariable Long id) {
-    final var command = new OfficeCommandHandler().delete(id).build();
+	@PutMapping("/{id}")
+	public String updateOffice(@PathVariable Long id, @RequestBody String json) {
 
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+		final var command = new OfficeCommandHandler().update(id).json(json).build();
 
-  @GetMapping("/{id}")
-  public ResponseEntity<OfficeDTO> getOffice(@PathVariable Long id) {
-    return ResponseEntity.ok(this.service.getOfficeById(id));
-  }
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
 
-  @GetMapping
-  public ResponseEntity<?> listOffices(
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer size,
-      @RequestParam(required = false) String search) {
-    var offices = this.service.listOffices(page, size, search);
-    var response =
-        (page == null || size == null) ? pageable.unpaged(offices) : pageable.toModel(offices);
-    return ResponseEntity.ok(response);
-  }
+	@DeleteMapping("/{id}")
+	public String deleteOffice(@PathVariable Long id) {
+		final var command = new OfficeCommandHandler().delete(id).build();
+
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<OfficeDTO> getOffice(@PathVariable Long id) {
+		return ResponseEntity.ok(this.service.getOfficeById(id));
+	}
+
+	@GetMapping
+	public ResponseEntity<?> listOffices(@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size, @RequestParam(required = false) String search) {
+		var offices = this.service.listOffices(page, size, search);
+		var response = (page == null || size == null) ? pageable.unpaged(offices) : pageable.toModel(offices);
+		return ResponseEntity.ok(response);
+	}
+
 }

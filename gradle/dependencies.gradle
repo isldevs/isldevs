@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.bundles.jwt)
     implementation(libs.bundles.netty)
-    implementation(libs.java.format)
 
     developmentOnly(libs.spring.boot.devtools)
     runtimeOnly(libs.postgresql)

@@ -30,7 +30,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RoleDTO {
 
-  private Long id;
-  private String name;
-  private Set<String> authorities;
+	private Long id;
+
+	private String name;
+
+	private Set<String> authorities;
+
 }

@@ -28,20 +28,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class Keys {
 
-  public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
-    var keyPair = generateRsaKey();
-    var publicKey = (RSAPublicKey) keyPair.getPublic();
-    var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-    return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
-  }
+	public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId, Timestamp created) {
+		var keyPair = generateRsaKey();
+		var publicKey = (RSAPublicKey) keyPair.getPublic();
+		var privateKey = (RSAPrivateKey) keyPair.getPrivate();
+		return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
+	}
 
-  private KeyPair generateRsaKey() {
-    try {
-      var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-      keyPairGenerator.initialize(2048);
-      return keyPairGenerator.generateKeyPair();
-    } catch (Exception ex) {
-      throw new IllegalStateException(ex);
-    }
-  }
+	private KeyPair generateRsaKey() {
+		try {
+			var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(2048);
+			return keyPairGenerator.generateKeyPair();
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
 }

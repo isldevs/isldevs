@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OAuth2PasswordAuthenticationTokenTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

@@ -29,23 +29,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class GlobalConfig {
 
-  private final Map<String, String> configMap;
+	private final Map<String, String> configMap;
 
-  @Autowired
-  public GlobalConfig(ConfigRepository configRepository) {
-    List<Config> configs = configRepository.findAllByEnabled(true);
-    this.configMap = configs.stream().collect(Collectors.toMap(Config::getCode, Config::getValue));
-  }
+	@Autowired
+	public GlobalConfig(ConfigRepository configRepository) {
+		List<Config> configs = configRepository.findAllByEnabled(true);
+		this.configMap = configs.stream().collect(Collectors.toMap(Config::getCode, Config::getValue));
+	}
 
-  public String getJwtPassword() {
-    return configMap.getOrDefault("JWT_PASSWORD", null);
-  }
+	public String getJwtPassword() {
+		return configMap.getOrDefault("JWT_PASSWORD", null);
+	}
 
-  public String getJwtSalt() {
-    return configMap.getOrDefault("JWT_SALT", null);
-  }
+	public String getJwtSalt() {
+		return configMap.getOrDefault("JWT_SALT", null);
+	}
 
-  public String getConfigValue(String key) {
-    return configMap.getOrDefault(key, null);
-  }
+	public String getConfigValue(String key) {
+		return configMap.getOrDefault(key, null);
+	}
+
 }

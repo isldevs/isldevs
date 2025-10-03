@@ -20,79 +20,89 @@ package com.base.core.data;
  */
 public final class ErrorData {
 
-  private final Integer status;
-  private final String error;
-  private final String description;
-  private final String message;
-  private final Object[] args;
+	private final Integer status;
 
-  public ErrorData(Builder builder) {
-    this.status = builder.status;
-    this.error = builder.error;
-    this.description = builder.description;
-    this.message = builder.message;
-    this.args = builder.args;
-  }
+	private final String error;
 
-  public static Builder builder() {
-    return new Builder();
-  }
+	private final String description;
 
-  public static class Builder {
+	private final String message;
 
-    private Integer status;
-    private String error;
-    private String description;
-    private String message;
-    private Object[] args;
+	private final Object[] args;
 
-    public ErrorData build() {
-      return new ErrorData(this);
-    }
+	public ErrorData(Builder builder) {
+		this.status = builder.status;
+		this.error = builder.error;
+		this.description = builder.description;
+		this.message = builder.message;
+		this.args = builder.args;
+	}
 
-    public Builder status(Integer status) {
-      this.status = status;
-      return this;
-    }
+	public static Builder builder() {
+		return new Builder();
+	}
 
-    public Builder error(String error) {
-      this.error = error;
-      return this;
-    }
+	public static class Builder {
 
-    public Builder description(String description) {
-      this.description = description;
-      return this;
-    }
+		private Integer status;
 
-    public Builder message(String message) {
-      this.message = message;
-      return this;
-    }
+		private String error;
 
-    public Builder args(Object... args) {
-      this.args = args;
-      return this;
-    }
-  }
+		private String description;
 
-  public Integer getStatus() {
-    return status;
-  }
+		private String message;
 
-  public String getError() {
-    return error;
-  }
+		private Object[] args;
 
-  public String getDescription() {
-    return description;
-  }
+		public ErrorData build() {
+			return new ErrorData(this);
+		}
 
-  public String getMessage() {
-    return message;
-  }
+		public Builder status(Integer status) {
+			this.status = status;
+			return this;
+		}
 
-  public Object[] getArgs() {
-    return args;
-  }
+		public Builder error(String error) {
+			this.error = error;
+			return this;
+		}
+
+		public Builder description(String description) {
+			this.description = description;
+			return this;
+		}
+
+		public Builder message(String message) {
+			this.message = message;
+			return this;
+		}
+
+		public Builder args(Object... args) {
+			this.args = args;
+			return this;
+		}
+
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public Object[] getArgs() {
+		return args;
+	}
+
 }

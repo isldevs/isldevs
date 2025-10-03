@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "CREATE", entity = DistrictConstants.PERMISSION)
 public class CreateDistrictHandlerProcessing implements CommandHandlerProcessing {
 
-  private final DistrictService service;
+	private final DistrictService service;
 
-  @Autowired
-  public CreateDistrictHandlerProcessing(DistrictService service) {
-    this.service = service;
-  }
+	@Autowired
+	public CreateDistrictHandlerProcessing(DistrictService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.createDistrict(command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.createDistrict(command);
+	}
+
 }

@@ -23,5 +23,6 @@ import java.util.Map;
  */
 public interface CommandHandlerProcessing {
 
-  Map<String, Object> process(JsonCommand command);
+	Map<String, Object> process(JsonCommand command);
+
 }

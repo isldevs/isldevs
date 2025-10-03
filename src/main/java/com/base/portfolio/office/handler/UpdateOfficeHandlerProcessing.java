@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = OfficeConstants.PERMISSION)
 public class UpdateOfficeHandlerProcessing implements CommandHandlerProcessing {
 
-  private final OfficeService service;
+	private final OfficeService service;
 
-  @Autowired
-  public UpdateOfficeHandlerProcessing(OfficeService service) {
-    this.service = service;
-  }
+	@Autowired
+	public UpdateOfficeHandlerProcessing(OfficeService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.updateOffice(command.getId(), command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.updateOffice(command.getId(), command);
+	}
+
 }

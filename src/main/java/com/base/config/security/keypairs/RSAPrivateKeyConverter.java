@@ -30,43 +30,41 @@ import org.springframework.util.FileCopyUtils;
 /**
  * @author YISivlay
  */
-public class RSAPrivateKeyConverter
-    implements Serializer<RSAPrivateKey>, Deserializer<RSAPrivateKey> {
+public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deserializer<RSAPrivateKey> {
 
-  private final TextEncryptor textEncryptor;
+	private final TextEncryptor textEncryptor;
 
-  public RSAPrivateKeyConverter(TextEncryptor textEncryptor) {
-    this.textEncryptor = textEncryptor;
-  }
+	public RSAPrivateKeyConverter(TextEncryptor textEncryptor) {
+		this.textEncryptor = textEncryptor;
+	}
 
-  @Override
-  public RSAPrivateKey deserialize(InputStream inputStream) {
-    try (var reader =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      var pem = this.textEncryptor.decrypt(FileCopyUtils.copyToString(reader));
-      var privateKeyPEM =
-          pem.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
-      var encoded = Base64.getMimeDecoder().decode(privateKeyPEM);
-      var keyFactory = KeyFactory.getInstance("RSA");
-      var keySpec = new PKCS8EncodedKeySpec(encoded);
-      return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
-    } catch (Throwable throwable) {
-      throw new IllegalArgumentException("there's been an exception", throwable);
-    }
-  }
+	@Override
+	public RSAPrivateKey deserialize(InputStream inputStream) {
+		try (var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+			var pem = this.textEncryptor.decrypt(FileCopyUtils.copyToString(reader));
+			var privateKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
+			var encoded = Base64.getMimeDecoder().decode(privateKeyPEM);
+			var keyFactory = KeyFactory.getInstance("RSA");
+			var keySpec = new PKCS8EncodedKeySpec(encoded);
+			return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
+		}
+		catch (Throwable throwable) {
+			throw new IllegalArgumentException("there's been an exception", throwable);
+		}
+	}
 
-  @Override
-  public void serialize(RSAPrivateKey object, OutputStream outputStream) throws IOException {
-    var pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(object.getEncoded());
-    var string =
-        "-----BEGIN PRIVATE KEY-----\n"
-            + Base64.getMimeEncoder().encodeToString(pkcs8EncodedKeySpec.getEncoded())
-            + "\n-----END PRIVATE KEY-----";
-    outputStream.write(this.textEncryptor.encrypt(string).getBytes(StandardCharsets.UTF_8));
-  }
+	@Override
+	public void serialize(RSAPrivateKey object, OutputStream outputStream) throws IOException {
+		var pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(object.getEncoded());
+		var string = "-----BEGIN PRIVATE KEY-----\n"
+				+ Base64.getMimeEncoder().encodeToString(pkcs8EncodedKeySpec.getEncoded())
+				+ "\n-----END PRIVATE KEY-----";
+		outputStream.write(this.textEncryptor.encrypt(string).getBytes(StandardCharsets.UTF_8));
+	}
 
-  public Key convertFromString(String keyStr) throws IOException {
-    var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
-    return deserialize(byteArrayInputStream);
-  }
+	public Key convertFromString(String keyStr) throws IOException {
+		var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
+		return deserialize(byteArrayInputStream);
+	}
+
 }

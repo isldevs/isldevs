@@ -24,4 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface LogRepository extends JpaRepository<Logs, Long>, JpaSpecificationExecutor<Logs> {}
+public interface LogRepository extends JpaRepository<Logs, Long>, JpaSpecificationExecutor<Logs> {
+
+}

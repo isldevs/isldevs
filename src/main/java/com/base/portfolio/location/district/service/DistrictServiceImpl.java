@@ -50,247 +50,231 @@ import org.springframework.stereotype.Service;
 @Service
 public class DistrictServiceImpl implements DistrictService {
 
-  private final MessageSource messageSource;
-  private final JdbcTemplate jdbcTemplate;
-  private final DistrictRepository repository;
-  private final DistrictDataValidation validation;
-  private final ProvinceRepository provinceRepository;
+	private final MessageSource messageSource;
 
-  @Autowired
-  public DistrictServiceImpl(
-      final MessageSource messageSource,
-      final JdbcTemplate jdbcTemplate,
-      final DistrictRepository repository,
-      final DistrictDataValidation validation,
-      final ProvinceRepository provinceRepository) {
-    this.messageSource = messageSource;
-    this.jdbcTemplate = jdbcTemplate;
-    this.repository = repository;
-    this.validation = validation;
-    this.provinceRepository = provinceRepository;
-  }
+	private final JdbcTemplate jdbcTemplate;
 
-  @Override
-  @CacheEvict(value = "districts", allEntries = true)
-  public Map<String, Object> createDistrict(JsonCommand command) {
-    this.validation.create(command.getJson());
+	private final DistrictRepository repository;
 
-    final Long provinceId = command.extractLong(DistrictConstants.PROVINCE);
-    final Province province =
-        this.provinceRepository
-            .findById(provinceId)
-            .orElseThrow(() -> new NotFoundException("msg.not.found", provinceId));
+	private final DistrictDataValidation validation;
 
-    final var data = District.fromJson(province, command);
+	private final ProvinceRepository provinceRepository;
 
-    this.repository.save(data);
-    return LogData.builder()
-        .id(data.getId())
-        .success("msg.success", messageSource)
-        .build()
-        .claims();
-  }
+	@Autowired
+	public DistrictServiceImpl(final MessageSource messageSource, final JdbcTemplate jdbcTemplate,
+			final DistrictRepository repository, final DistrictDataValidation validation,
+			final ProvinceRepository provinceRepository) {
+		this.messageSource = messageSource;
+		this.jdbcTemplate = jdbcTemplate;
+		this.repository = repository;
+		this.validation = validation;
+		this.provinceRepository = provinceRepository;
+	}
 
-  @Override
-  @CacheEvict(value = "districts", key = "#id")
-  public Map<String, Object> updateDistrict(Long id, JsonCommand command) {
-    var data =
-        this.repository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found", id));
+	@Override
+	@CacheEvict(value = "districts", allEntries = true)
+	public Map<String, Object> createDistrict(JsonCommand command) {
+		this.validation.create(command.getJson());
 
-    this.validation.update(command.getJson());
+		final Long provinceId = command.extractLong(DistrictConstants.PROVINCE);
+		final Province province = this.provinceRepository.findById(provinceId)
+			.orElseThrow(() -> new NotFoundException("msg.not.found", provinceId));
 
-    var changes = data.changed(command);
-    if (!changes.isEmpty()) {
-      this.repository.save(data);
-    }
-    return LogData.builder()
-        .id(data.getId())
-        .changes(changes)
-        .success("msg.success", messageSource)
-        .build()
-        .claims();
-  }
+		final var data = District.fromJson(province, command);
 
-  @Override
-  @CacheEvict(value = "districts", key = "#id")
-  public Map<String, Object> deleteDistrict(Long id) {
-    final var data =
-        this.repository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found", id));
-    this.repository.delete(data);
-    this.repository.flush();
-    return LogData.builder()
-        .id(data.getId())
-        .success("msg.success", messageSource)
-        .build()
-        .claims();
-  }
+		this.repository.save(data);
+		return LogData.builder().id(data.getId()).success("msg.success", messageSource).build().claims();
+	}
 
-  @Override
-  @Cacheable(value = "districts", key = "#id")
-  public DistrictDTO getDistrictById(Long id) {
-    try {
-      return jdbcTemplate.queryForObject(
-          """
-                            SELECT d.id, d.province_id, d.name_en, d.name_km, d.name_zh, d.type, d.postal_code,
-                                 COALESCE(
-                                    json_agg(
-                                        json_build_object(
-                                            'id', c.id,
-                                            'nameEn', trim(c.name_en),
-                                            'nameKm', trim(c.name_km),
-                                            'nameZh', trim(c.name_zh),
-                                            'type', trim(c.type),
-                                            'postalCode', trim(c.postal_code),
-                                            'villages', (
-                                               SELECT COALESCE(
-                                                  json_agg(
-                                                      json_build_object(
-                                                              'id', v.id,
-                                                              'nameEn', trim(v.name_en),
-                                                              'nameKm', trim(v.name_km),
-                                                              'nameZh', trim(v.name_zh),
-                                                              'type', trim(v.type),
-                                                              'postalCode', trim(v.postal_code)
-                                                      )
-                                                 ) FILTER (WHERE v.id IS NOT NULL), '[]'
-                                               )
-                                               FROM village v
-                                               WHERE v.commune_id = c.id
-                                            )
-                                        )
-                                    ) FILTER (WHERE c.id IS NOT NULL), '[]'
-                                 ) AS communes
-                            FROM district d
-                            LEFT JOIN commune c ON d.id = c.district_id
-                            WHERE d.id = ?
-                            GROUP BY d.id, d.name_km, d.type, d.postal_code;
-                            """,
-          this::mapRow,
-          id);
-    } catch (EmptyResultDataAccessException e) {
-      throw new NotFoundException("msg.not.found", id);
-    }
-  }
+	@Override
+	@CacheEvict(value = "districts", key = "#id")
+	public Map<String, Object> updateDistrict(Long id, JsonCommand command) {
+		var data = this.repository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
-  @Override
-  @Cacheable(value = "districts", key = "#page + '-' + #size + '-' + #search")
-  public Page<DistrictDTO> listDistricts(Integer page, Integer size, String search) {
-    try {
-      StringBuilder sqlBuilder =
-          new StringBuilder(
-              """
-                SELECT d.id, d.province_id, d.type, d.name_en, d.name_km, d.name_zh, d.postal_code
-            """);
+		this.validation.update(command.getJson());
 
-      StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM district d ");
+		var changes = data.changed(command);
+		if (!changes.isEmpty()) {
+			this.repository.save(data);
+		}
+		return LogData.builder()
+			.id(data.getId())
+			.changes(changes)
+			.success("msg.success", messageSource)
+			.build()
+			.claims();
+	}
 
-      List<Object> params = new ArrayList<>();
-      List<Object> countParams = new ArrayList<>();
+	@Override
+	@CacheEvict(value = "districts", key = "#id")
+	public Map<String, Object> deleteDistrict(Long id) {
+		final var data = this.repository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found", id));
+		this.repository.delete(data);
+		this.repository.flush();
+		return LogData.builder().id(data.getId()).success("msg.success", messageSource).build().claims();
+	}
 
-      if (search != null && !search.isEmpty()) {
-        sqlBuilder.append(
-            """
-                    , GREATEST(s.name_en_sim, s.name_km_sim, s.name_zh_sim, s.type_sim, s.postal_sim) AS max_similarity
-                    FROM district d
-                    CROSS JOIN LATERAL (
-                        SELECT
-                            similarity(?, d.name_en) as name_en_sim,
-                            similarity(?, d.name_km) as name_km_sim,
-                            similarity(?, d.name_zh) as name_zh_sim,
-                            similarity(?, d.type) as type_sim,
-                            similarity(?, d.postal_code) as postal_sim
-                    ) s
-                    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
-                    ORDER BY max_similarity DESC
-                """);
+	@Override
+	@Cacheable(value = "districts", key = "#id")
+	public DistrictDTO getDistrictById(Long id) {
+		try {
+			return jdbcTemplate.queryForObject("""
+					SELECT d.id, d.province_id, d.name_en, d.name_km, d.name_zh, d.type, d.postal_code,
+					     COALESCE(
+					        json_agg(
+					            json_build_object(
+					                'id', c.id,
+					                'nameEn', trim(c.name_en),
+					                'nameKm', trim(c.name_km),
+					                'nameZh', trim(c.name_zh),
+					                'type', trim(c.type),
+					                'postalCode', trim(c.postal_code),
+					                'villages', (
+					                   SELECT COALESCE(
+					                      json_agg(
+					                          json_build_object(
+					                                  'id', v.id,
+					                                  'nameEn', trim(v.name_en),
+					                                  'nameKm', trim(v.name_km),
+					                                  'nameZh', trim(v.name_zh),
+					                                  'type', trim(v.type),
+					                                  'postalCode', trim(v.postal_code)
+					                          )
+					                     ) FILTER (WHERE v.id IS NOT NULL), '[]'
+					                   )
+					                   FROM village v
+					                   WHERE v.commune_id = c.id
+					                )
+					            )
+					        ) FILTER (WHERE c.id IS NOT NULL), '[]'
+					     ) AS communes
+					FROM district d
+					LEFT JOIN commune c ON d.id = c.district_id
+					WHERE d.id = ?
+					GROUP BY d.id, d.name_km, d.type, d.postal_code;
+					""", this::mapRow, id);
+		}
+		catch (EmptyResultDataAccessException e) {
+			throw new NotFoundException("msg.not.found", id);
+		}
+	}
 
-        countSqlBuilder.append(
-            """
-                    CROSS JOIN LATERAL (
-                        SELECT
-                            similarity(?, d.name_en) as name_en_sim,
-                            similarity(?, d.name_km) as name_km_sim,
-                            similarity(?, d.name_zh) as name_zh_sim,
-                            similarity(?, d.type) as type_sim,
-                            similarity(?, d.postal_code) as postal_sim
-                    ) s
-                    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
-                """);
+	@Override
+	@Cacheable(value = "districts", key = "#page + '-' + #size + '-' + #search")
+	public Page<DistrictDTO> listDistricts(Integer page, Integer size, String search) {
+		try {
+			StringBuilder sqlBuilder = new StringBuilder("""
+					    SELECT d.id, d.province_id, d.type, d.name_en, d.name_km, d.name_zh, d.postal_code
+					""");
 
-        double threshold = 0.2;
-        IntStream.range(0, 5)
-            .forEach(
-                _ -> {
-                  params.add(search);
-                  countParams.add(search);
-                });
-        IntStream.range(0, 5)
-            .forEach(
-                _ -> {
-                  params.add(threshold);
-                  countParams.add(threshold);
-                });
-      } else {
-        sqlBuilder.append(
-            """
-                    FROM district d
-                    ORDER BY d.id ASC
-                """);
-      }
+			StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM district d ");
 
-      final String sql = sqlBuilder.toString();
-      final String countSql = countSqlBuilder.toString();
+			List<Object> params = new ArrayList<>();
+			List<Object> countParams = new ArrayList<>();
 
-      if (page != null && size != null) {
-        String paginatedSql = sql + " LIMIT ? OFFSET ?";
-        params.add(size);
-        params.add(page * size);
+			if (search != null && !search.isEmpty()) {
+				sqlBuilder
+					.append("""
+							    , GREATEST(s.name_en_sim, s.name_km_sim, s.name_zh_sim, s.type_sim, s.postal_sim) AS max_similarity
+							    FROM district d
+							    CROSS JOIN LATERAL (
+							        SELECT
+							            similarity(?, d.name_en) as name_en_sim,
+							            similarity(?, d.name_km) as name_km_sim,
+							            similarity(?, d.name_zh) as name_zh_sim,
+							            similarity(?, d.type) as type_sim,
+							            similarity(?, d.postal_code) as postal_sim
+							    ) s
+							    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
+							    ORDER BY max_similarity DESC
+							""");
 
-        List<DistrictDTO> content =
-            jdbcTemplate.query(paginatedSql, this::mapRow, params.toArray());
-        Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
+				countSqlBuilder
+					.append("""
+							    CROSS JOIN LATERAL (
+							        SELECT
+							            similarity(?, d.name_en) as name_en_sim,
+							            similarity(?, d.name_km) as name_km_sim,
+							            similarity(?, d.name_zh) as name_zh_sim,
+							            similarity(?, d.type) as type_sim,
+							            similarity(?, d.postal_code) as postal_sim
+							    ) s
+							    WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.type_sim >= ? OR s.postal_sim >= ?
+							""");
 
-        Pageable pageable = PageRequest.of(page, size);
-        return new PageImpl<>(content, pageable, total != null ? total : 0);
-      } else {
-        List<DistrictDTO> content = jdbcTemplate.query(sql, this::mapRow, params.toArray());
-        Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
+				double threshold = 0.2;
+				IntStream.range(0, 5).forEach(_ -> {
+					params.add(search);
+					countParams.add(search);
+				});
+				IntStream.range(0, 5).forEach(_ -> {
+					params.add(threshold);
+					countParams.add(threshold);
+				});
+			}
+			else {
+				sqlBuilder.append("""
+						    FROM district d
+						    ORDER BY d.id ASC
+						""");
+			}
 
-        return new PageImpl<>(content, Pageable.unpaged(), total != null ? total : 0);
-      }
+			final String sql = sqlBuilder.toString();
+			final String countSql = countSqlBuilder.toString();
 
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new ErrorException("msg.internal.error", "Error fetching districts list", e);
-    }
-  }
+			if (page != null && size != null) {
+				String paginatedSql = sql + " LIMIT ? OFFSET ?";
+				params.add(size);
+				params.add(page * size);
 
-  private DistrictDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-    final Long id = rs.getLong("id");
-    final Long provinceId = rs.getLong("province_id");
-    final String nameEn = rs.getString("name_en");
-    final String nameKm = rs.getString("name_km");
-    final String nameZh = rs.getString("name_zh");
-    final String type = rs.getString("type");
-    final String postalCode = rs.getString("postal_code");
-    List<CommuneDTO> communes = null;
-    try {
-      communes = fromJsonAsList(rs.getString("communes"), CommuneDTO[].class);
-    } catch (SQLException ignored) {
-    }
-    return DistrictDTO.builder()
-        .id(id)
-        .provinceId(provinceId)
-        .type(type)
-        .nameEn(nameEn)
-        .nameKm(nameKm)
-        .nameZh(nameZh)
-        .postalCode(postalCode)
-        .communes(communes)
-        .build();
-  }
+				List<DistrictDTO> content = jdbcTemplate.query(paginatedSql, this::mapRow, params.toArray());
+				Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
 
-  public static <T> List<T> fromJsonAsList(String json, Class<T[]> className) {
-    return json != null ? Arrays.asList(new Gson().fromJson(json, className)) : new ArrayList<>();
-  }
+				Pageable pageable = PageRequest.of(page, size);
+				return new PageImpl<>(content, pageable, total != null ? total : 0);
+			}
+			else {
+				List<DistrictDTO> content = jdbcTemplate.query(sql, this::mapRow, params.toArray());
+				Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
+
+				return new PageImpl<>(content, Pageable.unpaged(), total != null ? total : 0);
+			}
+
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new ErrorException("msg.internal.error", "Error fetching districts list", e);
+		}
+	}
+
+	private DistrictDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+		final Long id = rs.getLong("id");
+		final Long provinceId = rs.getLong("province_id");
+		final String nameEn = rs.getString("name_en");
+		final String nameKm = rs.getString("name_km");
+		final String nameZh = rs.getString("name_zh");
+		final String type = rs.getString("type");
+		final String postalCode = rs.getString("postal_code");
+		List<CommuneDTO> communes = null;
+		try {
+			communes = fromJsonAsList(rs.getString("communes"), CommuneDTO[].class);
+		}
+		catch (SQLException ignored) {
+		}
+		return DistrictDTO.builder()
+			.id(id)
+			.provinceId(provinceId)
+			.type(type)
+			.nameEn(nameEn)
+			.nameKm(nameKm)
+			.nameZh(nameZh)
+			.postalCode(postalCode)
+			.communes(communes)
+			.build();
+	}
+
+	public static <T> List<T> fromJsonAsList(String json, Class<T[]> className) {
+		return json != null ? Arrays.asList(new Gson().fromJson(json, className)) : new ArrayList<>();
+	}
+
 }

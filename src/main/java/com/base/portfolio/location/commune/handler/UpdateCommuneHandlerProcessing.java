@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = CommuneConstants.PERMISSION)
 public class UpdateCommuneHandlerProcessing implements CommandHandlerProcessing {
 
-  private final CommuneService service;
+	private final CommuneService service;
 
-  @Autowired
-  public UpdateCommuneHandlerProcessing(CommuneService service) {
-    this.service = service;
-  }
+	@Autowired
+	public UpdateCommuneHandlerProcessing(CommuneService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.updateCommune(command.getId(), command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.updateCommune(command.getId(), command);
+	}
+
 }

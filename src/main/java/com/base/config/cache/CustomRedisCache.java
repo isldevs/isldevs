@@ -25,27 +25,30 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
  */
 public class CustomRedisCache extends RedisCache {
 
-  private final AtomicLong cacheHits = new AtomicLong();
-  private final AtomicLong databaseHits = new AtomicLong();
+	private final AtomicLong cacheHits = new AtomicLong();
 
-  protected CustomRedisCache(
-      String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfiguration) {
-    super(name, cacheWriter, cacheConfiguration);
-  }
+	private final AtomicLong databaseHits = new AtomicLong();
 
-  @Override
-  public ValueWrapper get(Object key) {
-    var value = super.get(key);
-    if (value != null) cacheHits.incrementAndGet();
-    else databaseHits.incrementAndGet();
-    return value;
-  }
+	protected CustomRedisCache(String name, RedisCacheWriter cacheWriter, RedisCacheConfiguration cacheConfiguration) {
+		super(name, cacheWriter, cacheConfiguration);
+	}
 
-  public long getCacheHits() {
-    return cacheHits.get();
-  }
+	@Override
+	public ValueWrapper get(Object key) {
+		var value = super.get(key);
+		if (value != null)
+			cacheHits.incrementAndGet();
+		else
+			databaseHits.incrementAndGet();
+		return value;
+	}
 
-  public long getDatabaseHits() {
-    return databaseHits.get();
-  }
+	public long getCacheHits() {
+		return cacheHits.get();
+	}
+
+	public long getDatabaseHits() {
+		return databaseHits.get();
+	}
+
 }

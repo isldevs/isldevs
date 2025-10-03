@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.flyway)
     alias(libs.plugins.versions)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.spring.java.format)
 }
 
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
@@ -251,7 +252,6 @@ spotless {
         target 'src/main/java/**/*.java'
         licenseHeaderFile 'LICENSE', '(package|import|public|class|interface|enum)'
         removeUnusedImports()
-        googleJavaFormat()
 
         targetExclude([
                 '**/build/**', '**/aotSources/**', '**/generated/**', '**/target/**', '**/out/**', '**/bin/**',
@@ -265,12 +265,34 @@ spotless {
     }
 }
 
+import io.spring.javaformat.gradle.tasks.Format
+tasks.withType(Format).configureEach {
+    exclude("**/generated/**", "**/build/**", "**/out/**")
+}
+
 tasks.matching { it.name.contains("Aot") || it.name.contains("aot") }.configureEach {
     enabled = false
 }
 
-tasks.named("compileTestJava") { dependsOn tasks.named("generateTestClasses") }
-tasks.named("processAot") { dependsOn tasks.named("compileJava") }
+tasks.named('generateTestClasses') {
+    dependsOn tasks.named('formatMain')
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('formatMain')
+}
+
+tasks.named('formatTest') {
+    dependsOn tasks.named('generateTestClasses')
+}
+
+tasks.named('compileTestJava') {
+    dependsOn tasks.named('formatTest')
+}
+
+tasks.named('processAot') {
+    dependsOn tasks.named('compileJava')
+}
 
 tasks.named('test', Test) {
     environment(loadEnvironment())

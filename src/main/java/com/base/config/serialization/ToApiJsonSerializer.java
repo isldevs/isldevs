@@ -20,5 +20,6 @@ package com.base.config.serialization;
  */
 public interface ToApiJsonSerializer<T> {
 
-  String serialize(Object object);
+	String serialize(Object object);
+
 }

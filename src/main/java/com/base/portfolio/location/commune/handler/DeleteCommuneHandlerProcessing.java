@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = CommuneConstants.PERMISSION)
 public class DeleteCommuneHandlerProcessing implements CommandHandlerProcessing {
 
-  private final CommuneService service;
+	private final CommuneService service;
 
-  @Autowired
-  public DeleteCommuneHandlerProcessing(CommuneService service) {
-    this.service = service;
-  }
+	@Autowired
+	public DeleteCommuneHandlerProcessing(CommuneService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.deleteCommune(command.getId());
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.deleteCommune(command.getId());
+	}
+
 }

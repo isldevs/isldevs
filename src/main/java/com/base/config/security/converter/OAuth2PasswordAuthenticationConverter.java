@@ -30,41 +30,37 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
  */
 public class OAuth2PasswordAuthenticationConverter implements AuthenticationConverter {
 
-  @Override
-  public Authentication convert(HttpServletRequest request) {
-    var grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
-    if (!new AuthorizationGrantType("password").getValue().equals(grantType)) {
-      return null;
-    }
+	@Override
+	public Authentication convert(HttpServletRequest request) {
+		var grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
+		if (!new AuthorizationGrantType("password").getValue().equals(grantType)) {
+			return null;
+		}
 
-    var username = request.getParameter(OAuth2ParameterNames.USERNAME);
-    var password = request.getParameter(OAuth2ParameterNames.PASSWORD);
-    var scope = request.getParameter(OAuth2ParameterNames.SCOPE);
+		var username = request.getParameter(OAuth2ParameterNames.USERNAME);
+		var password = request.getParameter(OAuth2ParameterNames.PASSWORD);
+		var scope = request.getParameter(OAuth2ParameterNames.SCOPE);
 
-    if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
-      throw new IllegalArgumentException("Username and password must be provided.");
-    }
+		if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
+			throw new IllegalArgumentException("Username and password must be provided.");
+		}
 
-    Set<String> requestedScopes = null;
-    if (StringUtils.hasText(scope)) {
-      requestedScopes = new HashSet<>(Arrays.asList(scope.split(" ")));
-    }
+		Set<String> requestedScopes = null;
+		if (StringUtils.hasText(scope)) {
+			requestedScopes = new HashSet<>(Arrays.asList(scope.split(" ")));
+		}
 
-    Map<String, Object> additionalParameters = new HashMap<>();
-    request
-        .getParameterMap()
-        .forEach(
-            (key, values) -> {
-              if (!key.equals(OAuth2ParameterNames.GRANT_TYPE)
-                  && !key.equals(OAuth2ParameterNames.USERNAME)
-                  && !key.equals(OAuth2ParameterNames.PASSWORD)
-                  && !key.equals(OAuth2ParameterNames.SCOPE)) {
-                additionalParameters.put(key, values[0]);
-              }
-            });
+		Map<String, Object> additionalParameters = new HashMap<>();
+		request.getParameterMap().forEach((key, values) -> {
+			if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) && !key.equals(OAuth2ParameterNames.USERNAME)
+					&& !key.equals(OAuth2ParameterNames.PASSWORD) && !key.equals(OAuth2ParameterNames.SCOPE)) {
+				additionalParameters.put(key, values[0]);
+			}
+		});
 
-    var clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
-    return new OAuth2PasswordAuthenticationToken(
-        username, password, clientPrincipal, requestedScopes, additionalParameters);
-  }
+		var clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
+		return new OAuth2PasswordAuthenticationToken(username, password, clientPrincipal, requestedScopes,
+				additionalParameters);
+	}
+
 }

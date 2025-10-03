@@ -35,71 +35,58 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(DistrictConstants.API_PATH)
 public class DistrictController {
 
-  private final PageableHateoasAssembler pageable;
-  private final JsonSerializerImpl<DistrictDTO> serializer;
-  private final DistrictService service;
-  private final LogService logService;
+	private final PageableHateoasAssembler pageable;
 
-  @Autowired
-  public DistrictController(
-      final PageableHateoasAssembler pageable,
-      final JsonSerializerImpl<DistrictDTO> serializer,
-      final DistrictService service,
-      final LogService logService) {
-    this.pageable = pageable;
-    this.serializer = serializer;
-    this.service = service;
-    this.logService = logService;
-  }
+	private final JsonSerializerImpl<DistrictDTO> serializer;
 
-  @PostMapping(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String createDistrict(@RequestBody String json) {
-    final var command = new DistrictCommandHandler().create().json(json).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	private final DistrictService service;
 
-  @PutMapping(
-      value = "{id}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String updateDistrict(@RequestBody String json, @PathVariable Long id) {
-    final var command = new DistrictCommandHandler().update(id).json(json).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	private final LogService logService;
 
-  @DeleteMapping(
-      value = "{id}",
-      consumes = APPLICATION_JSON_VALUE,
-      produces = APPLICATION_JSON_VALUE)
-  public String deleteDistrict(@PathVariable Long id) {
-    final var command = new DistrictCommandHandler().delete(id).build();
-    final var data = this.logService.log(command);
-    return this.serializer.serialize(data);
-  }
+	@Autowired
+	public DistrictController(final PageableHateoasAssembler pageable, final JsonSerializerImpl<DistrictDTO> serializer,
+			final DistrictService service, final LogService logService) {
+		this.pageable = pageable;
+		this.serializer = serializer;
+		this.service = service;
+		this.logService = logService;
+	}
 
-  @GetMapping(
-      value = "/{id}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public String getDistrict(@PathVariable Long id) {
-    var data = this.service.getDistrictById(id);
-    return this.serializer.serialize(data);
-  }
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String createDistrict(@RequestBody String json) {
+		final var command = new DistrictCommandHandler().create().json(json).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
 
-  @GetMapping(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> listDistricts(
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer size,
-      @RequestParam(required = false) String search) {
-    var districts = this.service.listDistricts(page, size, search);
-    var response =
-        (page == null || size == null) ? pageable.unpaged(districts) : pageable.toModel(districts);
-    return ResponseEntity.ok(response);
-  }
+	@PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String updateDistrict(@RequestBody String json, @PathVariable Long id) {
+		final var command = new DistrictCommandHandler().update(id).json(json).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
+
+	@DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	public String deleteDistrict(@PathVariable Long id) {
+		final var command = new DistrictCommandHandler().delete(id).build();
+		final var data = this.logService.log(command);
+		return this.serializer.serialize(data);
+	}
+
+	@GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getDistrict(@PathVariable Long id) {
+		var data = this.service.getDistrictById(id);
+		return this.serializer.serialize(data);
+	}
+
+	@GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> listDistricts(@RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer size, @RequestParam(required = false) String search) {
+		var districts = this.service.listDistricts(page, size, search);
+		var response = (page == null || size == null) ? pageable.unpaged(districts) : pageable.toModel(districts);
+		return ResponseEntity.ok(response);
+	}
+
 }

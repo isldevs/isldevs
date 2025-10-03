@@ -30,21 +30,21 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 @Configuration
 public class I18nConfig {
 
-  @Bean
-  @Primary
-  public MessageSource messageSource() {
-    ReloadableResourceBundleMessageSource messageSource =
-        new ReloadableResourceBundleMessageSource();
-    messageSource.setBasenames("classpath:messages", "classpath:config/i18n/messages");
-    messageSource.setDefaultEncoding("UTF-8");
-    messageSource.setFallbackToSystemLocale(false);
-    return messageSource;
-  }
+	@Bean
+	@Primary
+	public MessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasenames("classpath:messages", "classpath:config/i18n/messages");
+		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setFallbackToSystemLocale(false);
+		return messageSource;
+	}
 
-  @Bean
-  public LocaleResolver localeResolver() {
-    AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
-    resolver.setDefaultLocale(Locale.ENGLISH);
-    return resolver;
-  }
+	@Bean
+	public LocaleResolver localeResolver() {
+		AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
+		resolver.setDefaultLocale(Locale.ENGLISH);
+		return resolver;
+	}
+
 }

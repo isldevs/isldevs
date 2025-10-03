@@ -29,12 +29,20 @@ import lombok.*;
 @NoArgsConstructor
 public class CommuneDTO {
 
-  private Long id;
-  private Long districtId;
-  private String type;
-  private String nameEn;
-  private String nameKm;
-  private String nameZh;
-  private String postalCode;
-  private List<VillageDTO> villages;
+	private Long id;
+
+	private Long districtId;
+
+	private String type;
+
+	private String nameEn;
+
+	private String nameKm;
+
+	private String nameZh;
+
+	private String postalCode;
+
+	private List<VillageDTO> villages;
+
 }

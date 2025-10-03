@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = DistrictConstants.PERMISSION)
 public class UpdateDistrictHandlerProcessing implements CommandHandlerProcessing {
 
-  private final DistrictService service;
+	private final DistrictService service;
 
-  @Autowired
-  public UpdateDistrictHandlerProcessing(DistrictService service) {
-    this.service = service;
-  }
+	@Autowired
+	public UpdateDistrictHandlerProcessing(DistrictService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.updateDistrict(command.getId(), command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.updateDistrict(command.getId(), command);
+	}
+
 }

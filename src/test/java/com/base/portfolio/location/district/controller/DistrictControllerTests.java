@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 
 class DistrictControllerTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

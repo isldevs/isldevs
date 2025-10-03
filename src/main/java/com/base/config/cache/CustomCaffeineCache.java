@@ -26,46 +26,43 @@ import org.springframework.cache.caffeine.CaffeineCache;
  */
 public class CustomCaffeineCache extends CaffeineCache {
 
-  private static final ConcurrentHashMap<String, Boolean> accessedCaches =
-      new ConcurrentHashMap<>();
-  private final AtomicLong cacheHits = new AtomicLong();
-  private final AtomicLong databaseHits = new AtomicLong();
+	private static final ConcurrentHashMap<String, Boolean> accessedCaches = new ConcurrentHashMap<>();
 
-  public CustomCaffeineCache(String name) {
-    super(
-        name,
-        Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .maximumSize(1000)
-            .recordStats()
-            .build());
-  }
+	private final AtomicLong cacheHits = new AtomicLong();
 
-  @Override
-  public ValueWrapper get(Object key) {
-    accessedCaches.put(getName(), true);
-    var value = super.get(key);
-    if (value != null) {
-      cacheHits.incrementAndGet();
-    } else {
-      databaseHits.incrementAndGet();
-    }
-    return value;
-  }
+	private final AtomicLong databaseHits = new AtomicLong();
 
-  public long getCacheHits() {
-    return cacheHits.get();
-  }
+	public CustomCaffeineCache(String name) {
+		super(name, Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).maximumSize(1000).recordStats().build());
+	}
 
-  public long getDatabaseHits() {
-    return databaseHits.get();
-  }
+	@Override
+	public ValueWrapper get(Object key) {
+		accessedCaches.put(getName(), true);
+		var value = super.get(key);
+		if (value != null) {
+			cacheHits.incrementAndGet();
+		}
+		else {
+			databaseHits.incrementAndGet();
+		}
+		return value;
+	}
 
-  public static boolean wasAccessed(String name) {
-    return accessedCaches.containsKey(name);
-  }
+	public long getCacheHits() {
+		return cacheHits.get();
+	}
 
-  public static void clearAccessed() {
-    accessedCaches.clear();
-  }
+	public long getDatabaseHits() {
+		return databaseHits.get();
+	}
+
+	public static boolean wasAccessed(String name) {
+		return accessedCaches.containsKey(name);
+	}
+
+	public static void clearAccessed() {
+		accessedCaches.clear();
+	}
+
 }

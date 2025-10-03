@@ -27,10 +27,16 @@ import lombok.*;
 @NoArgsConstructor
 public class VillageDTO {
 
-  private Long id;
-  private Long communeId;
-  private String nameEn;
-  private String nameKm;
-  private String nameZh;
-  private String postalCode;
+	private Long id;
+
+	private Long communeId;
+
+	private String nameEn;
+
+	private String nameKm;
+
+	private String nameZh;
+
+	private String postalCode;
+
 }

@@ -34,41 +34,50 @@ import org.springframework.hateoas.Link;
 @AllArgsConstructor
 public class PageableResponse<T> {
 
-  private EmbeddedContent<T> embedded;
-  private Map<String, Link> links;
-  private PageMetadata page;
+	private EmbeddedContent<T> embedded;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class EmbeddedContent<T> {
+	private Map<String, Link> links;
 
-    @JsonIgnore private List<T> content;
+	private PageMetadata page;
 
-    @JsonAnyGetter
-    public Map<String, List<T>> getDynamicPropertyName() {
-      if (content == null || content.isEmpty()) {
-        return Collections.emptyMap();
-      }
-      return Map.of("contents", content);
-    }
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class EmbeddedContent<T> {
 
-    @JsonAnySetter
-    public void setDynamicProperties(List<T> value) {
-      this.content = value;
-    }
-  }
+		@JsonIgnore
+		private List<T> content;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class PageMetadata {
+		@JsonAnyGetter
+		public Map<String, List<T>> getDynamicPropertyName() {
+			if (content == null || content.isEmpty()) {
+				return Collections.emptyMap();
+			}
+			return Map.of("contents", content);
+		}
 
-    private Integer size;
-    private Long totalElements;
-    private Integer totalPages;
-    private Integer number;
-  }
+		@JsonAnySetter
+		public void setDynamicProperties(List<T> value) {
+			this.content = value;
+		}
+
+	}
+
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class PageMetadata {
+
+		private Integer size;
+
+		private Long totalElements;
+
+		private Integer totalPages;
+
+		private Integer number;
+
+	}
+
 }

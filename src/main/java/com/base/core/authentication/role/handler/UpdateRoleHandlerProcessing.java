@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = RoleConstants.PERMISSION)
 public class UpdateRoleHandlerProcessing implements CommandHandlerProcessing {
 
-  private final RoleService service;
+	private final RoleService service;
 
-  @Autowired
-  public UpdateRoleHandlerProcessing(RoleService service) {
-    this.service = service;
-  }
+	@Autowired
+	public UpdateRoleHandlerProcessing(RoleService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.updateRole(command.getId(), command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.updateRole(command.getId(), command);
+	}
+
 }

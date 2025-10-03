@@ -24,5 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface DistrictRepository
-    extends JpaRepository<District, Long>, JpaSpecificationExecutor<District> {}
+public interface DistrictRepository extends JpaRepository<District, Long>, JpaSpecificationExecutor<District> {
+
+}

@@ -36,55 +36,54 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommandTypeProvider implements ApplicationContextAware {
 
-  private final Logger logger = LoggerFactory.getLogger(CommandTypeProvider.class);
+	private final Logger logger = LoggerFactory.getLogger(CommandTypeProvider.class);
 
-  @Autowired private Environment environment;
-  private ApplicationContext applicationContext;
-  private HashMap<String, String> registeredCommandTypes;
+	@Autowired
+	private Environment environment;
 
-  @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext = applicationContext;
-    List<String> commandTypes = new ArrayList<>();
-    if (registeredCommandTypes == null) {
-      this.registeredCommandTypes = new HashMap<>();
-      this.applicationContext
-          .getBeansWithAnnotation(CommandType.class)
-          .forEach(
-              (_, bean) -> {
-                CommandType commandType =
-                    AopUtils.getTargetClass(bean).getAnnotation(CommandType.class);
-                this.registeredCommandTypes.put(
-                    commandType.action() + "|" + commandType.entity(),
-                    AopUtils.getTargetClass(bean).getName());
-                commandTypes.add(commandType.action() + "|" + commandType.entity());
-              });
-    }
-    if (isDevProfileActive()) {
-      logger.info("Registered @CommandType annotation {}", commandTypes);
-    }
-  }
+	private ApplicationContext applicationContext;
 
-  public CommandHandlerProcessing allHandler(String action, String entity) {
-    final String permission = action + "|" + entity;
-    if (!this.registeredCommandTypes.containsKey(permission)) {
-      throw new ErrorException("msg.bad.request.description", permission);
-    }
-    try {
-      Class<?> clazz = Class.forName(this.registeredCommandTypes.get(permission));
-      return (CommandHandlerProcessing) this.applicationContext.getBean(clazz);
-    } catch (ClassNotFoundException e) {
-      throw new ErrorException(
-          "msg.bad.request.description", this.registeredCommandTypes.get(permission));
-    }
-  }
+	private HashMap<String, String> registeredCommandTypes;
 
-  private boolean isDevProfileActive() {
-    for (String profile : environment.getActiveProfiles()) {
-      if ("dev".equals(profile)) {
-        return true;
-      }
-    }
-    return false;
-  }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+		List<String> commandTypes = new ArrayList<>();
+		if (registeredCommandTypes == null) {
+			this.registeredCommandTypes = new HashMap<>();
+			this.applicationContext.getBeansWithAnnotation(CommandType.class).forEach((_, bean) -> {
+				CommandType commandType = AopUtils.getTargetClass(bean).getAnnotation(CommandType.class);
+				this.registeredCommandTypes.put(commandType.action() + "|" + commandType.entity(),
+						AopUtils.getTargetClass(bean).getName());
+				commandTypes.add(commandType.action() + "|" + commandType.entity());
+			});
+		}
+		if (isDevProfileActive()) {
+			logger.info("Registered @CommandType annotation {}", commandTypes);
+		}
+	}
+
+	public CommandHandlerProcessing allHandler(String action, String entity) {
+		final String permission = action + "|" + entity;
+		if (!this.registeredCommandTypes.containsKey(permission)) {
+			throw new ErrorException("msg.bad.request.description", permission);
+		}
+		try {
+			Class<?> clazz = Class.forName(this.registeredCommandTypes.get(permission));
+			return (CommandHandlerProcessing) this.applicationContext.getBean(clazz);
+		}
+		catch (ClassNotFoundException e) {
+			throw new ErrorException("msg.bad.request.description", this.registeredCommandTypes.get(permission));
+		}
+	}
+
+	private boolean isDevProfileActive() {
+		for (String profile : environment.getActiveProfiles()) {
+			if ("dev".equals(profile)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

@@ -24,5 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface ProvinceRepository
-    extends JpaRepository<Province, Long>, JpaSpecificationExecutor<Province> {}
+public interface ProvinceRepository extends JpaRepository<Province, Long>, JpaSpecificationExecutor<Province> {
+
+}

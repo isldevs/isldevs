@@ -26,11 +26,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class PageableHateoasControllerAdvice {
 
-  @Autowired private PageableHateoasAssembler hateoasAssembler;
+	@Autowired
+	private PageableHateoasAssembler hateoasAssembler;
 
-  @ResponseBody
-  @ModelAttribute
-  public PageableHateoasAssembler hateoasAssembler() {
-    return hateoasAssembler;
-  }
+	@ResponseBody
+	@ModelAttribute
+	public PageableHateoasAssembler hateoasAssembler() {
+		return hateoasAssembler;
+	}
+
 }

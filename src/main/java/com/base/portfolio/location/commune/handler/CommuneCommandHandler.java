@@ -23,23 +23,22 @@ import com.base.portfolio.location.commune.controller.CommuneConstants;
  */
 public class CommuneCommandHandler extends CommandBuilder {
 
-  public CommandBuilder create() {
-    return this.action("CREATE")
-        .entity(CommuneConstants.PERMISSION)
-        .href(CommuneConstants.API_PATH);
-  }
+	public CommandBuilder create() {
+		return this.action("CREATE").entity(CommuneConstants.PERMISSION).href(CommuneConstants.API_PATH);
+	}
 
-  public CommandBuilder update(final Long id) {
-    return this.action("UPDATE")
-        .entity(CommuneConstants.PERMISSION)
-        .id(id)
-        .href(CommuneConstants.API_PATH + "/" + id);
-  }
+	public CommandBuilder update(final Long id) {
+		return this.action("UPDATE")
+			.entity(CommuneConstants.PERMISSION)
+			.id(id)
+			.href(CommuneConstants.API_PATH + "/" + id);
+	}
 
-  public CommandBuilder delete(final Long id) {
-    return this.action("DELETE")
-        .entity(CommuneConstants.PERMISSION)
-        .id(id)
-        .href(CommuneConstants.API_PATH + "/" + id);
-  }
+	public CommandBuilder delete(final Long id) {
+		return this.action("DELETE")
+			.entity(CommuneConstants.PERMISSION)
+			.id(id)
+			.href(CommuneConstants.API_PATH + "/" + id);
+	}
+
 }

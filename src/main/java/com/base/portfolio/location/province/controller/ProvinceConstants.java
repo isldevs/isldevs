@@ -24,17 +24,25 @@ import java.util.HashSet;
  */
 public class ProvinceConstants {
 
-  public static final String PERMISSION = "PROVINCE";
-  public static final String API_PATH = "/provinces";
+	public static final String PERMISSION = "PROVINCE";
 
-  public static final String ID = "id";
-  public static final String TYPE = "type";
-  public static final String NAME_EN = "nameEn";
-  public static final String NAME_KM = "nameKm";
-  public static final String NAME_ZH = "nameZh";
-  public static final String POSTAL_CODE = "postalCode";
-  public static final String DISTRICT = "districts";
+	public static final String API_PATH = "/provinces";
 
-  public static final Collection<String> SUPPORTED_PARAMETERS =
-      new HashSet<>(Arrays.asList(ID, TYPE, NAME_EN, NAME_KM, NAME_ZH, POSTAL_CODE, DISTRICT));
+	public static final String ID = "id";
+
+	public static final String TYPE = "type";
+
+	public static final String NAME_EN = "nameEn";
+
+	public static final String NAME_KM = "nameKm";
+
+	public static final String NAME_ZH = "nameZh";
+
+	public static final String POSTAL_CODE = "postalCode";
+
+	public static final String DISTRICT = "districts";
+
+	public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(
+			Arrays.asList(ID, TYPE, NAME_EN, NAME_KM, NAME_ZH, POSTAL_CODE, DISTRICT));
+
 }

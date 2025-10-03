@@ -25,13 +25,14 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 @Configuration
 public class Converters {
 
-  @Bean
-  RSAPublicKeyConverter rsaPublicKeyConverter(TextEncryptor textEncryptor) {
-    return new RSAPublicKeyConverter(textEncryptor);
-  }
+	@Bean
+	RSAPublicKeyConverter rsaPublicKeyConverter(TextEncryptor textEncryptor) {
+		return new RSAPublicKeyConverter(textEncryptor);
+	}
 
-  @Bean
-  RSAPrivateKeyConverter rsaPrivateKeyConverter(TextEncryptor textEncryptor) {
-    return new RSAPrivateKeyConverter(textEncryptor);
-  }
+	@Bean
+	RSAPrivateKeyConverter rsaPrivateKeyConverter(TextEncryptor textEncryptor) {
+		return new RSAPrivateKeyConverter(textEncryptor);
+	}
+
 }

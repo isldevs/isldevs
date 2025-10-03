@@ -25,7 +25,8 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface ConfigRepository
-    extends JpaRepository<Config, Long>, JpaSpecificationExecutor<Config> {
-  List<Config> findAllByEnabled(Boolean enabled);
+public interface ConfigRepository extends JpaRepository<Config, Long>, JpaSpecificationExecutor<Config> {
+
+	List<Config> findAllByEnabled(Boolean enabled);
+
 }

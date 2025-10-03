@@ -25,42 +25,38 @@ import jakarta.persistence.UniqueConstraint;
  * @author YISivlay
  */
 @Entity
-@Table(
-    name = "config",
-    uniqueConstraints = {
-      @UniqueConstraint(
-          name = "config_code_key",
-          columnNames = {"code"})
-    })
+@Table(name = "config", uniqueConstraints = { @UniqueConstraint(name = "config_code_key", columnNames = { "code" }) })
 public class Config extends CustomAbstractAuditable {
 
-  @Column(name = "name")
-  private String name;
+	@Column(name = "name")
+	private String name;
 
-  @Column(name = "code")
-  private String code;
+	@Column(name = "code")
+	private String code;
 
-  @Column(name = "value")
-  private String value;
+	@Column(name = "value")
+	private String value;
 
-  @Column(name = "enabled")
-  private Boolean enabled;
+	@Column(name = "enabled")
+	private Boolean enabled;
 
-  public Config() {}
+	public Config() {
+	}
 
-  public String getName() {
-    return name;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public String getCode() {
-    return code;
-  }
+	public String getCode() {
+		return code;
+	}
 
-  public String getValue() {
-    return value;
-  }
+	public String getValue() {
+		return value;
+	}
 
-  public Boolean getEnabled() {
-    return enabled;
-  }
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
 }

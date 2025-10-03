@@ -30,34 +30,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileDataValidation {
 
-  private final JsonHelper jsonHelper;
-  private final ApiDataValidator validator;
+	private final JsonHelper jsonHelper;
 
-  @Autowired
-  public FileDataValidation(final JsonHelper jsonHelper, final ApiDataValidator validator) {
-    this.jsonHelper = jsonHelper;
-    this.validator = validator;
-  }
+	private final ApiDataValidator validator;
 
-  public void upload(String type, Long id) {
+	@Autowired
+	public FileDataValidation(final JsonHelper jsonHelper, final ApiDataValidator validator) {
+		this.jsonHelper = jsonHelper;
+		this.validator = validator;
+	}
 
-    final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+	public void upload(String type, Long id) {
 
-    Map<String, Object> map = Map.of(FileConstants.ENTITY, type, FileConstants.ENTITY_ID, id);
-    String json = new Gson().toJson(map);
+		final var typeOfMap = new TypeToken<Map<String, Object>>() {
+		}.getType();
 
-    this.jsonHelper.unsupportedParameters(typeOfMap, json, FileConstants.SUPPORTED_PARAMETER);
+		Map<String, Object> map = Map.of(FileConstants.ENTITY, type, FileConstants.ENTITY_ID, id);
+		String json = new Gson().toJson(map);
 
-    final var jsonElement = this.jsonHelper.parse(json);
+		this.jsonHelper.unsupportedParameters(typeOfMap, json, FileConstants.SUPPORTED_PARAMETER);
 
-    final var entity = this.jsonHelper.extractString(FileConstants.ENTITY, jsonElement);
-    validator.parameter(FileConstants.ENTITY, entity).isString().notEmpty().maxLength(100);
+		final var jsonElement = this.jsonHelper.parse(json);
 
-    final var entityId = this.jsonHelper.extractLong(FileConstants.ENTITY_ID, jsonElement);
-    validator
-        .parameter(FileConstants.ENTITY_ID, entityId)
-        .isNumber()
-        .notNullAndNotEmpty()
-        .maxLength(20);
-  }
+		final var entity = this.jsonHelper.extractString(FileConstants.ENTITY, jsonElement);
+		validator.parameter(FileConstants.ENTITY, entity).isString().notEmpty().maxLength(100);
+
+		final var entityId = this.jsonHelper.extractLong(FileConstants.ENTITY_ID, jsonElement);
+		validator.parameter(FileConstants.ENTITY_ID, entityId).isNumber().notNullAndNotEmpty().maxLength(20);
+	}
+
 }

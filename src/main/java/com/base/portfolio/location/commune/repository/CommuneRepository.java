@@ -24,5 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface CommuneRepository
-    extends JpaRepository<Commune, Long>, JpaSpecificationExecutor<Commune> {}
+public interface CommuneRepository extends JpaRepository<Commune, Long>, JpaSpecificationExecutor<Commune> {
+
+}

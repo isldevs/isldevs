@@ -27,21 +27,33 @@ import lombok.*;
 @NoArgsConstructor
 public class OfficeDTO {
 
-  private Long id;
-  private OfficeDTO parent;
-  private String decorated;
-  private String nameEn;
-  private String nameKm;
-  private String nameZh;
-  private String hierarchyEn;
-  private String hierarchyKm;
-  private String hierarchyZh;
-  private String profile;
+	private Long id;
 
-  public static String decorate(String hierarchy, String name) {
-    if (hierarchy == null || hierarchy.isEmpty() || name == null) return name;
-    var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
-    if (level <= 0) return name;
-    return ".".repeat(level * 4) + name;
-  }
+	private OfficeDTO parent;
+
+	private String decorated;
+
+	private String nameEn;
+
+	private String nameKm;
+
+	private String nameZh;
+
+	private String hierarchyEn;
+
+	private String hierarchyKm;
+
+	private String hierarchyZh;
+
+	private String profile;
+
+	public static String decorate(String hierarchy, String name) {
+		if (hierarchy == null || hierarchy.isEmpty() || name == null)
+			return name;
+		var level = hierarchy.length() - hierarchy.replace(".", "").length() - 1;
+		if (level <= 0)
+			return name;
+		return ".".repeat(level * 4) + name;
+	}
+
 }

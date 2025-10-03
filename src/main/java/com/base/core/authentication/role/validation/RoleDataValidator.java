@@ -29,36 +29,40 @@ import org.springframework.stereotype.Component;
 @Component
 public class RoleDataValidator {
 
-  private final JsonHelper jsonHelper;
-  private final ApiDataValidator validator;
+	private final JsonHelper jsonHelper;
 
-  @Autowired
-  public RoleDataValidator(final JsonHelper jsonHelper, final ApiDataValidator validator) {
-    this.jsonHelper = jsonHelper;
-    this.validator = validator;
-  }
+	private final ApiDataValidator validator;
 
-  public void create(String json) {
+	@Autowired
+	public RoleDataValidator(final JsonHelper jsonHelper, final ApiDataValidator validator) {
+		this.jsonHelper = jsonHelper;
+		this.validator = validator;
+	}
 
-    final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-    this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
+	public void create(String json) {
 
-    final var jsonElement = this.jsonHelper.parse(json);
+		final var typeOfMap = new TypeToken<Map<String, Object>>() {
+		}.getType();
+		this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
 
-    final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
-    validator.parameter(RoleConstants.NAME, name).isString().notEmpty().maxLength(2);
-  }
+		final var jsonElement = this.jsonHelper.parse(json);
 
-  public void update(String json) {
+		final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
+		validator.parameter(RoleConstants.NAME, name).isString().notEmpty().maxLength(2);
+	}
 
-    final var typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-    this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
+	public void update(String json) {
 
-    final var jsonElement = this.jsonHelper.parse(json);
+		final var typeOfMap = new TypeToken<Map<String, Object>>() {
+		}.getType();
+		this.jsonHelper.unsupportedParameters(typeOfMap, json, RoleConstants.SUPPORTED_PARAMETER);
 
-    if (this.jsonHelper.parameterExists(RoleConstants.NAME, jsonElement)) {
-      final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
-      validator.parameter(RoleConstants.NAME, name).isString().notEmpty();
-    }
-  }
+		final var jsonElement = this.jsonHelper.parse(json);
+
+		if (this.jsonHelper.parameterExists(RoleConstants.NAME, jsonElement)) {
+			final var name = this.jsonHelper.extractString(RoleConstants.NAME, jsonElement);
+			validator.parameter(RoleConstants.NAME, name).isString().notEmpty();
+		}
+	}
+
 }

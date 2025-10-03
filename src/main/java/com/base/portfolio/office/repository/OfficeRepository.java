@@ -24,5 +24,6 @@ import org.springframework.stereotype.Repository;
  * @author YISivlay
  */
 @Repository
-public interface OfficeRepository
-    extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {}
+public interface OfficeRepository extends JpaRepository<Office, Long>, JpaSpecificationExecutor<Office> {
+
+}

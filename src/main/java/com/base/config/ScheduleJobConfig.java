@@ -41,88 +41,89 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 @EnableScheduling
 public class ScheduleJobConfig implements SchedulingConfigurer {
 
-  private final Logger logger = LoggerFactory.getLogger(ScheduleJobConfig.class);
+	private final Logger logger = LoggerFactory.getLogger(ScheduleJobConfig.class);
 
-  private final ApplicationContext applicationContext;
-  private final ScheduleJobRepository jobRepository;
-  private final ScheduledJobHistoryRepository jobHistoryRepository;
+	private final ApplicationContext applicationContext;
 
-  public ScheduleJobConfig(
-      final ApplicationContext applicationContext,
-      final ScheduleJobRepository jobRepository,
-      final ScheduledJobHistoryRepository jobHistoryRepository) {
-    this.applicationContext = applicationContext;
-    this.jobRepository = jobRepository;
-    this.jobHistoryRepository = jobHistoryRepository;
-  }
+	private final ScheduleJobRepository jobRepository;
 
-  @Override
-  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-    var jobs = jobRepository.findAll();
-    if (!jobs.isEmpty()) {
-      for (ScheduleJob job : jobs) {
-        if (!job.isEnabled()) continue;
-        var task = getRunnableBean(job.getBeanName());
-        Trigger trigger =
-            triggerContext -> {
-              var cron = job.getCronExpression();
-              try {
-                if (!CronExpression.isValidExpression(cron)) {
-                  throw new IllegalArgumentException("Invalid cron: " + cron);
-                }
-                return new CronTrigger(cron).nextExecution(triggerContext);
-              } catch (Exception ex) {
-                logger.error(
-                    "Invalid cron expression for job {}: {}. Using fallback.",
-                    job.getJobName(),
-                    ex.getMessage());
-                return new CronTrigger("0 0 0 */30 * *").nextExecution(triggerContext);
-              }
-            };
+	private final ScheduledJobHistoryRepository jobHistoryRepository;
 
-        Runnable wrappedTask =
-            () -> {
-              var executedAt = Timestamp.valueOf(LocalDateTime.now().withNano(0));
-              Timestamp nextExecuteAt = null;
-              try {
-                var cronTrigger = new CronTrigger(job.getCronExpression());
-                var next = cronTrigger.nextExecution(new SimpleTriggerContext());
-                if (next != null) {
-                  var nextLocalDateTime =
-                      LocalDateTime.ofInstant(next, ZoneId.systemDefault()).withNano(0);
-                  nextExecuteAt = Timestamp.valueOf(nextLocalDateTime);
-                }
-              } catch (Exception e) {
-                logger.error("Failed to calculate nextExecuteAt for job '{}'", job.getJobName(), e);
-              }
+	public ScheduleJobConfig(final ApplicationContext applicationContext, final ScheduleJobRepository jobRepository,
+			final ScheduledJobHistoryRepository jobHistoryRepository) {
+		this.applicationContext = applicationContext;
+		this.jobRepository = jobRepository;
+		this.jobHistoryRepository = jobHistoryRepository;
+	}
 
-              var history = new ScheduledJobHistory();
-              history.setJobName(job.getJobName());
-              history.setExecutedAt(executedAt);
-              history.setNextExecutedAt(nextExecuteAt);
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		var jobs = jobRepository.findAll();
+		if (!jobs.isEmpty()) {
+			for (ScheduleJob job : jobs) {
+				if (!job.isEnabled())
+					continue;
+				var task = getRunnableBean(job.getBeanName());
+				Trigger trigger = triggerContext -> {
+					var cron = job.getCronExpression();
+					try {
+						if (!CronExpression.isValidExpression(cron)) {
+							throw new IllegalArgumentException("Invalid cron: " + cron);
+						}
+						return new CronTrigger(cron).nextExecution(triggerContext);
+					}
+					catch (Exception ex) {
+						logger.error("Invalid cron expression for job {}: {}. Using fallback.", job.getJobName(),
+								ex.getMessage());
+						return new CronTrigger("0 0 0 */30 * *").nextExecution(triggerContext);
+					}
+				};
 
-              try {
-                task.run();
-                history.setStatus("SUCCESS");
-              } catch (Exception ex) {
-                logger.error("Job {} failed", job.getJobName(), ex);
-                history.setStatus("FAILED");
-                history.setErrorMessage(ex.getMessage());
-              }
+				Runnable wrappedTask = () -> {
+					var executedAt = Timestamp.valueOf(LocalDateTime.now().withNano(0));
+					Timestamp nextExecuteAt = null;
+					try {
+						var cronTrigger = new CronTrigger(job.getCronExpression());
+						var next = cronTrigger.nextExecution(new SimpleTriggerContext());
+						if (next != null) {
+							var nextLocalDateTime = LocalDateTime.ofInstant(next, ZoneId.systemDefault()).withNano(0);
+							nextExecuteAt = Timestamp.valueOf(nextLocalDateTime);
+						}
+					}
+					catch (Exception e) {
+						logger.error("Failed to calculate nextExecuteAt for job '{}'", job.getJobName(), e);
+					}
 
-              jobHistoryRepository.save(history);
-            };
+					var history = new ScheduledJobHistory();
+					history.setJobName(job.getJobName());
+					history.setExecutedAt(executedAt);
+					history.setNextExecutedAt(nextExecuteAt);
 
-        taskRegistrar.addTriggerTask(wrappedTask, trigger);
-      }
-    }
-  }
+					try {
+						task.run();
+						history.setStatus("SUCCESS");
+					}
+					catch (Exception ex) {
+						logger.error("Job {} failed", job.getJobName(), ex);
+						history.setStatus("FAILED");
+						history.setErrorMessage(ex.getMessage());
+					}
 
-  private Runnable getRunnableBean(String beanName) {
-    try {
-      return (Runnable) applicationContext.getBean(beanName);
-    } catch (Exception ex) {
-      throw new IllegalArgumentException("No such bean found for job: " + beanName);
-    }
-  }
+					jobHistoryRepository.save(history);
+				};
+
+				taskRegistrar.addTriggerTask(wrappedTask, trigger);
+			}
+		}
+	}
+
+	private Runnable getRunnableBean(String beanName) {
+		try {
+			return (Runnable) applicationContext.getBean(beanName);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException("No such bean found for job: " + beanName);
+		}
+	}
+
 }

@@ -28,11 +28,12 @@ import org.springframework.util.unit.DataSize;
 @Configuration
 public class MultipartConfig {
 
-  @Bean
-  public MultipartConfigElement multipartConfigElement() {
-    MultipartConfigFactory factory = new MultipartConfigFactory();
-    factory.setMaxFileSize(DataSize.ofMegabytes(FileConstants.MAX_FILE_SIZE));
-    factory.setMaxRequestSize(DataSize.ofMegabytes(FileConstants.MAX_REQUEST_SIZE));
-    return factory.createMultipartConfig();
-  }
+	@Bean
+	public MultipartConfigElement multipartConfigElement() {
+		MultipartConfigFactory factory = new MultipartConfigFactory();
+		factory.setMaxFileSize(DataSize.ofMegabytes(FileConstants.MAX_FILE_SIZE));
+		factory.setMaxRequestSize(DataSize.ofMegabytes(FileConstants.MAX_REQUEST_SIZE));
+		return factory.createMultipartConfig();
+	}
+
 }

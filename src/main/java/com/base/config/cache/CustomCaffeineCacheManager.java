@@ -23,12 +23,13 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
  */
 public class CustomCaffeineCacheManager extends CaffeineCacheManager {
 
-  public CustomCaffeineCacheManager(String... cacheNames) {
-    super(cacheNames);
-  }
+	public CustomCaffeineCacheManager(String... cacheNames) {
+		super(cacheNames);
+	}
 
-  @Override
-  protected CaffeineCache createCaffeineCache(String name) {
-    return new CustomCaffeineCache(name);
-  }
+	@Override
+	protected CaffeineCache createCaffeineCache(String name) {
+		return new CustomCaffeineCache(name);
+	}
+
 }

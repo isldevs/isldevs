@@ -30,32 +30,34 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
  */
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
-  private final RegisteredClientRepository clientRepository;
-  private final JwtDecoderFactory<ClientAuthenticationToken> jwtDecoderFactory;
+	private final RegisteredClientRepository clientRepository;
 
-  public JwtAuthenticationProvider(
-      RegisteredClientRepository clientRepository,
-      JwtDecoderFactory<ClientAuthenticationToken> jwtDecoderFactory) {
-    this.clientRepository = clientRepository;
-    this.jwtDecoderFactory = jwtDecoderFactory;
-  }
+	private final JwtDecoderFactory<ClientAuthenticationToken> jwtDecoderFactory;
 
-  @Override
-  public Authentication authenticate(Authentication authentication) {
-    var token = (ClientAuthenticationToken) authentication;
+	public JwtAuthenticationProvider(RegisteredClientRepository clientRepository,
+			JwtDecoderFactory<ClientAuthenticationToken> jwtDecoderFactory) {
+		this.clientRepository = clientRepository;
+		this.jwtDecoderFactory = jwtDecoderFactory;
+	}
 
-    var client = clientRepository.findByClientId(token.getClientId());
-    if (client == null) throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
+	@Override
+	public Authentication authenticate(Authentication authentication) {
+		var token = (ClientAuthenticationToken) authentication;
 
-    var jwtDecoder = jwtDecoderFactory.createDecoder(token);
-    var jwt = jwtDecoder.decode(token.getClientAssertion());
+		var client = clientRepository.findByClientId(token.getClientId());
+		if (client == null)
+			throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
 
-    return new OAuth2ClientAuthenticationToken(
-        client.getClientId(), ClientAuthenticationMethod.PRIVATE_KEY_JWT, jwt, null);
-  }
+		var jwtDecoder = jwtDecoderFactory.createDecoder(token);
+		var jwt = jwtDecoder.decode(token.getClientAssertion());
 
-  @Override
-  public boolean supports(Class<?> authentication) {
-    return ClientAuthenticationToken.class.isAssignableFrom(authentication);
-  }
+		return new OAuth2ClientAuthenticationToken(client.getClientId(), ClientAuthenticationMethod.PRIVATE_KEY_JWT,
+				jwt, null);
+	}
+
+	@Override
+	public boolean supports(Class<?> authentication) {
+		return ClientAuthenticationToken.class.isAssignableFrom(authentication);
+	}
+
 }

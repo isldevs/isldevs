@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DatasourceConfigTests {
 
-    @Test
-    void contextLoads() {
-    }
+	@Test
+	void contextLoads() {
+	}
+
 }

@@ -33,15 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "CREATE", entity = RoleConstants.PERMISSION)
 public class CreateRoleHandlerProcessing implements CommandHandlerProcessing {
 
-  private final RoleService service;
+	private final RoleService service;
 
-  @Autowired
-  public CreateRoleHandlerProcessing(RoleService service) {
-    this.service = service;
-  }
+	@Autowired
+	public CreateRoleHandlerProcessing(RoleService service) {
+		this.service = service;
+	}
 
-  @Override
-  public Map<String, Object> process(JsonCommand command) {
-    return this.service.createRole(command);
-  }
+	@Override
+	public Map<String, Object> process(JsonCommand command) {
+		return this.service.createRole(command);
+	}
+
 }

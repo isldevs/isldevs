@@ -24,17 +24,25 @@ import java.util.HashSet;
  */
 public class VillageConstants {
 
-  public static final String PERMISSION = "VILLAGE";
-  public static final String API_PATH = "/villages";
+	public static final String PERMISSION = "VILLAGE";
 
-  public static final String ID = "id";
-  public static final String COMMUNE = "communeId";
-  public static final String TYPE = "type";
-  public static final String NAME_EN = "nameEn";
-  public static final String NAME_KM = "nameKm";
-  public static final String NAME_ZH = "nameZh";
-  public static final String POSTAL_CODE = "postalCode";
+	public static final String API_PATH = "/villages";
 
-  public static final Collection<String> SUPPORTED_PARAMETERS =
-      new HashSet<>(Arrays.asList(ID, COMMUNE, TYPE, NAME_EN, NAME_KM, NAME_ZH, POSTAL_CODE));
+	public static final String ID = "id";
+
+	public static final String COMMUNE = "communeId";
+
+	public static final String TYPE = "type";
+
+	public static final String NAME_EN = "nameEn";
+
+	public static final String NAME_KM = "nameKm";
+
+	public static final String NAME_ZH = "nameZh";
+
+	public static final String POSTAL_CODE = "postalCode";
+
+	public static final Collection<String> SUPPORTED_PARAMETERS = new HashSet<>(
+			Arrays.asList(ID, COMMUNE, TYPE, NAME_EN, NAME_KM, NAME_ZH, POSTAL_CODE));
+
 }
