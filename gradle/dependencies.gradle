@@ -17,7 +17,8 @@ dependencies {
     implementation(libs.caffeine)
     implementation(libs.jackson.databind)
     implementation(libs.bundles.jwt)
-    implementation(libs.google.java.format)
+    implementation(libs.bundles.netty)
+    implementation(libs.java.format)
 
     developmentOnly(libs.spring.boot.devtools)
     runtimeOnly(libs.postgresql)

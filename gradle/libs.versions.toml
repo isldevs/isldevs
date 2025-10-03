@@ -14,7 +14,6 @@ flyway-core = "9.22.3"
 jackson-databind = "2.20.0"
 dotenv-java = "3.2.0"
 commons-lang3 = "3.19.0"
-modelmapper = "3.2.4"
 gson = "2.13.2"
 mapstruct = "1.6.3"
 caffeine = "3.2.2"
@@ -25,7 +24,8 @@ lombok-mapstruct-binding = "0.2.0"
 assertj-core = "3.27.6"
 junit = "5.14.0"
 mockito = "5.20.0"
-google-java-format = "1.28.0"
+netty = "4.2.6.Final"
+javaformat = "0.0.47"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
@@ -48,7 +48,6 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql"}
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 dotenv-java = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv-java" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
-modelmapper = { module = "org.modelmapper:modelmapper", version.ref = "modelmapper" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
@@ -63,7 +62,14 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj-cor
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit"}
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito"}
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
-google-java-format = { module = "com.google.googlejavaformat:google-java-format", version.ref = "google-java-format" }
+netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
+netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
+netty-common = { module = "io.netty:netty-common", version.ref = "netty" }
+netty-handler = { module = "io.netty:netty-handler", version.ref = "netty" }
+netty-resolver = { module = "io.netty:netty-resolver", version.ref = "netty" }
+netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
+netty-transport-native-unix-common = { module = "io.netty:netty-transport-native-unix-common", version.ref = "netty" }
+java-format = { module = "io.spring.javaformat:spring-javaformat-maven-plugin", version.ref = "javaformat" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
@@ -77,6 +83,7 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot-web = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-hateoas"]
 spring-security = ["spring-security-core", "spring-security-cas", "spring-security-oauth2-authorization-server"]
 jwt = ["jjwt-api", "jjwt-impl", "jjwt-jackson"]
-mapping = ["modelmapper", "mapstruct", "gson"]
+netty = ["netty-buffer", "netty-codec", "netty-common", "netty-handler", "netty-resolver", "netty-transport", "netty-transport-native-unix-common"]
+mapping = ["mapstruct", "gson"]
 mockito = ["mockito-core", "mockito-junit-jupiter"]
 spring-test = ["spring-boot-starter-test", "assertj-core"]

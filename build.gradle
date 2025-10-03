@@ -151,7 +151,7 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
             "-parameters",
             "-Xlint:-unchecked",
-            "-Xlint:deprecation",
+            "-Xlint:-deprecation",
             "--enable-preview",
             "-Amapstruct.suppressGeneratorTimestamp=true",
             "-Amapstruct.suppressGeneratorVersionInfoComment=true",
@@ -160,7 +160,9 @@ tasks.withType(JavaCompile).configureEach {
     ]
 }
 
-tasks.withType(JavaExec).configureEach { jvmArgs += "--enable-preview" }
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += ["--enable-preview"]
+}
 
 springBoot { mainClass = "com.base.ISLDevsApplication" }
 
@@ -170,7 +172,9 @@ bootRun {
             "-Dspring.profiles.active=${activeProfile}",
             "-Dfile.encoding=UTF-8",
             "-XX:+HeapDumpOnOutOfMemoryError",
-            "--enable-preview"
+            "--add-opens",
+            "java.base/sun.misc=ALL-UNNAMED",
+            "--enable-preview",
     ]
     systemProperties = System.properties
     sourceResources sourceSets.main
@@ -271,7 +275,7 @@ tasks.named("processAot") { dependsOn tasks.named("compileJava") }
 tasks.named('test', Test) {
     environment(loadEnvironment())
     useJUnitPlatform()
-    jvmArgs += "--enable-preview"
+    jvmArgs += ["--enable-preview"]
     systemProperty 'spring.profiles.active', 'test'
     maxHeapSize = '2G'
     testLogging {
