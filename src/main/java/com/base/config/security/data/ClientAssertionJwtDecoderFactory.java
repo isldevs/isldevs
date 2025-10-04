@@ -27,22 +27,23 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
  */
 public class ClientAssertionJwtDecoderFactory implements JwtDecoderFactory<ClientAuthenticationToken> {
 
-	private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairRepository rsaKeyPairRepository;
 
-	public ClientAssertionJwtDecoderFactory(RSAKeyPairRepository rsaKeyPairRepository) {
-		this.rsaKeyPairRepository = rsaKeyPairRepository;
-	}
+    public ClientAssertionJwtDecoderFactory(RSAKeyPairRepository rsaKeyPairRepository) {
+        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    }
 
-	@Override
-	public JwtDecoder createDecoder(ClientAuthenticationToken context) {
+    @Override
+    public JwtDecoder createDecoder(ClientAuthenticationToken context) {
 
-		var key = rsaKeyPairRepository.findKeyPairs()
-			.stream()
-			.max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-			.map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-			.orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
+        var key = rsaKeyPairRepository.findKeyPairs()
+                                      .stream()
+                                      .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                                      .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                                      .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
 
-		return NimbusJwtDecoder.withPublicKey(key).build();
-	}
+        return NimbusJwtDecoder.withPublicKey(key)
+                               .build();
+    }
 
 }

@@ -34,50 +34,49 @@ import org.springframework.hateoas.Link;
 @AllArgsConstructor
 public class PageableResponse<T> {
 
-	private EmbeddedContent<T> embedded;
+    private EmbeddedContent<T> embedded;
 
-	private Map<String, Link> links;
+    private Map<String, Link> links;
 
-	private PageMetadata page;
+    private PageMetadata page;
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class EmbeddedContent<T> {
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EmbeddedContent<T> {
 
-		@JsonIgnore
-		private List<T> content;
+        @JsonIgnore
+        private List<T> content;
 
-		@JsonAnyGetter
-		public Map<String, List<T>> getDynamicPropertyName() {
-			if (content == null || content.isEmpty()) {
-				return Collections.emptyMap();
-			}
-			return Map.of("contents", content);
-		}
+        @JsonAnyGetter
+        public Map<String, List<T>> getDynamicPropertyName() {
+            if (content == null || content.isEmpty()) {
+                return Collections.emptyMap();
+            }
+            return Map.of("contents",
+                          content);
+        }
 
-		@JsonAnySetter
-		public void setDynamicProperties(List<T> value) {
-			this.content = value;
-		}
+        @JsonAnySetter
+        public void setDynamicProperties(List<T> value) { this.content = value; }
 
-	}
+    }
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class PageMetadata {
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PageMetadata {
 
-		private Integer size;
+        private Integer size;
 
-		private Long totalElements;
+        private Long totalElements;
 
-		private Integer totalPages;
+        private Integer totalPages;
 
-		private Integer number;
+        private Integer number;
 
-	}
+    }
 
 }

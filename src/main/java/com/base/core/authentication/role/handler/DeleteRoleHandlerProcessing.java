@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = RoleConstants.PERMISSION)
 public class DeleteRoleHandlerProcessing implements CommandHandlerProcessing {
 
-	private final RoleService service;
+    private final RoleService service;
 
-	@Autowired
-	public DeleteRoleHandlerProcessing(RoleService service) {
-		this.service = service;
-	}
+    @Autowired
+    public DeleteRoleHandlerProcessing(RoleService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.deleteRole(command.getId());
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.deleteRole(command.getId());
+    }
 
 }

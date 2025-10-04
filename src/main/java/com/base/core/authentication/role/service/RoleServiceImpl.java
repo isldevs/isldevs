@@ -45,104 +45,150 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-	private final MessageSource messageSource;
+    private final MessageSource messageSource;
 
-	private final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-	private final RoleDataValidator validator;
+    private final RoleDataValidator validator;
 
-	private final RoleMapper roleMapper;
+    private final RoleMapper roleMapper;
 
-	@Autowired
-	public RoleServiceImpl(final MessageSource messageSource, final RoleRepository roleRepository,
-			final RoleDataValidator validator, final RoleMapper roleMapper) {
-		this.messageSource = messageSource;
-		this.roleRepository = roleRepository;
-		this.validator = validator;
-		this.roleMapper = roleMapper;
-	}
+    @Autowired
+    public RoleServiceImpl(final MessageSource messageSource,
+                           final RoleRepository roleRepository,
+                           final RoleDataValidator validator,
+                           final RoleMapper roleMapper) {
+        this.messageSource = messageSource;
+        this.roleRepository = roleRepository;
+        this.validator = validator;
+        this.roleMapper = roleMapper;
+    }
 
-	@Override
-	@CacheEvict(value = "roles", allEntries = true)
-	public Map<String, Object> createRole(JsonCommand command) {
+    @Override
+    @CacheEvict(value = "roles", allEntries = true)
+    public Map<String, Object> createRole(JsonCommand command) {
 
-		this.validator.create(command.getJson());
+        this.validator.create(command.getJson());
 
-		final var name = command.extractString(RoleConstants.NAME);
-		final var authorities = command.extractArrayAs(RoleConstants.AUTHORITIES, String.class);
-		var allAuthorities = authorities.stream().map(auth -> {
-			Authority authority = new Authority();
-			authority.setAuthority(auth);
-			return authority;
-		}).collect(Collectors.toSet());
-		var data = Role.builder().name(name).authorities(allAuthorities).build();
-		var role = roleRepository.save(data);
+        final var name = command.extractString(RoleConstants.NAME);
+        final var authorities = command.extractArrayAs(RoleConstants.AUTHORITIES,
+                                                       String.class);
+        var allAuthorities = authorities.stream()
+                                        .map(auth -> {
+                                            Authority authority = new Authority();
+                                            authority.setAuthority(auth);
+                                            return authority;
+                                        })
+                                        .collect(Collectors.toSet());
+        var data = Role.builder()
+                       .name(name)
+                       .authorities(allAuthorities)
+                       .build();
+        var role = roleRepository.save(data);
 
-		return LogData.builder().id(role.getId()).success("msg.success", messageSource).build().claims();
-	}
+        return LogData.builder()
+                      .id(role.getId())
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
-	@Override
-	@CacheEvict(value = "roles", key = "T(java.util.Objects).hash(#id, #command)")
-	public Map<String, Object> updateRole(Long id, JsonCommand command) {
+    @Override
+    @CacheEvict(value = "roles", key = "T(java.util.Objects).hash(#id, #command)")
+    public Map<String, Object> updateRole(Long id,
+                                          JsonCommand command) {
 
-		var exist = this.roleRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
+        var exist = this.roleRepository.findById(id)
+                                       .orElseThrow(() -> new NotFoundException("msg.not.found.role",
+                                                                                id));
 
-		this.validator.update(command.getJson());
+        this.validator.update(command.getJson());
 
-		var changes = exist.changed(command);
-		if (!changes.isEmpty()) {
-			this.roleRepository.save(exist);
-		}
+        var changes = exist.changed(command);
+        if (!changes.isEmpty()) {
+            this.roleRepository.save(exist);
+        }
 
-		return LogData.builder().id(id).changes(changes).success("msg.success", messageSource).build().claims();
-	}
+        return LogData.builder()
+                      .id(id)
+                      .changes(changes)
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
-	@Override
-	@CacheEvict(value = "roles", key = "#id")
-	public Map<String, Object> deleteRole(Long id) {
+    @Override
+    @CacheEvict(value = "roles", key = "#id")
+    public Map<String, Object> deleteRole(Long id) {
 
-		final var role = this.roleRepository.findById(id)
-			.orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
-		this.roleRepository.delete(role);
-		this.roleRepository.flush();
+        final var role = this.roleRepository.findById(id)
+                                            .orElseThrow(() -> new NotFoundException("msg.not.found.role",
+                                                                                     id));
+        this.roleRepository.delete(role);
+        this.roleRepository.flush();
 
-		return LogData.builder().id(id).success("msg.success", messageSource).build().claims();
-	}
+        return LogData.builder()
+                      .id(id)
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
-	@Override
-	@Cacheable(value = "roles", key = "#id")
-	public RoleDTO getRoleById(Long id) {
+    @Override
+    @Cacheable(value = "roles", key = "#id")
+    public RoleDTO getRoleById(Long id) {
 
-		var role = this.roleRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
+        var role = this.roleRepository.findById(id)
+                                      .orElseThrow(() -> new NotFoundException("msg.not.found.role",
+                                                                               id));
 
-		return roleMapper.toDTO(role);
-	}
+        return roleMapper.toDTO(role);
+    }
 
-	@Override
-	@Cacheable(value = "roles", key = "#page + '-' + #size + '-' + #search")
-	public Page<RoleDTO> listRoles(Integer page, Integer size, String search) {
-		Specification<Role> specification = (root, _, sp) -> {
-			List<Predicate> predicates = new ArrayList<>();
-			if (search != null && !search.isEmpty()) {
-				predicates.add(sp.like(root.get("name"), "%" + search.toLowerCase() + "%"));
-			}
-			return sp.and(predicates.toArray(new Predicate[0]));
-		};
-		if (page == null || size == null) {
-			var allRoles = this.roleRepository.findAll(specification, Sort.by("name").ascending());
-			return new PageImpl<>(allRoles.stream().map(this::convertToDTO).toList());
-		}
-		var pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-		var roles = this.roleRepository.findAll(specification, pageable);
-		return roleMapper.toDTOPage(roles);
-	}
+    @Override
+    @Cacheable(value = "roles", key = "#page + '-' + #size + '-' + #search")
+    public Page<RoleDTO> listRoles(Integer page,
+                                   Integer size,
+                                   String search) {
+        Specification<Role> specification = (root,
+                                             _,
+                                             sp) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (search != null && !search.isEmpty()) {
+                predicates.add(sp.like(root.get("name"),
+                                       "%" + search.toLowerCase() + "%"));
+            }
+            return sp.and(predicates.toArray(new Predicate[0]));
+        };
+        if (page == null || size == null) {
+            var allRoles = this.roleRepository.findAll(specification,
+                                                       Sort.by("name")
+                                                           .ascending());
+            return new PageImpl<>(allRoles.stream()
+                                          .map(this::convertToDTO)
+                                          .toList());
+        }
+        var pageable = PageRequest.of(page,
+                                      size,
+                                      Sort.by("name")
+                                          .ascending());
+        var roles = this.roleRepository.findAll(specification,
+                                                pageable);
+        return roleMapper.toDTOPage(roles);
+    }
 
-	private RoleDTO convertToDTO(Role role) {
-		return RoleDTO.builder()
-			.id(role.getId())
-			.name(role.getName())
-			.authorities(role.getAuthorities().stream().map(Authority::getAuthority).collect(Collectors.toSet()))
-			.build();
-	}
+    private RoleDTO convertToDTO(Role role) {
+        return RoleDTO.builder()
+                      .id(role.getId())
+                      .name(role.getName())
+                      .authorities(role.getAuthorities()
+                                       .stream()
+                                       .map(Authority::getAuthority)
+                                       .collect(Collectors.toSet()))
+                      .build();
+    }
 
 }

@@ -34,31 +34,36 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-	private MessageSource messageSource;
+    private MessageSource messageSource;
 
-	public CustomAuthenticationEntryPoint(MessageSource messageSource) {
-		this.messageSource = messageSource;
-	}
+    public CustomAuthenticationEntryPoint(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
-	@Override
-	public void commence(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException authException) throws IOException {
+    @Override
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException authException) throws IOException {
 
-		Locale locale = request.getLocale();
-		String message = messageSource.getMessage("msg.unauthorized.description", null, "Please login again.", locale);
+        Locale locale = request.getLocale();
+        String message = messageSource.getMessage("msg.unauthorized.description",
+                                                  null,
+                                                  "Please login again.",
+                                                  locale);
 
-		ErrorData errorData = ErrorData.builder()
-			.status(HttpStatus.UNAUTHORIZED.value())
-			.error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-			.description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-			.message(message)
-			.build();
+        ErrorData errorData = ErrorData.builder()
+                                       .status(HttpStatus.UNAUTHORIZED.value())
+                                       .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                                       .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                                       .message(message)
+                                       .build();
 
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writeValue(response.getOutputStream(), errorData);
-	}
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getOutputStream(),
+                          errorData);
+    }
 
 }

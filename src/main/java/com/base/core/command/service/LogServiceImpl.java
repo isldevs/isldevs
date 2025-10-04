@@ -37,52 +37,61 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LogServiceImpl implements LogService {
 
-	private final LogRepository logRepository;
+    private final LogRepository logRepository;
 
-	private final CommandTypeProvider commandTypeProvider;
+    private final CommandTypeProvider commandTypeProvider;
 
-	private final JsonDelegator jsonDelegator;
+    private final JsonDelegator jsonDelegator;
 
-	private final SecurityContext securityContext;
+    private final SecurityContext securityContext;
 
-	@Autowired
-	public LogServiceImpl(final LogRepository logRepository, final CommandTypeProvider commandTypeProvider,
-			final JsonDelegator jsonDelegator, final SecurityContext securityContext) {
-		this.logRepository = logRepository;
-		this.commandTypeProvider = commandTypeProvider;
-		this.jsonDelegator = jsonDelegator;
-		this.securityContext = securityContext;
-	}
+    @Autowired
+    public LogServiceImpl(final LogRepository logRepository,
+                          final CommandTypeProvider commandTypeProvider,
+                          final JsonDelegator jsonDelegator,
+                          final SecurityContext securityContext) {
+        this.logRepository = logRepository;
+        this.commandTypeProvider = commandTypeProvider;
+        this.jsonDelegator = jsonDelegator;
+        this.securityContext = securityContext;
+    }
 
-	@Override
-	public Map<String, Object> log(Command command) {
-		CommandHandlerProcessing handler = getHandler(command.getAction(), command.getEntity());
-		JsonElement jsonElement = jsonDelegator.parseString(command.getJson());
-		JsonCommand jsonCommand = JsonCommand.builder()
-			.id(command.getId())
-			.action(command.getAction())
-			.entity(command.getEntity())
-			.entityType(command.getEntityType())
-			.entityId(command.getEntityId())
-			.permission(command.getAction() + "_" + command.getEntity())
-			.file(command.getFile())
-			.json(command.getJson())
-			.href(command.getHref())
-			.jsonDelegator(jsonDelegator)
-			.jsonElement(jsonElement)
-			.build();
-		Map<String, Object> logData = handler.process(jsonCommand);
-		User createdBy = this.securityContext.authenticatedUser();
-		Logs logs = new Logs(logData.get("id") != null ? (Long) logData.get("id") : command.getEntityId(),
-				command.getAction(), command.getEntity(), command.getHref(), command.getJson(), createdBy.getName(),
-				new Date());
-		this.logRepository.save(logs);
+    @Override
+    public Map<String, Object> log(Command command) {
+        CommandHandlerProcessing handler = getHandler(command.getAction(),
+                                                      command.getEntity());
+        JsonElement jsonElement = jsonDelegator.parseString(command.getJson());
+        JsonCommand jsonCommand = JsonCommand.builder()
+                                             .id(command.getId())
+                                             .action(command.getAction())
+                                             .entity(command.getEntity())
+                                             .entityType(command.getEntityType())
+                                             .entityId(command.getEntityId())
+                                             .permission(command.getAction() + "_" + command.getEntity())
+                                             .file(command.getFile())
+                                             .json(command.getJson())
+                                             .href(command.getHref())
+                                             .jsonDelegator(jsonDelegator)
+                                             .jsonElement(jsonElement)
+                                             .build();
+        Map<String, Object> logData = handler.process(jsonCommand);
+        User createdBy = this.securityContext.authenticatedUser();
+        Logs logs = new Logs(logData.get("id") != null ? (Long) logData.get("id") : command.getEntityId(),
+                             command.getAction(),
+                             command.getEntity(),
+                             command.getHref(),
+                             command.getJson(),
+                             createdBy.getName(),
+                             new Date());
+        this.logRepository.save(logs);
 
-		return logData;
-	}
+        return logData;
+    }
 
-	private CommandHandlerProcessing getHandler(String action, String entity) {
-		return this.commandTypeProvider.allHandler(action, entity);
-	}
+    private CommandHandlerProcessing getHandler(String action,
+                                                String entity) {
+        return this.commandTypeProvider.allHandler(action,
+                                                   entity);
+    }
 
 }

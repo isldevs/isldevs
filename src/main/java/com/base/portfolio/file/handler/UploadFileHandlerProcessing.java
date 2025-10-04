@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPLOAD", entity = FileConstants.PERMISSION)
 public class UploadFileHandlerProcessing implements CommandHandlerProcessing {
 
-	private final FileService service;
+    private final FileService service;
 
-	@Autowired
-	public UploadFileHandlerProcessing(FileService service) {
-		this.service = service;
-	}
+    @Autowired
+    public UploadFileHandlerProcessing(FileService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.uploadFile(command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.uploadFile(command);
+    }
 
 }

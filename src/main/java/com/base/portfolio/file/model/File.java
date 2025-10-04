@@ -25,159 +25,130 @@ import jakarta.persistence.UniqueConstraint;
  * @author YISivlay
  */
 @Entity
-@Table(name = "file", uniqueConstraints = {
-		@UniqueConstraint(name = "file_entity_entity_id_key", columnNames = { "entity", "entity_id" }) })
+@Table(name = "file", uniqueConstraints = {@UniqueConstraint(name = "file_entity_entity_id_key", columnNames = {"entity", "entity_id"})})
 public class File extends CustomAbstractAuditable {
 
-	@Column(name = "entity")
-	private String entity;
+    @Column(name = "entity")
+    private String entity;
 
-	@Column(name = "entity_id")
-	private Long entityId;
+    @Column(name = "entity_id")
+    private Long entityId;
 
-	@Column(name = "name")
-	private String name;
+    @Column(name = "name")
+    private String name;
 
-	@Column(name = "size")
-	private Long size;
+    @Column(name = "size")
+    private Long size;
 
-	@Column(name = "mime_type")
-	private String mimeType;
+    @Column(name = "mime_type")
+    private String mimeType;
 
-	@Column(name = "location")
-	private String location;
+    @Column(name = "location")
+    private String location;
 
-	@Column(name = "storage_type")
-	private Integer storageType;
+    @Column(name = "storage_type")
+    private Integer storageType;
 
-	protected File() {
-	}
+    protected File() {
+    }
 
-	public File(Builder builder) {
-		this.entity = builder.entity;
-		this.entityId = builder.entityId;
-		this.name = builder.name;
-		this.size = builder.size;
-		this.mimeType = builder.mimeType;
-		this.location = builder.location;
-		this.storageType = builder.storageType;
-	}
+    public File(Builder builder) {
+        this.entity = builder.entity;
+        this.entityId = builder.entityId;
+        this.name = builder.name;
+        this.size = builder.size;
+        this.mimeType = builder.mimeType;
+        this.location = builder.location;
+        this.storageType = builder.storageType;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private String entity;
+        private String entity;
 
-		private Long entityId;
+        private Long entityId;
 
-		private String name;
+        private String name;
 
-		private Long size;
+        private Long size;
 
-		private String mimeType;
+        private String mimeType;
 
-		private String location;
+        private String location;
 
-		private Integer storageType;
+        private Integer storageType;
 
-		public File build() {
-			return new File(this);
-		}
+        public File build() {
+            return new File(this);
+        }
 
-		public Builder entity(String entity) {
-			this.entity = entity;
-			return this;
-		}
+        public Builder entity(String entity) {
+            this.entity = entity;
+            return this;
+        }
 
-		public Builder entityId(Long entityId) {
-			this.entityId = entityId;
-			return this;
-		}
+        public Builder entityId(Long entityId) {
+            this.entityId = entityId;
+            return this;
+        }
 
-		public Builder name(String name) {
-			this.name = name;
-			return this;
-		}
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
 
-		public Builder size(Long size) {
-			this.size = size;
-			return this;
-		}
+        public Builder size(Long size) {
+            this.size = size;
+            return this;
+        }
 
-		public Builder mimeType(String mimeType) {
-			this.mimeType = mimeType;
-			return this;
-		}
+        public Builder mimeType(String mimeType) {
+            this.mimeType = mimeType;
+            return this;
+        }
 
-		public Builder location(String location) {
-			this.location = location;
-			return this;
-		}
+        public Builder location(String location) {
+            this.location = location;
+            return this;
+        }
 
-		public Builder storageType(Integer storageType) {
-			this.storageType = storageType;
-			return this;
-		}
+        public Builder storageType(Integer storageType) {
+            this.storageType = storageType;
+            return this;
+        }
 
-	}
+    }
 
-	public String getEntity() {
-		return entity;
-	}
+    public String getEntity() { return entity; }
 
-	public Long getEntityId() {
-		return entityId;
-	}
+    public Long getEntityId() { return entityId; }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() { return name; }
 
-	public Long getSize() {
-		return size;
-	}
+    public Long getSize() { return size; }
 
-	public String getMimeType() {
-		return mimeType;
-	}
+    public String getMimeType() { return mimeType; }
 
-	public String getLocation() {
-		return location;
-	}
+    public String getLocation() { return location; }
 
-	public Integer getStorageType() {
-		return storageType;
-	}
+    public Integer getStorageType() { return storageType; }
 
-	public void setEntity(String entity) {
-		this.entity = entity;
-	}
+    public void setEntity(String entity) { this.entity = entity; }
 
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
+    public void setEntityId(Long entityId) { this.entityId = entityId; }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) { this.name = name; }
 
-	public void setSize(Long size) {
-		this.size = size;
-	}
+    public void setSize(Long size) { this.size = size; }
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
+    public void setMimeType(String mimeType) { this.mimeType = mimeType; }
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+    public void setLocation(String location) { this.location = location; }
 
-	public void setStorageType(Integer storageType) {
-		this.storageType = storageType;
-	}
+    public void setStorageType(Integer storageType) { this.storageType = storageType; }
 
 }

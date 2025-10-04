@@ -27,6 +27,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
 
-	Optional<Role> findByName(String roleName);
+    Optional<Role> findByName(String roleName);
 
 }

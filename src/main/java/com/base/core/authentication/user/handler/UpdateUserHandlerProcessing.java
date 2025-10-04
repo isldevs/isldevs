@@ -33,16 +33,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = UserConstants.PERMISSION)
 public class UpdateUserHandlerProcessing implements CommandHandlerProcessing {
 
-	private final UserService service;
+    private final UserService service;
 
-	@Autowired
-	public UpdateUserHandlerProcessing(UserService service) {
-		this.service = service;
-	}
+    @Autowired
+    public UpdateUserHandlerProcessing(UserService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.updateUser(command.getId(), command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.updateUser(command.getId(),
+                                       command);
+    }
 
 }

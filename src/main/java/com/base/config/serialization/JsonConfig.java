@@ -33,21 +33,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JsonConfig {
 
-	@Bean
-	public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
-		return builder -> {
-			SimpleModule module = new SimpleModule();
-			module.addSerializer(new PageableResponseSerializer());
-			module.addSerializer(new PageableJsonSerializer());
-			builder.modules(module);
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+        return builder -> {
+            SimpleModule module = new SimpleModule();
+            module.addSerializer(new PageableResponseSerializer());
+            module.addSerializer(new PageableJsonSerializer());
+            builder.modules(module);
 
-			builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
-			builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-			builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-			builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
-			builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
-			builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
-		};
-	}
+            builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
+            builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+            builder.visibility(PropertyAccessor.FIELD,
+                               JsonAutoDetect.Visibility.ANY);
+            builder.visibility(PropertyAccessor.GETTER,
+                               JsonAutoDetect.Visibility.NONE);
+            builder.visibility(PropertyAccessor.SETTER,
+                               JsonAutoDetect.Visibility.NONE);
+            builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        };
+    }
 
 }

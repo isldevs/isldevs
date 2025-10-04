@@ -25,41 +25,37 @@ import jakarta.persistence.*;
 @Table(name = "authorities")
 public class Authority extends CustomAbstractPersistable {
 
-	@Column(nullable = false)
-	private String authority;
+    @Column(nullable = false)
+    private String authority;
 
-	public Authority() {
-	}
+    public Authority() {
+    }
 
-	public Authority(Builder builder) {
-		this.authority = builder.authority;
-	}
+    public Authority(Builder builder) {
+        this.authority = builder.authority;
+    }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public static class Builder {
+    public static class Builder {
 
-		private String authority;
+        private String authority;
 
-		public Authority build() {
-			return new Authority(this);
-		}
+        public Authority build() {
+            return new Authority(this);
+        }
 
-		public Builder authority(String authority) {
-			this.authority = authority;
-			return this;
-		}
+        public Builder authority(String authority) {
+            this.authority = authority;
+            return this;
+        }
 
-	}
+    }
 
-	public String getAuthority() {
-		return authority;
-	}
+    public String getAuthority() { return authority; }
 
-	public void setAuthority(String authority) {
-		this.authority = authority;
-	}
+    public void setAuthority(String authority) { this.authority = authority; }
 
 }

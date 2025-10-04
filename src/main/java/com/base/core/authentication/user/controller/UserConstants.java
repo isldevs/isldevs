@@ -24,36 +24,44 @@ import java.util.HashSet;
  */
 public class UserConstants {
 
-	public static final String PERMISSION = "USER";
+    public static final String PERMISSION = "USER";
 
-	public static final String API_PATH = "/users";
+    public static final String API_PATH = "/users";
 
-	public static final String ID = "id";
+    public static final String ID = "id";
 
-	public static final String USERNAME = "username";
+    public static final String USERNAME = "username";
 
-	public static final String PASSWORD = "password";
+    public static final String PASSWORD = "password";
 
-	public static final String NAME = "name";
+    public static final String NAME = "name";
 
-	public static final String EMAIL = "email";
+    public static final String EMAIL = "email";
 
-	public static final String ROLES = "roles";
+    public static final String ROLES = "roles";
 
-	public static final String AUTHORITIES = "authorities";
+    public static final String AUTHORITIES = "authorities";
 
-	public static final String ENABLED = "enabled";
+    public static final String ENABLED = "enabled";
 
-	public static final String AUTHENTICATED = "authenticated";
+    public static final String AUTHENTICATED = "authenticated";
 
-	public static final String IS_ACCOUNT_NON_EXPIRED = "accountNonExpired";
+    public static final String IS_ACCOUNT_NON_EXPIRED = "accountNonExpired";
 
-	public static final String IS_ACCOUNT_NON_LOCKED = "accountNonLocked";
+    public static final String IS_ACCOUNT_NON_LOCKED = "accountNonLocked";
 
-	public static final String IS_CREDENTIALS_NON_EXPIRED = "credentialsNonExpired";
+    public static final String IS_CREDENTIALS_NON_EXPIRED = "credentialsNonExpired";
 
-	public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(
-			Arrays.asList(USERNAME, PASSWORD, NAME, EMAIL, ROLES, AUTHORITIES, ENABLED, AUTHENTICATED,
-					IS_ACCOUNT_NON_EXPIRED, IS_ACCOUNT_NON_LOCKED, IS_CREDENTIALS_NON_EXPIRED));
+    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(USERNAME,
+                                                                                             PASSWORD,
+                                                                                             NAME,
+                                                                                             EMAIL,
+                                                                                             ROLES,
+                                                                                             AUTHORITIES,
+                                                                                             ENABLED,
+                                                                                             AUTHENTICATED,
+                                                                                             IS_ACCOUNT_NON_EXPIRED,
+                                                                                             IS_ACCOUNT_NON_LOCKED,
+                                                                                             IS_CREDENTIALS_NON_EXPIRED));
 
 }

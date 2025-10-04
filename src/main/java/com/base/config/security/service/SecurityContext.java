@@ -22,10 +22,10 @@ import com.base.core.authentication.user.model.User;
  */
 public interface SecurityContext {
 
-	User authenticatedUser();
+    User authenticatedUser();
 
-	boolean isAdmin();
+    boolean isAdmin();
 
-	boolean hasAuthority(String authority);
+    boolean hasAuthority(String authority);
 
 }

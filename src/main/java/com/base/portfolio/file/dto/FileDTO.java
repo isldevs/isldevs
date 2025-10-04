@@ -21,6 +21,5 @@ import lombok.Builder;
  * @author YISivlay
  */
 @Builder
-public record FileDTO(Long id, String entity, Long entityId, String name, Long size, String mimeType, String location,
-		Integer storageType, String url) {
+public record FileDTO(Long id, String entity, Long entityId, String name, Long size, String mimeType, String location, Integer storageType, String url) {
 }

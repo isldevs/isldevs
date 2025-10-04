@@ -23,16 +23,24 @@ import com.base.core.command.data.CommandBuilder;
  */
 public class UserCommandBuilder extends CommandBuilder {
 
-	public CommandBuilder create() {
-		return this.action("CREATE").entity(UserConstants.PERMISSION).href(UserConstants.API_PATH);
-	}
+    public CommandBuilder create() {
+        return this.action("CREATE")
+                   .entity(UserConstants.PERMISSION)
+                   .href(UserConstants.API_PATH);
+    }
 
-	public CommandBuilder update(final Long id) {
-		return this.action("UPDATE").entity(UserConstants.PERMISSION).id(id).href(UserConstants.API_PATH + "/" + id);
-	}
+    public CommandBuilder update(final Long id) {
+        return this.action("UPDATE")
+                   .entity(UserConstants.PERMISSION)
+                   .id(id)
+                   .href(UserConstants.API_PATH + "/" + id);
+    }
 
-	public CommandBuilder delete(final Long id) {
-		return this.action("DELETE").entity(UserConstants.PERMISSION).id(id).href(UserConstants.API_PATH + "/" + id);
-	}
+    public CommandBuilder delete(final Long id) {
+        return this.action("DELETE")
+                   .entity(UserConstants.PERMISSION)
+                   .id(id)
+                   .href(UserConstants.API_PATH + "/" + id);
+    }
 
 }

@@ -30,30 +30,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringProfileConfig implements EnvironmentAware {
 
-	private ConfigurableEnvironment env;
+    private ConfigurableEnvironment env;
 
-	@Override
-	public void setEnvironment(Environment environment) {
-		this.env = (ConfigurableEnvironment) environment;
-		loadEnvFile();
-	}
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.env = (ConfigurableEnvironment) environment;
+        loadEnvFile();
+    }
 
-	private void loadEnvFile() {
-		var envFile = env.getProperty("spring.env.file");
-		var profile = env.getProperty("spring.profiles.active");
-		if (envFile != null) {
-			try {
-				var file = new File(envFile);
-				if (file.exists()) {
-					var props = new Properties();
-					props.load(new FileInputStream(file));
-					props.forEach((key, value) -> System.setProperty(key.toString(), value.toString()));
-				}
-			}
-			catch (IOException e) {
-				throw new RuntimeException("Failed to load ." + profile + " file", e);
-			}
-		}
-	}
+    private void loadEnvFile() {
+        var envFile = env.getProperty("spring.env.file");
+        var profile = env.getProperty("spring.profiles.active");
+        if (envFile != null) {
+            try {
+                var file = new File(envFile);
+                if (file.exists()) {
+                    var props = new Properties();
+                    props.load(new FileInputStream(file));
+                    props.forEach((key,
+                                   value) -> System.setProperty(key.toString(),
+                                                                value.toString()));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load ." + profile + " file",
+                                           e);
+            }
+        }
+    }
 
 }

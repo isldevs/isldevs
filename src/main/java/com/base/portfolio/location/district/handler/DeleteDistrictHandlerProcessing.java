@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = DistrictConstants.PERMISSION)
 public class DeleteDistrictHandlerProcessing implements CommandHandlerProcessing {
 
-	private final DistrictService service;
+    private final DistrictService service;
 
-	@Autowired
-	public DeleteDistrictHandlerProcessing(DistrictService service) {
-		this.service = service;
-	}
+    @Autowired
+    public DeleteDistrictHandlerProcessing(DistrictService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.deleteDistrict(command.getId());
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.deleteDistrict(command.getId());
+    }
 
 }

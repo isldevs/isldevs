@@ -30,21 +30,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VirtualThreadConfig {
 
-	final Logger logger = LoggerFactory.getLogger(VirtualThreadConfig.class);
+    final Logger logger = LoggerFactory.getLogger(VirtualThreadConfig.class);
 
-	@Bean(value = TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
-	public Executor applicationTaskExecutor() {
-		int availableProcessors = Runtime.getRuntime().availableProcessors();
-		logger.info(
-				"Virtual thread per task executor, available processors: {}, will scale dynamically base on workload",
-				availableProcessors);
-		return Executors.newVirtualThreadPerTaskExecutor();
-	}
+    @Bean(value = TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
+    public Executor applicationTaskExecutor() {
+        int availableProcessors = Runtime.getRuntime()
+                                         .availableProcessors();
+        logger.info("Virtual thread per task executor, available processors: {}, will scale dynamically base on workload",
+                    availableProcessors);
+        return Executors.newVirtualThreadPerTaskExecutor();
+    }
 
-	@Bean
-	public TomcatProtocolHandlerCustomizer<?> tomcatVirtualThreadExecutor() {
-		logger.info("Tomcat will handle requests with virtual thread per task model");
-		return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-	}
+    @Bean
+    public TomcatProtocolHandlerCustomizer<?> tomcatVirtualThreadExecutor() {
+        logger.info("Tomcat will handle requests with virtual thread per task model");
+        return protocolHandler -> protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+    }
 
 }

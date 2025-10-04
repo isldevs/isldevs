@@ -27,21 +27,24 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface RoleService {
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_ROLE')")
-	Map<String, Object> createRole(JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_ROLE')")
+    Map<String, Object> createRole(JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_ROLE')")
-	Map<String, Object> updateRole(Long id, JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_ROLE')")
+    Map<String, Object> updateRole(Long id,
+                                   JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_ROLE')")
-	Map<String, Object> deleteRole(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_ROLE')")
+    Map<String, Object> deleteRole(Long id);
 
-	@Transactional(readOnly = true)
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_ROLE')")
-	RoleDTO getRoleById(Long id);
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_ROLE')")
+    RoleDTO getRoleById(Long id);
 
-	@Transactional(readOnly = true)
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_ROLE')")
-	Page<RoleDTO> listRoles(Integer page, Integer size, String search);
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_ROLE')")
+    Page<RoleDTO> listRoles(Integer page,
+                            Integer size,
+                            String search);
 
 }

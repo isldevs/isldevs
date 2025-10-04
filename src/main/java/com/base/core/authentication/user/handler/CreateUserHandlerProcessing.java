@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "CREATE", entity = UserConstants.PERMISSION)
 public class CreateUserHandlerProcessing implements CommandHandlerProcessing {
 
-	private final UserService service;
+    private final UserService service;
 
-	@Autowired
-	public CreateUserHandlerProcessing(UserService service) {
-		this.service = service;
-	}
+    @Autowired
+    public CreateUserHandlerProcessing(UserService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.createUser(command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.createUser(command);
+    }
 
 }

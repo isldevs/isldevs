@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.flyway)
     alias(libs.plugins.versions)
     alias(libs.plugins.spotless)
-    alias(libs.plugins.spring.java.format)
 }
 
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
@@ -249,10 +248,9 @@ tasks.register('generateTestClasses', GenerateTestClasses) {
 
 spotless {
     java {
+        eclipse().configFile(file('src/main/resources/java-code-style.xml'))
         target 'src/main/java/**/*.java'
         licenseHeaderFile 'LICENSE', '(package|import|public|class|interface|enum)'
-        removeUnusedImports()
-
         targetExclude([
                 '**/build/**', '**/aotSources/**', '**/generated/**', '**/target/**', '**/out/**', '**/bin/**',
                 '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**', '**/*.properties',
@@ -262,32 +260,34 @@ spotless {
                 '**/gradlew*', '**/gradle/wrapper/**', '**/*Tests.java', '**/*Test.java',
                 '**/.dev', '**/.prod', '**/.env', '**/aot*/**', '**/*__Generated.java', '**/org/springframework/**'
         ])
+        removeUnusedImports()
     }
 }
 
-import io.spring.javaformat.gradle.tasks.Format
-tasks.withType(Format).configureEach {
-    exclude("**/generated/**", "**/build/**", "**/out/**")
+tasks.named("spotlessApply") {
+    group = 'formatting'
+    description = 'Apply code formatting'
+}
+
+tasks.named("spotlessCheck") {
+    group = 'verification'
+    description = 'Check code formatting and Apply LICENSE Header'
+}
+
+tasks.named('generateTestClasses') {
+    dependsOn tasks.named('spotlessApply')
+}
+
+tasks.named('compileJava') {
+    dependsOn tasks.named('spotlessApply')
+}
+
+tasks.named('compileTestJava') {
+    dependsOn tasks.named('generateTestClasses')
 }
 
 tasks.matching { it.name.contains("Aot") || it.name.contains("aot") }.configureEach {
     enabled = false
-}
-
-tasks.named('generateTestClasses') {
-    dependsOn tasks.named('formatMain')
-}
-
-tasks.named('compileJava') {
-    dependsOn tasks.named('formatMain')
-}
-
-tasks.named('formatTest') {
-    dependsOn tasks.named('generateTestClasses')
-}
-
-tasks.named('compileTestJava') {
-    dependsOn tasks.named('formatTest')
 }
 
 tasks.named('processAot') {
@@ -304,7 +304,8 @@ tasks.named('test', Test) {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
     }
-    if (project.hasProperty('skipIntegrationTests') && Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
+    if (project.hasProperty('skipIntegrationTests') &&
+            Boolean.parseBoolean(project.property('skipIntegrationTests'))) {
         exclude('**/test/**')
     }
 }

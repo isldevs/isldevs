@@ -41,109 +41,128 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
-	private final WebClient webClient;
+    private final WebClient webClient;
 
-	private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-	public AccessTokenResponseClient(WebClient webClient, ObjectMapper objectMapper) {
-		this.webClient = webClient;
-		this.objectMapper = objectMapper;
-	}
+    public AccessTokenResponseClient(WebClient webClient,
+                                     ObjectMapper objectMapper) {
+        this.webClient = webClient;
+        this.objectMapper = objectMapper;
+    }
 
-	@Override
-	public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
-		ClientRegistration clientRegistration = authorizationGrantRequest.getClientRegistration();
+    @Override
+    public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
+        ClientRegistration clientRegistration = authorizationGrantRequest.getClientRegistration();
 
-		return webClient.post().uri(clientRegistration.getProviderDetails().getTokenUri()).headers(headers -> {
-			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-			headers.setBasicAuth(clientRegistration.getClientId(), clientRegistration.getClientSecret());
-		})
-			.body(BodyInserters.fromFormData(createTokenRequestParameters(authorizationGrantRequest)))
-			.retrieve()
-			.bodyToMono(String.class)
-			.map(responseBody -> extractTokenResponse(responseBody, clientRegistration))
-			.block();
-	}
+        return webClient.post()
+                        .uri(clientRegistration.getProviderDetails()
+                                               .getTokenUri())
+                        .headers(headers -> {
+                            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                            headers.setBasicAuth(clientRegistration.getClientId(),
+                                                 clientRegistration.getClientSecret());
+                        })
+                        .body(BodyInserters.fromFormData(createTokenRequestParameters(authorizationGrantRequest)))
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .map(responseBody -> extractTokenResponse(responseBody,
+                                                                  clientRegistration))
+                        .block();
+    }
 
-	private MultiValueMap<String, String> createTokenRequestParameters(
-			OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
-		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-		parameters.add(OAuth2ParameterNames.GRANT_TYPE, authorizationGrantRequest.getGrantType().getValue());
-		parameters.add(OAuth2ParameterNames.CODE,
-				authorizationGrantRequest.getAuthorizationExchange().getAuthorizationResponse().getCode());
-		parameters.add(OAuth2ParameterNames.REDIRECT_URI,
-				authorizationGrantRequest.getAuthorizationExchange().getAuthorizationRequest().getRedirectUri());
-		parameters.add(OAuth2ParameterNames.CLIENT_ID, authorizationGrantRequest.getClientRegistration().getClientId());
+    private MultiValueMap<String, String> createTokenRequestParameters(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
+        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+        parameters.add(OAuth2ParameterNames.GRANT_TYPE,
+                       authorizationGrantRequest.getGrantType()
+                                                .getValue());
+        parameters.add(OAuth2ParameterNames.CODE,
+                       authorizationGrantRequest.getAuthorizationExchange()
+                                                .getAuthorizationResponse()
+                                                .getCode());
+        parameters.add(OAuth2ParameterNames.REDIRECT_URI,
+                       authorizationGrantRequest.getAuthorizationExchange()
+                                                .getAuthorizationRequest()
+                                                .getRedirectUri());
+        parameters.add(OAuth2ParameterNames.CLIENT_ID,
+                       authorizationGrantRequest.getClientRegistration()
+                                                .getClientId());
 
-		// Add PKCE parameters if available
-		OAuth2AuthorizationRequest authorizationRequest = authorizationGrantRequest.getAuthorizationExchange()
-			.getAuthorizationRequest();
-		String codeVerifier = (String) authorizationRequest.getAttribute(PkceParameterNames.CODE_VERIFIER);
-		if (codeVerifier != null) {
-			parameters.add(PkceParameterNames.CODE_VERIFIER, codeVerifier);
-		}
+        // Add PKCE parameters if available
+        OAuth2AuthorizationRequest authorizationRequest = authorizationGrantRequest.getAuthorizationExchange()
+                                                                                   .getAuthorizationRequest();
+        String codeVerifier = (String) authorizationRequest.getAttribute(PkceParameterNames.CODE_VERIFIER);
+        if (codeVerifier != null) {
+            parameters.add(PkceParameterNames.CODE_VERIFIER,
+                           codeVerifier);
+        }
 
-		return parameters;
-	}
+        return parameters;
+    }
 
-	private OAuth2AccessTokenResponse extractTokenResponse(String responseBody, ClientRegistration clientRegistration) {
-		try {
-			Map<String, Object> tokenResponseMap = objectMapper.readValue(responseBody,
-					new TypeReference<Map<String, Object>>() {
-					});
+    private OAuth2AccessTokenResponse extractTokenResponse(String responseBody,
+                                                           ClientRegistration clientRegistration) {
+        try {
+            Map<String, Object> tokenResponseMap = objectMapper.readValue(responseBody,
+                                                                          new TypeReference<Map<String, Object>>() {
+                                                                          });
 
-			String accessToken = (String) tokenResponseMap.get(OAuth2ParameterNames.ACCESS_TOKEN);
-			String tokenType = (String) tokenResponseMap.get(OAuth2ParameterNames.TOKEN_TYPE);
-			long expiresIn = getExpiresIn(tokenResponseMap);
-			Set<String> scopes = getScopes(tokenResponseMap);
-			String refreshToken = (String) tokenResponseMap.get(OAuth2ParameterNames.REFRESH_TOKEN);
-			Map<String, Object> additionalParameters = getAdditionalParameters(tokenResponseMap);
+            String accessToken = (String) tokenResponseMap.get(OAuth2ParameterNames.ACCESS_TOKEN);
+            String tokenType = (String) tokenResponseMap.get(OAuth2ParameterNames.TOKEN_TYPE);
+            long expiresIn = getExpiresIn(tokenResponseMap);
+            Set<String> scopes = getScopes(tokenResponseMap);
+            String refreshToken = (String) tokenResponseMap.get(OAuth2ParameterNames.REFRESH_TOKEN);
+            Map<String, Object> additionalParameters = getAdditionalParameters(tokenResponseMap);
 
-			return OAuth2AccessTokenResponse.withToken(accessToken)
-				.tokenType(new OAuth2AccessToken.TokenType(tokenType.toUpperCase()))
-				.expiresIn(expiresIn)
-				.scopes(scopes)
-				.refreshToken(refreshToken)
-				.additionalParameters(additionalParameters)
-				.build();
+            return OAuth2AccessTokenResponse.withToken(accessToken)
+                                            .tokenType(new OAuth2AccessToken.TokenType(tokenType.toUpperCase()))
+                                            .expiresIn(expiresIn)
+                                            .scopes(scopes)
+                                            .refreshToken(refreshToken)
+                                            .additionalParameters(additionalParameters)
+                                            .build();
 
-		}
-		catch (IOException e) {
-			throw new ErrorException("msg.internal.error", "Failed to parse token response", e);
-		}
-	}
+        } catch (IOException e) {
+            throw new ErrorException("msg.internal.error",
+                                     "Failed to parse token response",
+                                     e);
+        }
+    }
 
-	private long getExpiresIn(Map<String, Object> tokenResponseMap) {
-		Object expiresInObj = tokenResponseMap.get(OAuth2ParameterNames.EXPIRES_IN);
-		if (expiresInObj instanceof Number) {
-			return ((Number) expiresInObj).longValue();
-		}
-		else if (expiresInObj instanceof String) {
-			return Long.parseLong((String) expiresInObj);
-		}
-		return 3600L;
-	}
+    private long getExpiresIn(Map<String, Object> tokenResponseMap) {
+        Object expiresInObj = tokenResponseMap.get(OAuth2ParameterNames.EXPIRES_IN);
+        if (expiresInObj instanceof Number) {
+            return ((Number) expiresInObj).longValue();
+        } else if (expiresInObj instanceof String) {
+            return Long.parseLong((String) expiresInObj);
+        }
+        return 3600L;
+    }
 
-	private Set<String> getScopes(Map<String, Object> tokenResponseMap) {
-		Object scopeObj = tokenResponseMap.get(OAuth2ParameterNames.SCOPE);
-		if (scopeObj instanceof String) {
-			return new HashSet<>(Arrays.asList(((String) scopeObj).split(" ")));
-		}
-		return Collections.emptySet();
-	}
+    private Set<String> getScopes(Map<String, Object> tokenResponseMap) {
+        Object scopeObj = tokenResponseMap.get(OAuth2ParameterNames.SCOPE);
+        if (scopeObj instanceof String) {
+            return new HashSet<>(Arrays.asList(((String) scopeObj).split(" ")));
+        }
+        return Collections.emptySet();
+    }
 
-	private Map<String, Object> getAdditionalParameters(Map<String, Object> tokenResponseMap) {
-		Map<String, Object> additionalParameters = new HashMap<>();
-		Set<String> standardParameters = Set.of(OAuth2ParameterNames.ACCESS_TOKEN, OAuth2ParameterNames.TOKEN_TYPE,
-				OAuth2ParameterNames.EXPIRES_IN, OAuth2ParameterNames.REFRESH_TOKEN, OAuth2ParameterNames.SCOPE);
+    private Map<String, Object> getAdditionalParameters(Map<String, Object> tokenResponseMap) {
+        Map<String, Object> additionalParameters = new HashMap<>();
+        Set<String> standardParameters = Set.of(OAuth2ParameterNames.ACCESS_TOKEN,
+                                                OAuth2ParameterNames.TOKEN_TYPE,
+                                                OAuth2ParameterNames.EXPIRES_IN,
+                                                OAuth2ParameterNames.REFRESH_TOKEN,
+                                                OAuth2ParameterNames.SCOPE);
 
-		for (Map.Entry<String, Object> entry : tokenResponseMap.entrySet()) {
-			if (!standardParameters.contains(entry.getKey())) {
-				additionalParameters.put(entry.getKey(), entry.getValue());
-			}
-		}
+        for (Map.Entry<String, Object> entry : tokenResponseMap.entrySet()) {
+            if (!standardParameters.contains(entry.getKey())) {
+                additionalParameters.put(entry.getKey(),
+                                         entry.getValue());
+            }
+        }
 
-		return additionalParameters;
-	}
+        return additionalParameters;
+    }
 
 }

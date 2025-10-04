@@ -34,27 +34,31 @@ import org.springframework.data.domain.PageImpl;
 @Mapper(componentModel = "spring")
 public abstract class RoleMapper {
 
-	@Named("toDTO")
-	@Mapping(target = "authorities", expression = "java(mapAuthorities(role.getAuthorities()))")
-	public abstract RoleDTO toDTO(Role role);
+    @Named("toDTO")
+    @Mapping(target = "authorities", expression = "java(mapAuthorities(role.getAuthorities()))")
+    public abstract RoleDTO toDTO(Role role);
 
-	@IterableMapping(qualifiedByName = "toDTO")
-	public abstract List<RoleDTO> toDTOList(List<Role> roles);
+    @IterableMapping(qualifiedByName = "toDTO")
+    public abstract List<RoleDTO> toDTOList(List<Role> roles);
 
-	public Page<RoleDTO> toDTOPage(Page<Role> rolePage) {
-		if (rolePage == null || !rolePage.hasContent()) {
-			return Page.empty();
-		}
-		List<RoleDTO> content = toDTOList(rolePage.getContent());
-		return new PageImpl<>(content, rolePage.getPageable(), rolePage.getTotalElements());
-	}
+    public Page<RoleDTO> toDTOPage(Page<Role> rolePage) {
+        if (rolePage == null || !rolePage.hasContent()) {
+            return Page.empty();
+        }
+        List<RoleDTO> content = toDTOList(rolePage.getContent());
+        return new PageImpl<>(content,
+                              rolePage.getPageable(),
+                              rolePage.getTotalElements());
+    }
 
-	@Named("mapAuthorities")
-	protected Set<String> mapAuthorities(Set<Authority> authorities) {
-		if (authorities == null) {
-			return Set.of();
-		}
-		return authorities.stream().map(Authority::getAuthority).collect(Collectors.toSet());
-	}
+    @Named("mapAuthorities")
+    protected Set<String> mapAuthorities(Set<Authority> authorities) {
+        if (authorities == null) {
+            return Set.of();
+        }
+        return authorities.stream()
+                          .map(Authority::getAuthority)
+                          .collect(Collectors.toSet());
+    }
 
 }

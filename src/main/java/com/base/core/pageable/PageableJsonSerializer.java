@@ -26,16 +26,18 @@ import org.springframework.hateoas.Link;
  */
 public class PageableJsonSerializer extends StdSerializer<Link> {
 
-	public PageableJsonSerializer() {
-		super(Link.class);
-	}
+    public PageableJsonSerializer() {
+        super(Link.class);
+    }
 
-	@Override
-	public void serialize(Link link, JsonGenerator generator, SerializerProvider serializerProvider)
-			throws IOException {
-		generator.writeStartObject();
-		generator.writeStringField("href", link.getHref());
-		generator.writeEndObject();
-	}
+    @Override
+    public void serialize(Link link,
+                          JsonGenerator generator,
+                          SerializerProvider serializerProvider) throws IOException {
+        generator.writeStartObject();
+        generator.writeStringField("href",
+                                   link.getHref());
+        generator.writeEndObject();
+    }
 
 }

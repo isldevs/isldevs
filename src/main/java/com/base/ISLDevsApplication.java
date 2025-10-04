@@ -25,22 +25,22 @@ import org.springframework.context.annotation.Import;
  */
 public class ISLDevsApplication extends SpringBootServletInitializer {
 
-	@Import({ AbstractISLDevsApplication.class })
-	public static final class Configuration {
+    @Import({AbstractISLDevsApplication.class})
+    public static final class Configuration {
 
-	}
+    }
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		return configureApplication(builder);
-	}
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return configureApplication(builder);
+    }
 
-	private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
-		return builder.sources(Configuration.class);
-	}
+    private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder) {
+        return builder.sources(Configuration.class);
+    }
 
-	public static void main(String[] args) {
-		configureApplication(new SpringApplicationBuilder(ISLDevsApplication.class)).run(args);
-	}
+    public static void main(String[] args) {
+        configureApplication(new SpringApplicationBuilder(ISLDevsApplication.class)).run(args);
+    }
 
 }

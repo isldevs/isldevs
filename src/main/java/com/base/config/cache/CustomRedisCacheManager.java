@@ -25,13 +25,18 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
  */
 public class CustomRedisCacheManager extends RedisCacheManager {
 
-	public CustomRedisCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration) {
-		super(cacheWriter, defaultCacheConfiguration);
-	}
+    public CustomRedisCacheManager(RedisCacheWriter cacheWriter,
+                                   RedisCacheConfiguration defaultCacheConfiguration) {
+        super(cacheWriter,
+              defaultCacheConfiguration);
+    }
 
-	@Override
-	protected RedisCache createRedisCache(String name, RedisCacheConfiguration cacheConfig) {
-		return new CustomRedisCache(name, getCacheWriter(), cacheConfig);
-	}
+    @Override
+    protected RedisCache createRedisCache(String name,
+                                          RedisCacheConfiguration cacheConfig) {
+        return new CustomRedisCache(name,
+                                    getCacheWriter(),
+                                    cacheConfig);
+    }
 
 }

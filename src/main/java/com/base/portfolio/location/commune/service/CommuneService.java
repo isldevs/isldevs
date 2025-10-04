@@ -26,19 +26,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface CommuneService {
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_COMMUNE')")
-	Map<String, Object> createCommune(JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_COMMUNE')")
+    Map<String, Object> createCommune(JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_COMMUNE')")
-	Map<String, Object> updateCommune(Long id, JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_COMMUNE')")
+    Map<String, Object> updateCommune(Long id,
+                                      JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_COMMUNE')")
-	Map<String, Object> deleteCommune(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_COMMUNE')")
+    Map<String, Object> deleteCommune(Long id);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
-	CommuneDTO getCommuneById(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
+    CommuneDTO getCommuneById(Long id);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
-	Page<CommuneDTO> listCommunes(Integer page, Integer size, String search);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_COMMUNE')")
+    Page<CommuneDTO> listCommunes(Integer page,
+                                  Integer size,
+                                  String search);
 
 }

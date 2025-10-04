@@ -35,75 +35,85 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Entity
-@Table(name = "village", uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "commune_id", "postal_code" }, name = "idx_village_postal_code_key") })
+@Table(name = "village", uniqueConstraints = {@UniqueConstraint(columnNames = {"commune_id", "postal_code"}, name = "idx_village_postal_code_key")})
 public class Village extends CustomAbstractAuditable {
 
-	@ManyToOne
-	@JoinColumn(name = "commune_id")
-	private Commune commune;
+    @ManyToOne
+    @JoinColumn(name = "commune_id")
+    private Commune commune;
 
-	@Column(name = "name_en", nullable = false)
-	private String nameEn;
+    @Column(name = "name_en", nullable = false)
+    private String nameEn;
 
-	@Column(name = "name_km", nullable = false)
-	private String nameKm;
+    @Column(name = "name_km", nullable = false)
+    private String nameKm;
 
-	@Column(name = "name_zh", nullable = false)
-	private String nameZh;
+    @Column(name = "name_zh", nullable = false)
+    private String nameZh;
 
-	@Column(name = "postal_code", nullable = false)
-	private String postalCode;
+    @Column(name = "postal_code", nullable = false)
+    private String postalCode;
 
-	protected Village() {
-	}
+    protected Village() {
+    }
 
-	public static Village fromJson(final Commune commune, final JsonCommand command) {
+    public static Village fromJson(final Commune commune,
+                                   final JsonCommand command) {
 
-		final var nameEn = command.extractString(VillageConstants.NAME_EN);
-		final var nameKm = command.extractString(VillageConstants.NAME_KM);
-		final var nameZh = command.extractString(VillageConstants.NAME_ZH);
-		final var postalCode = command.extractString(VillageConstants.POSTAL_CODE);
+        final var nameEn = command.extractString(VillageConstants.NAME_EN);
+        final var nameKm = command.extractString(VillageConstants.NAME_KM);
+        final var nameZh = command.extractString(VillageConstants.NAME_ZH);
+        final var postalCode = command.extractString(VillageConstants.POSTAL_CODE);
 
-		return Village.builder()
-			.commune(commune)
-			.nameEn(nameEn)
-			.nameKm(nameKm)
-			.nameZh(nameZh)
-			.postalCode(postalCode)
-			.build();
-	}
+        return Village.builder()
+                      .commune(commune)
+                      .nameEn(nameEn)
+                      .nameKm(nameKm)
+                      .nameZh(nameZh)
+                      .postalCode(postalCode)
+                      .build();
+    }
 
-	public Map<String, Object> changed(JsonCommand command) {
+    public Map<String, Object> changed(JsonCommand command) {
 
-		final Map<String, Object> changes = new HashMap<>(7);
+        final Map<String, Object> changes = new HashMap<>(7);
 
-		if (command.isChangeAsLong(VillageConstants.COMMUNE, this.commune == null ? null : this.commune.getId())) {
-			final var commune = command.extractLong(VillageConstants.COMMUNE);
-			changes.put(VillageConstants.COMMUNE, commune);
-		}
-		if (command.isChangeAsString(VillageConstants.NAME_EN, this.nameEn)) {
-			final var nameEn = command.extractString(VillageConstants.NAME_EN);
-			this.nameEn = nameEn;
-			changes.put(VillageConstants.NAME_EN, nameEn);
-		}
-		if (command.isChangeAsString(VillageConstants.NAME_KM, this.nameKm)) {
-			final var nameKm = command.extractString(VillageConstants.NAME_KM);
-			this.nameKm = nameKm;
-			changes.put(VillageConstants.NAME_KM, nameKm);
-		}
-		if (command.isChangeAsString(VillageConstants.NAME_ZH, this.nameZh)) {
-			final var nameZh = command.extractString(VillageConstants.NAME_ZH);
-			this.nameZh = nameZh;
-			changes.put(VillageConstants.NAME_ZH, nameZh);
-		}
-		if (command.isChangeAsString(VillageConstants.POSTAL_CODE, this.postalCode)) {
-			final var postalCode = command.extractString(VillageConstants.POSTAL_CODE);
-			this.postalCode = postalCode;
-			changes.put(VillageConstants.POSTAL_CODE, postalCode);
-		}
+        if (command.isChangeAsLong(VillageConstants.COMMUNE,
+                                   this.commune == null ? null : this.commune.getId())) {
+            final var commune = command.extractLong(VillageConstants.COMMUNE);
+            changes.put(VillageConstants.COMMUNE,
+                        commune);
+        }
+        if (command.isChangeAsString(VillageConstants.NAME_EN,
+                                     this.nameEn)) {
+            final var nameEn = command.extractString(VillageConstants.NAME_EN);
+            this.nameEn = nameEn;
+            changes.put(VillageConstants.NAME_EN,
+                        nameEn);
+        }
+        if (command.isChangeAsString(VillageConstants.NAME_KM,
+                                     this.nameKm)) {
+            final var nameKm = command.extractString(VillageConstants.NAME_KM);
+            this.nameKm = nameKm;
+            changes.put(VillageConstants.NAME_KM,
+                        nameKm);
+        }
+        if (command.isChangeAsString(VillageConstants.NAME_ZH,
+                                     this.nameZh)) {
+            final var nameZh = command.extractString(VillageConstants.NAME_ZH);
+            this.nameZh = nameZh;
+            changes.put(VillageConstants.NAME_ZH,
+                        nameZh);
+        }
+        if (command.isChangeAsString(VillageConstants.POSTAL_CODE,
+                                     this.postalCode)) {
+            final var postalCode = command.extractString(VillageConstants.POSTAL_CODE);
+            this.postalCode = postalCode;
+            changes.put(VillageConstants.POSTAL_CODE,
+                        postalCode);
+        }
 
-		return changes;
-	}
+        return changes;
+    }
 
 }

@@ -32,44 +32,54 @@ import org.springframework.util.Assert;
 @Component
 public class JdbcRSAKeyPairRepository implements RSAKeyPairRepository {
 
-	private final JdbcTemplate jdbc;
+    private final JdbcTemplate jdbc;
 
-	private final RSAPublicKeyConverter rsaPublicKeyConverter;
+    private final RSAPublicKeyConverter rsaPublicKeyConverter;
 
-	private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
+    private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
 
-	private final RowMapper<RSAKeyPair> keyPairRowMapper;
+    private final RowMapper<RSAKeyPair> keyPairRowMapper;
 
-	@Autowired
-	public JdbcRSAKeyPairRepository(final JdbcTemplate jdbc, final RSAPublicKeyConverter rsaPublicKeyConverter,
-			final RSAPrivateKeyConverter rsaPrivateKeyConverter, final RowMapper<RSAKeyPair> keyPairRowMapper) {
-		this.jdbc = jdbc;
-		this.rsaPublicKeyConverter = rsaPublicKeyConverter;
-		this.rsaPrivateKeyConverter = rsaPrivateKeyConverter;
-		this.keyPairRowMapper = keyPairRowMapper;
-	}
+    @Autowired
+    public JdbcRSAKeyPairRepository(final JdbcTemplate jdbc,
+                                    final RSAPublicKeyConverter rsaPublicKeyConverter,
+                                    final RSAPrivateKeyConverter rsaPrivateKeyConverter,
+                                    final RowMapper<RSAKeyPair> keyPairRowMapper) {
+        this.jdbc = jdbc;
+        this.rsaPublicKeyConverter = rsaPublicKeyConverter;
+        this.rsaPrivateKeyConverter = rsaPrivateKeyConverter;
+        this.keyPairRowMapper = keyPairRowMapper;
+    }
 
-	@Override
-	public List<RSAKeyPair> findKeyPairs() {
-		return this.jdbc.query("SELECT * FROM rsa_key_pairs ORDER BY created DESC", this.keyPairRowMapper);
-	}
+    @Override
+    public List<RSAKeyPair> findKeyPairs() {
+        return this.jdbc.query("SELECT * FROM rsa_key_pairs ORDER BY created DESC",
+                               this.keyPairRowMapper);
+    }
 
-	@Override
-	public void save(RSAKeyPair keyPair) {
-		var sql = """
-				INSERT INTO rsa_key_pairs (id, private_key, public_key, created) VALUES (?, ?, ?, ?)
-				ON CONFLICT ON CONSTRAINT rsa_key_pairs_id_created_key DO NOTHING
-				""";
-		try (var privateBAOS = new ByteArrayOutputStream(); var publicBAOS = new ByteArrayOutputStream()) {
-			this.rsaPrivateKeyConverter.serialize(keyPair.privateKey(), privateBAOS);
-			this.rsaPublicKeyConverter.serialize(keyPair.publicKey(), publicBAOS);
-			var updated = this.jdbc.update(sql, keyPair.id(), privateBAOS.toString(StandardCharsets.UTF_8),
-					publicBAOS.toString(StandardCharsets.UTF_8), new Date(keyPair.created().getTime()));
-			Assert.state(updated == 0 || updated == 1, "no more than one record should have been updated");
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("there's been an exception", e);
-		}
-	}
+    @Override
+    public void save(RSAKeyPair keyPair) {
+        var sql = """
+                INSERT INTO rsa_key_pairs (id, private_key, public_key, created) VALUES (?, ?, ?, ?)
+                ON CONFLICT ON CONSTRAINT rsa_key_pairs_id_created_key DO NOTHING
+                """;
+        try (var privateBAOS = new ByteArrayOutputStream(); var publicBAOS = new ByteArrayOutputStream()) {
+            this.rsaPrivateKeyConverter.serialize(keyPair.privateKey(),
+                                                  privateBAOS);
+            this.rsaPublicKeyConverter.serialize(keyPair.publicKey(),
+                                                 publicBAOS);
+            var updated = this.jdbc.update(sql,
+                                           keyPair.id(),
+                                           privateBAOS.toString(StandardCharsets.UTF_8),
+                                           publicBAOS.toString(StandardCharsets.UTF_8),
+                                           new Date(keyPair.created()
+                                                           .getTime()));
+            Assert.state(updated == 0 || updated == 1,
+                         "no more than one record should have been updated");
+        } catch (IOException e) {
+            throw new IllegalArgumentException("there's been an exception",
+                                               e);
+        }
+    }
 
 }

@@ -27,6 +27,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuthorityRepository extends JpaRepository<Authority, Long>, JpaSpecificationExecutor<Authority> {
 
-	Optional<Authority> findByAuthority(String authority);
+    Optional<Authority> findByAuthority(String authority);
 
 }

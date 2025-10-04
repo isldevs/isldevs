@@ -32,39 +32,44 @@ import org.springframework.util.FileCopyUtils;
  */
 public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserializer<RSAPublicKey> {
 
-	private final TextEncryptor textEncryptor;
+    private final TextEncryptor textEncryptor;
 
-	public RSAPublicKeyConverter(TextEncryptor textEncryptor) {
-		this.textEncryptor = textEncryptor;
-	}
+    public RSAPublicKeyConverter(TextEncryptor textEncryptor) {
+        this.textEncryptor = textEncryptor;
+    }
 
-	@Override
-	public RSAPublicKey deserialize(InputStream inputStream) {
-		try {
-			var pem = textEncryptor.decrypt(FileCopyUtils.copyToString(new InputStreamReader(inputStream)));
-			var publicKeyPEM = pem.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "");
-			var encoded = Base64.getMimeDecoder().decode(publicKeyPEM);
-			var keyFactory = KeyFactory.getInstance("RSA");
-			var keySpec = new X509EncodedKeySpec(encoded);
-			return (RSAPublicKey) keyFactory.generatePublic(keySpec);
-		}
-		catch (Throwable throwable) {
-			throw new IllegalArgumentException("there's been an exception", throwable);
-		}
-	}
+    @Override
+    public RSAPublicKey deserialize(InputStream inputStream) {
+        try {
+            var pem = textEncryptor.decrypt(FileCopyUtils.copyToString(new InputStreamReader(inputStream)));
+            var publicKeyPEM = pem.replace("-----BEGIN PUBLIC KEY-----",
+                                           "")
+                                  .replace("-----END PUBLIC KEY-----",
+                                           "");
+            var encoded = Base64.getMimeDecoder()
+                                .decode(publicKeyPEM);
+            var keyFactory = KeyFactory.getInstance("RSA");
+            var keySpec = new X509EncodedKeySpec(encoded);
+            return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        } catch (Throwable throwable) {
+            throw new IllegalArgumentException("there's been an exception",
+                                               throwable);
+        }
+    }
 
-	@Override
-	public void serialize(RSAPublicKey object, OutputStream outputStream) throws IOException {
-		var x509EncodedKeySpec = new X509EncodedKeySpec(object.getEncoded());
-		var pem = "-----BEGIN PUBLIC KEY-----\n"
-				+ Base64.getMimeEncoder().encodeToString(x509EncodedKeySpec.getEncoded())
-				+ "\n-----END PUBLIC KEY-----";
-		outputStream.write(this.textEncryptor.encrypt(pem).getBytes(StandardCharsets.UTF_8));
-	}
+    @Override
+    public void serialize(RSAPublicKey object,
+                          OutputStream outputStream) throws IOException {
+        var x509EncodedKeySpec = new X509EncodedKeySpec(object.getEncoded());
+        var pem = "-----BEGIN PUBLIC KEY-----\n" + Base64.getMimeEncoder()
+                                                         .encodeToString(x509EncodedKeySpec.getEncoded()) + "\n-----END PUBLIC KEY-----";
+        outputStream.write(this.textEncryptor.encrypt(pem)
+                                             .getBytes(StandardCharsets.UTF_8));
+    }
 
-	public Key convertFromString(String keyStr) throws IOException {
-		var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
-		return deserialize(byteArrayInputStream);
-	}
+    public Key convertFromString(String keyStr) throws IOException {
+        var byteArrayInputStream = new ByteArrayInputStream(keyStr.getBytes(StandardCharsets.UTF_8));
+        return deserialize(byteArrayInputStream);
+    }
 
 }

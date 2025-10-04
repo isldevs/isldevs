@@ -31,17 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/jwt")
 public class JwtAssertionApiResource {
 
-	private final JwtAssertionGeneratorService service;
+    private final JwtAssertionGeneratorService service;
 
-	@Autowired
-	public JwtAssertionApiResource(JwtAssertionGeneratorService service) {
-		this.service = service;
-	}
+    @Autowired
+    public JwtAssertionApiResource(JwtAssertionGeneratorService service) {
+        this.service = service;
+    }
 
-	@GetMapping("/assertion")
-	public ResponseEntity<Map<String, String>> generate() throws JOSEException {
-		String assertion = service.generateClientAssertion();
-		return ResponseEntity.ok(Map.of("assertion", assertion));
-	}
+    @GetMapping("/assertion")
+    public ResponseEntity<Map<String, String>> generate() throws JOSEException {
+        String assertion = service.generateClientAssertion();
+        return ResponseEntity.ok(Map.of("assertion",
+                                        assertion));
+    }
 
 }

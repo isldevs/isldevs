@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "CREATE", entity = ProvinceConstants.PERMISSION)
 public class CreateProvinceHandlerProcessing implements CommandHandlerProcessing {
 
-	private final ProvinceService service;
+    private final ProvinceService service;
 
-	@Autowired
-	public CreateProvinceHandlerProcessing(ProvinceService service) {
-		this.service = service;
-	}
+    @Autowired
+    public CreateProvinceHandlerProcessing(ProvinceService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.createProvince(command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.createProvince(command);
+    }
 
 }

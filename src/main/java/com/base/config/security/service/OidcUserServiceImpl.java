@@ -39,74 +39,81 @@ import org.springframework.stereotype.Component;
 @Component
 public class OidcUserServiceImpl implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-	private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	public OidcUserServiceImpl(final UserRepository userRepository, final RoleRepository roleRepository,
-			final PasswordEncoder passwordEncoder) {
-		this.userRepository = userRepository;
-		this.roleRepository = roleRepository;
-		this.passwordEncoder = passwordEncoder;
-	}
+    @Autowired
+    public OidcUserServiceImpl(final UserRepository userRepository,
+                               final RoleRepository roleRepository,
+                               final PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-	@Override
-	public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+    @Override
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
 
-		OidcUserService oidcDelegate = new OidcUserService();
-		OidcUser oidcUser = oidcDelegate.loadUser(userRequest);
+        OidcUserService oidcDelegate = new OidcUserService();
+        OidcUser oidcUser = oidcDelegate.loadUser(userRequest);
 
-		String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String registrationId = userRequest.getClientRegistration()
+                                           .getRegistrationId();
 
-		Map<String, Object> attributes = oidcUser.getAttributes();
+        Map<String, Object> attributes = oidcUser.getAttributes();
 
-		String username = extractUsername(attributes, registrationId);
-		String email = (String) attributes.get("email");
-		String fullName = (String) attributes.get("name");
-		String avatarUrl = extractAvatarUrl(attributes, registrationId);
+        String username = extractUsername(attributes,
+                                          registrationId);
+        String email = (String) attributes.get("email");
+        String fullName = (String) attributes.get("name");
+        String avatarUrl = extractAvatarUrl(attributes,
+                                            registrationId);
 
-		User user = userRepository.findByUsername(username).orElse(null);
-		if (user == null) {
-			user = User.builder()
-				.username(username)
-				.email(email)
-				.name(fullName)
-				.password(passwordEncoder.encode(UUID.randomUUID().toString()))
-				.providerId(username)
-				.provider(registrationId.toUpperCase())
-				.providerAvatarUrl(avatarUrl)
-				.roles(resolveRoles(new HashSet<>(Set.of("USER")), roleRepository))
-				.build();
-		}
-		else {
-			user.setProviderAvatarUrl(avatarUrl);
-			if (fullName != null)
-				user.setName(fullName);
-			if (email != null)
-				user.setEmail(email);
-		}
-		userRepository.save(user);
-		return oidcUser;
-	}
+        User user = userRepository.findByUsername(username)
+                                  .orElse(null);
+        if (user == null) {
+            user = User.builder()
+                       .username(username)
+                       .email(email)
+                       .name(fullName)
+                       .password(passwordEncoder.encode(UUID.randomUUID()
+                                                            .toString()))
+                       .providerId(username)
+                       .provider(registrationId.toUpperCase())
+                       .providerAvatarUrl(avatarUrl)
+                       .roles(resolveRoles(new HashSet<>(Set.of("USER")),
+                                           roleRepository))
+                       .build();
+        } else {
+            user.setProviderAvatarUrl(avatarUrl);
+            if (fullName != null) user.setName(fullName);
+            if (email != null) user.setEmail(email);
+        }
+        userRepository.save(user);
+        return oidcUser;
+    }
 
-	private String extractUsername(Map<String, Object> attributes, String provider) {
-		return switch (provider) {
-			case "github" -> (String) attributes.get("login");
-			case "google" -> (String) attributes.get("sub");
-			case "facebook" -> (String) attributes.get("id");
-			default -> UUID.randomUUID().toString();
-		};
-	}
+    private String extractUsername(Map<String, Object> attributes,
+                                   String provider) {
+        return switch (provider) {
+            case "github" -> (String) attributes.get("login");
+            case "google" -> (String) attributes.get("sub");
+            case "facebook" -> (String) attributes.get("id");
+            default -> UUID.randomUUID()
+                           .toString();
+        };
+    }
 
-	private String extractAvatarUrl(Map<String, Object> attributes, String provider) {
-		return switch (provider) {
-			case "github" -> (String) attributes.get("avatar_url");
-			case "google", "facebook" -> (String) attributes.get("picture");
-			default -> null;
-		};
-	}
+    private String extractAvatarUrl(Map<String, Object> attributes,
+                                    String provider) {
+        return switch (provider) {
+            case "github" -> (String) attributes.get("avatar_url");
+            case "google", "facebook" -> (String) attributes.get("picture");
+            default -> null;
+        };
+    }
 
 }

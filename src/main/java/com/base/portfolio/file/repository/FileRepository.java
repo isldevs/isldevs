@@ -27,8 +27,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FileRepository extends JpaRepository<File, Long>, JpaSpecificationExecutor<File> {
 
-	File findByEntityAndEntityId(String entity, Long entityId);
+    File findByEntityAndEntityId(String entity,
+                                 Long entityId);
 
-	Optional<File> findByEntityAndEntityIdAndId(String entity, Long entityId, Long id);
+    Optional<File> findByEntityAndEntityIdAndId(String entity,
+                                                Long entityId,
+                                                Long id);
 
 }

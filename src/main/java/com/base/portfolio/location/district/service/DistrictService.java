@@ -26,19 +26,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface DistrictService {
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_DISTRICT')")
-	Map<String, Object> createDistrict(JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_DISTRICT')")
+    Map<String, Object> createDistrict(JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_DISTRICT')")
-	Map<String, Object> updateDistrict(Long id, JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_DISTRICT')")
+    Map<String, Object> updateDistrict(Long id,
+                                       JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_DISTRICT')")
-	Map<String, Object> deleteDistrict(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_DISTRICT')")
+    Map<String, Object> deleteDistrict(Long id);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
-	DistrictDTO getDistrictById(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
+    DistrictDTO getDistrictById(Long id);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
-	Page<DistrictDTO> listDistricts(Integer page, Integer size, String search);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_DISTRICT')")
+    Page<DistrictDTO> listDistricts(Integer page,
+                                    Integer size,
+                                    String search);
 
 }

@@ -24,23 +24,27 @@ import java.util.HashSet;
  */
 public class OfficeConstants {
 
-	public static final String API_PATH = "/offices";
+    public static final String API_PATH = "/offices";
 
-	public static final String PERMISSION = "OFFICE";
+    public static final String PERMISSION = "OFFICE";
 
-	public static final String PARENT_ID = "parentId";
+    public static final String PARENT_ID = "parentId";
 
-	public static final String HIERARCHY = "hierarchy";
+    public static final String HIERARCHY = "hierarchy";
 
-	public static final String DECORATED = "decorated";
+    public static final String DECORATED = "decorated";
 
-	public static final String NAME_EN = "nameEn";
+    public static final String NAME_EN = "nameEn";
 
-	public static final String NAME_KM = "nameKm";
+    public static final String NAME_KM = "nameKm";
 
-	public static final String NAME_ZH = "nameZh";
+    public static final String NAME_ZH = "nameZh";
 
-	public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(
-			Arrays.asList(PARENT_ID, HIERARCHY, DECORATED, NAME_EN, NAME_KM, NAME_ZH));
+    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(PARENT_ID,
+                                                                                             HIERARCHY,
+                                                                                             DECORATED,
+                                                                                             NAME_EN,
+                                                                                             NAME_KM,
+                                                                                             NAME_ZH));
 
 }

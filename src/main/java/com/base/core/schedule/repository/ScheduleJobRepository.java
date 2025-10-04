@@ -24,6 +24,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ScheduleJobRepository extends JpaRepository<ScheduleJob, String> {
 
-	Optional<ScheduleJob> findByJobName(String jobName);
+    Optional<ScheduleJob> findByJobName(String jobName);
 
 }

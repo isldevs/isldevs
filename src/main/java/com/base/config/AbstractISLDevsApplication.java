@@ -41,13 +41,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableTransactionManagement
-@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
-		DataSourceTransactionManagerAutoConfiguration.class, GsonAutoConfiguration.class,
-		JdbcTemplateAutoConfiguration.class, LiquibaseAutoConfiguration.class })
-@Import({ DatasourceConfig.class })
-@ComponentScan(basePackages = { "com.base" })
-@EnableJpaRepositories(basePackages = { "com.base" })
-@IntegrationComponentScan(basePackages = { "com.base" })
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, GsonAutoConfiguration.class, JdbcTemplateAutoConfiguration.class, LiquibaseAutoConfiguration.class})
+@Import({DatasourceConfig.class})
+@ComponentScan(basePackages = {"com.base"})
+@EnableJpaRepositories(basePackages = {"com.base"})
+@IntegrationComponentScan(basePackages = {"com.base"})
 public abstract class AbstractISLDevsApplication {
 
 }

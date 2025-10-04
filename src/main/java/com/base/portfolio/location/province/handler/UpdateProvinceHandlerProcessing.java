@@ -33,16 +33,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = ProvinceConstants.PERMISSION)
 public class UpdateProvinceHandlerProcessing implements CommandHandlerProcessing {
 
-	private final ProvinceService service;
+    private final ProvinceService service;
 
-	@Autowired
-	public UpdateProvinceHandlerProcessing(ProvinceService service) {
-		this.service = service;
-	}
+    @Autowired
+    public UpdateProvinceHandlerProcessing(ProvinceService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.updateProvince(command.getId(), command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.updateProvince(command.getId(),
+                                           command);
+    }
 
 }

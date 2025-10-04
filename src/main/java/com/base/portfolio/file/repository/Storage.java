@@ -24,16 +24,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class Storage {
 
-	public StorageRepository repository() {
-		return new StorageRepository();
-	}
+    public StorageRepository repository() {
+        return new StorageRepository();
+    }
 
-	public StorageUtils repository(final int type) {
-		StorageType storageType = StorageType.fromInt(type);
-		if (storageType == StorageType.FILE_SYSTEM) {
-			return new StorageRepository();
-		}
-		return null;
-	}
+    public StorageUtils repository(final int type) {
+        StorageType storageType = StorageType.fromInt(type);
+        if (storageType == StorageType.FILE_SYSTEM) {
+            return new StorageRepository();
+        }
+        return null;
+    }
 
 }

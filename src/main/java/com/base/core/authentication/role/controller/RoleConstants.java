@@ -24,14 +24,15 @@ import java.util.HashSet;
  */
 public class RoleConstants {
 
-	public static final String API_PATH = "/roles";
+    public static final String API_PATH = "/roles";
 
-	public static final String PERMISSION = "ROLE";
+    public static final String PERMISSION = "ROLE";
 
-	public static final String NAME = "name";
+    public static final String NAME = "name";
 
-	public static final String AUTHORITIES = "authorities";
+    public static final String AUTHORITIES = "authorities";
 
-	public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(NAME, AUTHORITIES));
+    public static final Collection<String> SUPPORTED_PARAMETER = new HashSet<>(Arrays.asList(NAME,
+                                                                                             AUTHORITIES));
 
 }

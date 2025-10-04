@@ -33,26 +33,27 @@ import org.springframework.stereotype.Component;
 @Component(value = "customJWKSource")
 public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext> {
 
-	private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairRepository rsaKeyPairRepository;
 
-	@Autowired
-	public RSAKeyPairRepositoryJWKSource(RSAKeyPairRepository rsaKeyPairRepository) {
-		this.rsaKeyPairRepository = rsaKeyPairRepository;
-	}
+    @Autowired
+    public RSAKeyPairRepositoryJWKSource(RSAKeyPairRepository rsaKeyPairRepository) {
+        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    }
 
-	@Override
-	public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext) throws KeySourceException {
-		return rsaKeyPairRepository.findKeyPairs()
-			.stream()
-			.max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-			.map(keyPair -> {
-				var rsaKey = new RSAKey.Builder(keyPair.publicKey()).privateKey(keyPair.privateKey())
-					.keyID(keyPair.id())
-					.algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
-					.build();
-				return jwkSelector.select(new com.nimbusds.jose.jwk.JWKSet(rsaKey));
-			})
-			.orElse(Collections.emptyList());
-	}
+    @Override
+    public List<JWK> get(JWKSelector jwkSelector,
+                         SecurityContext securityContext) throws KeySourceException {
+        return rsaKeyPairRepository.findKeyPairs()
+                                   .stream()
+                                   .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                                   .map(keyPair -> {
+                                       var rsaKey = new RSAKey.Builder(keyPair.publicKey()).privateKey(keyPair.privateKey())
+                                                                                           .keyID(keyPair.id())
+                                                                                           .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
+                                                                                           .build();
+                                       return jwkSelector.select(new com.nimbusds.jose.jwk.JWKSet(rsaKey));
+                                   })
+                                   .orElse(Collections.emptyList());
+    }
 
 }

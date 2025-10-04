@@ -31,58 +31,84 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class PageableHateoasAssembler {
 
-	@Autowired
-	private HttpServletRequest request;
+    @Autowired
+    private HttpServletRequest request;
 
-	public <T> PageableResponse<T> toModel(Page<T> page) {
+    public <T> PageableResponse<T> toModel(Page<T> page) {
 
-		PageableResponse.EmbeddedContent<T> embedded = PageableResponse.EmbeddedContent.<T>builder()
-			.content(page.getContent())
-			.build();
+        PageableResponse.EmbeddedContent<T> embedded = PageableResponse.EmbeddedContent.<T>builder()
+                                                                                       .content(page.getContent())
+                                                                                       .build();
 
-		PageableResponse.PageMetadata pageMetadata = PageableResponse.PageMetadata.builder()
-			.size(page.getSize())
-			.totalElements(page.getTotalElements())
-			.totalPages(page.getTotalPages())
-			.number(page.getNumber())
-			.build();
+        PageableResponse.PageMetadata pageMetadata = PageableResponse.PageMetadata.builder()
+                                                                                  .size(page.getSize())
+                                                                                  .totalElements(page.getTotalElements())
+                                                                                  .totalPages(page.getTotalPages())
+                                                                                  .number(page.getNumber())
+                                                                                  .build();
 
-		Map<String, Link> links = generateLinks(page, request.getRequestURI());
+        Map<String, Link> links = generateLinks(page,
+                                                request.getRequestURI());
 
-		return PageableResponse.<T>builder().embedded(embedded).links(links).page(pageMetadata).build();
-	}
+        return PageableResponse.<T>builder()
+                               .embedded(embedded)
+                               .links(links)
+                               .page(pageMetadata)
+                               .build();
+    }
 
-	private Map<String, Link> generateLinks(Page<?> page, String basePath) {
-		Map<String, Link> links = new LinkedHashMap<>();
+    private Map<String, Link> generateLinks(Page<?> page,
+                                            String basePath) {
+        Map<String, Link> links = new LinkedHashMap<>();
 
-		int currentPage = page.getNumber();
-		int pageSize = page.getSize();
-		int totalPages = page.getTotalPages();
+        int currentPage = page.getNumber();
+        int pageSize = page.getSize();
+        int totalPages = page.getTotalPages();
 
-		links.put("self", createLink(basePath, currentPage, pageSize));
-		links.put("first", createLink(basePath, 0, pageSize));
-		if (totalPages > 0) {
-			links.put("last", createLink(basePath, totalPages - 1, pageSize));
-		}
-		if (page.hasNext()) {
-			links.put("next", createLink(basePath, currentPage + 1, pageSize));
-		}
-		if (page.hasPrevious()) {
-			links.put("prev", createLink(basePath, currentPage - 1, pageSize));
-		}
+        links.put("self",
+                  createLink(basePath,
+                             currentPage,
+                             pageSize));
+        links.put("first",
+                  createLink(basePath,
+                             0,
+                             pageSize));
+        if (totalPages > 0) {
+            links.put("last",
+                      createLink(basePath,
+                                 totalPages - 1,
+                                 pageSize));
+        }
+        if (page.hasNext()) {
+            links.put("next",
+                      createLink(basePath,
+                                 currentPage + 1,
+                                 pageSize));
+        }
+        if (page.hasPrevious()) {
+            links.put("prev",
+                      createLink(basePath,
+                                 currentPage - 1,
+                                 pageSize));
+        }
 
-		return links;
-	}
+        return links;
+    }
 
-	private Link createLink(String basePath, int page, int size) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromPath(basePath);
-		builder.queryParam("page", page);
-		builder.queryParam("size", size);
-		return Link.of(builder.build().toUriString());
-	}
+    private Link createLink(String basePath,
+                            int page,
+                            int size) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath(basePath);
+        builder.queryParam("page",
+                           page);
+        builder.queryParam("size",
+                           size);
+        return Link.of(builder.build()
+                              .toUriString());
+    }
 
-	public <T> List<T> unpaged(Page<T> page) {
-		return page.getContent();
-	}
+    public <T> List<T> unpaged(Page<T> page) {
+        return page.getContent();
+    }
 
 }

@@ -44,108 +44,158 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private final MessageSource messageSource;
+    private final MessageSource messageSource;
 
-	private final SecurityContext securityContext;
+    private final SecurityContext securityContext;
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-	private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	private final UserDataValidation validation;
+    private final UserDataValidation validation;
 
-	private final FileService fileService;
+    private final FileService fileService;
 
-	@Autowired
-	public UserServiceImpl(final MessageSource messageSource, final SecurityContext securityContext,
-			final UserRepository userRepository, final RoleRepository roleRepository,
-			final PasswordEncoder passwordEncoder, final UserDataValidation validation, final FileService fileService) {
-		this.messageSource = messageSource;
-		this.securityContext = securityContext;
-		this.userRepository = userRepository;
-		this.roleRepository = roleRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.validation = validation;
-		this.fileService = fileService;
-	}
+    @Autowired
+    public UserServiceImpl(final MessageSource messageSource,
+                           final SecurityContext securityContext,
+                           final UserRepository userRepository,
+                           final RoleRepository roleRepository,
+                           final PasswordEncoder passwordEncoder,
+                           final UserDataValidation validation,
+                           final FileService fileService) {
+        this.messageSource = messageSource;
+        this.securityContext = securityContext;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.validation = validation;
+        this.fileService = fileService;
+    }
 
-	@Override
-	@CacheEvict(value = "users", allEntries = true)
-	public Map<String, Object> createUser(JsonCommand command) {
-		this.validation.create(command.getJson());
+    @Override
+    @CacheEvict(value = "users", allEntries = true)
+    public Map<String, Object> createUser(JsonCommand command) {
+        this.validation.create(command.getJson());
 
-		final var username = command.extractString(UserConstants.USERNAME);
+        final var username = command.extractString(UserConstants.USERNAME);
 
-		if (userRepository.existsByUsername(username)) {
-			throw new NotFoundException("msg.username.exist", username);
-		}
+        if (userRepository.existsByUsername(username)) {
+            throw new NotFoundException("msg.username.exist",
+                                        username);
+        }
 
-		var data = User.from(command, username, passwordEncoder, roleRepository);
+        var data = User.from(command,
+                             username,
+                             passwordEncoder,
+                             roleRepository);
 
-		var user = userRepository.save(data);
-		return LogData.builder().id(user.getId()).success("msg.success", messageSource).build().claims();
-	}
+        var user = userRepository.save(data);
+        return LogData.builder()
+                      .id(user.getId())
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
-	@Override
-	@Cacheable(value = "users", key = "#id")
-	public UserDTO getUserById(Long id) {
-		var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
-		return UserDTO.toDTO(user, fileService);
-	}
+    @Override
+    @Cacheable(value = "users", key = "#id")
+    public UserDTO getUserById(Long id) {
+        var user = userRepository.findById(id)
+                                 .orElseThrow(() -> new NotFoundException("msg.not.found.user",
+                                                                          id));
+        return UserDTO.toDTO(user,
+                             fileService);
+    }
 
-	@Override
-	@Cacheable(value = "users", key = "#page + '-' + #size + '-' + #search")
-	public Page<UserDTO> listUsers(Integer page, Integer size, String search) {
-		Specification<User> specification = (root, _, sp) -> {
-			List<Predicate> predicates = new ArrayList<>();
-			if (search != null && !search.isBlank()) {
-				predicates.add(sp.like(sp.lower(root.get("username")), "%" + search.toLowerCase() + "%"));
-			}
-			if (!securityContext.isAdmin()) {
-				predicates.add(sp.isTrue(root.get("enabled")));
-			}
-			return sp.and(predicates.toArray(new Predicate[0]));
-		};
+    @Override
+    @Cacheable(value = "users", key = "#page + '-' + #size + '-' + #search")
+    public Page<UserDTO> listUsers(Integer page,
+                                   Integer size,
+                                   String search) {
+        Specification<User> specification = (root,
+                                             _,
+                                             sp) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (search != null && !search.isBlank()) {
+                predicates.add(sp.like(sp.lower(root.get("username")),
+                                       "%" + search.toLowerCase() + "%"));
+            }
+            if (!securityContext.isAdmin()) {
+                predicates.add(sp.isTrue(root.get("enabled")));
+            }
+            return sp.and(predicates.toArray(new Predicate[0]));
+        };
 
-		if (page == null || size == null) {
-			var users = userRepository.findAll(specification, Sort.by("username").ascending());
-			return new PageImpl<>(users.stream().map(user -> UserDTO.toDTO(user, null)).toList());
-		}
+        if (page == null || size == null) {
+            var users = userRepository.findAll(specification,
+                                               Sort.by("username")
+                                                   .ascending());
+            return new PageImpl<>(users.stream()
+                                       .map(user -> UserDTO.toDTO(user,
+                                                                  null))
+                                       .toList());
+        }
 
-		var pageable = PageRequest.of(page, size, Sort.by("username").ascending());
-		var usersPage = userRepository.findAll(specification, pageable);
-		return usersPage.map(user -> UserDTO.toDTO(user, null));
-	}
+        var pageable = PageRequest.of(page,
+                                      size,
+                                      Sort.by("username")
+                                          .ascending());
+        var usersPage = userRepository.findAll(specification,
+                                               pageable);
+        return usersPage.map(user -> UserDTO.toDTO(user,
+                                                   null));
+    }
 
-	@Override
-	@CacheEvict(value = "users", key = "#id")
-	public Map<String, Object> updateUser(Long id, JsonCommand command) {
-		var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
+    @Override
+    @CacheEvict(value = "users", key = "#id")
+    public Map<String, Object> updateUser(Long id,
+                                          JsonCommand command) {
+        var user = userRepository.findById(id)
+                                 .orElseThrow(() -> new NotFoundException("msg.not.found.user",
+                                                                          id));
 
-		this.validation.update(command.getJson());
+        this.validation.update(command.getJson());
 
-		final var username = command.extractString(UserConstants.USERNAME);
-		if (!user.getUsername().equals(username) && userRepository.existsByUsername(username)) {
-			throw new ErrorException("msg.username.exist", username);
-		}
-		var changes = user.changed(this.passwordEncoder, this.roleRepository, command);
-		if (!changes.isEmpty()) {
-			userRepository.save(user);
-		}
-		return LogData.builder().id(id).changes(changes).success("msg.success", messageSource).build().claims();
-	}
+        final var username = command.extractString(UserConstants.USERNAME);
+        if (!user.getUsername()
+                 .equals(username) && userRepository.existsByUsername(username)) {
+            throw new ErrorException("msg.username.exist",
+                                     username);
+        }
+        var changes = user.changed(this.passwordEncoder,
+                                   this.roleRepository,
+                                   command);
+        if (!changes.isEmpty()) {
+            userRepository.save(user);
+        }
+        return LogData.builder()
+                      .id(id)
+                      .changes(changes)
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
-	@Override
-	@CacheEvict(value = "users", key = "#id")
-	public Map<String, Object> deleteUser(Long id) {
-		if (!userRepository.existsById(id)) {
-			throw new NotFoundException("msg.not.found.user", id);
-		}
-		userRepository.deleteById(id);
+    @Override
+    @CacheEvict(value = "users", key = "#id")
+    public Map<String, Object> deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("msg.not.found.user",
+                                        id);
+        }
+        userRepository.deleteById(id);
 
-		return LogData.builder().id(id).success("msg.success", messageSource).build().claims();
-	}
+        return LogData.builder()
+                      .id(id)
+                      .success("msg.success",
+                               messageSource)
+                      .build()
+                      .claims();
+    }
 
 }

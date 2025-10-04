@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "CREATE", entity = VillageConstants.PERMISSION)
 public class CreateVillageHandlerProcessing implements CommandHandlerProcessing {
 
-	private final VillageService service;
+    private final VillageService service;
 
-	@Autowired
-	public CreateVillageHandlerProcessing(VillageService service) {
-		this.service = service;
-	}
+    @Autowired
+    public CreateVillageHandlerProcessing(VillageService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.createVillage(command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.createVillage(command);
+    }
 
 }

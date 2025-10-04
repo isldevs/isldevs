@@ -33,57 +33,69 @@ import org.springframework.stereotype.Component;
 @Component("rsaKeyRotator")
 public class ScheduledKeyRotator implements Runnable {
 
-	private final Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
+    private final Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
 
-	private final RSAKeyPairRepository repository;
+    private final RSAKeyPairRepository repository;
 
-	private final Keys keys;
+    private final Keys keys;
 
-	@Autowired
-	public ScheduledKeyRotator(RSAKeyPairRepository repository, Keys keys) {
-		this.repository = repository;
-		this.keys = keys;
-	}
+    @Autowired
+    public ScheduledKeyRotator(RSAKeyPairRepository repository,
+                               Keys keys) {
+        this.repository = repository;
+        this.keys = keys;
+    }
 
-	@Override
-	public void run() {
-		try {
-			ensureAtLeastOneKeyExists();
-			performScheduledRotation();
-		}
-		catch (Exception e) {
-			logger.error("RSA key rotation failed", e);
-		}
-	}
+    @Override
+    public void run() {
+        try {
+            ensureAtLeastOneKeyExists();
+            performScheduledRotation();
+        } catch (Exception e) {
+            logger.error("RSA key rotation failed",
+                         e);
+        }
+    }
 
-	private void ensureAtLeastOneKeyExists() {
-		if (repository.findKeyPairs().isEmpty()) {
-			generateEmergencyKey();
-		}
-	}
+    private void ensureAtLeastOneKeyExists() {
+        if (repository.findKeyPairs()
+                      .isEmpty()) {
+            generateEmergencyKey();
+        }
+    }
 
-	private void performScheduledRotation() {
-		var existingKey = repository.findKeyPairs()
-			.stream()
-			.max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
-		var shouldRotate = existingKey.isEmpty()
-				|| existingKey.get().created().toInstant().isBefore(Instant.now().minus(30, ChronoUnit.DAYS));
+    private void performScheduledRotation() {
+        var existingKey = repository.findKeyPairs()
+                                    .stream()
+                                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+        var shouldRotate = existingKey.isEmpty() || existingKey.get()
+                                                               .created()
+                                                               .toInstant()
+                                                               .isBefore(Instant.now()
+                                                                                .minus(30,
+                                                                                       ChronoUnit.DAYS));
 
-		if (shouldRotate) {
-			var keyId = UUID.randomUUID().toString();
-			var created = new Timestamp(System.currentTimeMillis());
-			var newKey = keys.generateKeyPair(keyId, created);
-			repository.save(newKey);
-			logger.info("New rotated RSA key with ID {} on {}", keyId, created);
-		}
-	}
+        if (shouldRotate) {
+            var keyId = UUID.randomUUID()
+                            .toString();
+            var created = new Timestamp(System.currentTimeMillis());
+            var newKey = keys.generateKeyPair(keyId,
+                                              created);
+            repository.save(newKey);
+            logger.info("New rotated RSA key with ID {} on {}",
+                        keyId,
+                        created);
+        }
+    }
 
-	private void generateEmergencyKey() {
-		var keyId = UUID.randomUUID().toString();
-		var created = new Timestamp(System.currentTimeMillis());
-		var newKey = keys.generateKeyPair(keyId, created);
-		repository.save(newKey);
-		logger.warn("Generated new RSA key due to missing keys");
-	}
+    private void generateEmergencyKey() {
+        var keyId = UUID.randomUUID()
+                        .toString();
+        var created = new Timestamp(System.currentTimeMillis());
+        var newKey = keys.generateKeyPair(keyId,
+                                          created);
+        repository.save(newKey);
+        logger.warn("Generated new RSA key due to missing keys");
+    }
 
 }

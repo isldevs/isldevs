@@ -23,6 +23,6 @@ import java.util.Map;
  */
 public interface LogService {
 
-	Map<String, Object> log(Command command);
+    Map<String, Object> log(Command command);
 
 }

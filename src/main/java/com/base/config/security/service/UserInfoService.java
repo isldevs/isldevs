@@ -32,42 +32,47 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInfoService {
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	@Autowired
-	public UserInfoService(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
+    @Autowired
+    public UserInfoService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-	public OidcUserInfo loadUser(OidcUserInfoAuthenticationContext context) {
-		var username = context.getAuthorization().getPrincipalName();
+    public OidcUserInfo loadUser(OidcUserInfoAuthenticationContext context) {
+        var username = context.getAuthorization()
+                              .getPrincipalName();
 
-		var user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        var user = userRepository.findByUsername(username)
+                                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-		var roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-		var authorities = user.getRoles()
-			.stream()
-			.flatMap(role -> role.getAuthorities().stream())
-			.map(Authority::getAuthority)
-			.collect(Collectors.toSet());
+        var roles = user.getRoles()
+                        .stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toSet());
+        var authorities = user.getRoles()
+                              .stream()
+                              .flatMap(role -> role.getAuthorities()
+                                                   .stream())
+                              .map(Authority::getAuthority)
+                              .collect(Collectors.toSet());
 
-		var userInfo = UserInfoData.builder()
-			.id(user.getId())
-			.username(username)
-			.name(user.getName())
-			.email(user.getEmail())
-			.enabled(user.isEnabled())
-			.authenticated(true)
-			.isAccountNonExpired(user.isAccountNonExpired())
-			.isAccountNonLocked(user.isAccountNonLocked())
-			.isCredentialsNonExpired(user.isCredentialsNonExpired())
-			.roles(roles)
-			.authorities(authorities)
-			.build()
-			.getClaims();
+        var userInfo = UserInfoData.builder()
+                                   .id(user.getId())
+                                   .username(username)
+                                   .name(user.getName())
+                                   .email(user.getEmail())
+                                   .enabled(user.isEnabled())
+                                   .authenticated(true)
+                                   .isAccountNonExpired(user.isAccountNonExpired())
+                                   .isAccountNonLocked(user.isAccountNonLocked())
+                                   .isCredentialsNonExpired(user.isCredentialsNonExpired())
+                                   .roles(roles)
+                                   .authorities(authorities)
+                                   .build()
+                                   .getClaims();
 
-		return new OidcUserInfo(userInfo);
-	}
+        return new OidcUserInfo(userInfo);
+    }
 
 }

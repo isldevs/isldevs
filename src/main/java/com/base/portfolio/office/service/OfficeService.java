@@ -27,21 +27,24 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface OfficeService {
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_OFFICE')")
-	Map<String, Object> createOffice(JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'CREATE_OFFICE')")
+    Map<String, Object> createOffice(JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_OFFICE')")
-	Map<String, Object> updateOffice(Long id, JsonCommand command);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'UPDATE_OFFICE')")
+    Map<String, Object> updateOffice(Long id,
+                                     JsonCommand command);
 
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_OFFICE')")
-	Map<String, Object> deleteOffice(Long id);
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'DELETE_OFFICE')")
+    Map<String, Object> deleteOffice(Long id);
 
-	@Transactional(readOnly = true)
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_OFFICE')")
-	OfficeDTO getOfficeById(Long id);
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_OFFICE')")
+    OfficeDTO getOfficeById(Long id);
 
-	@Transactional(readOnly = true)
-	@PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_OFFICE')")
-	Page<OfficeDTO> listOffices(Integer page, Integer size, String search);
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyAuthority('FULL_ACCESS', 'READ_OFFICE')")
+    Page<OfficeDTO> listOffices(Integer page,
+                                Integer size,
+                                String search);
 
 }

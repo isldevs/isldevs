@@ -20,6 +20,6 @@ package com.base.core.serializer;
  */
 public interface JsonSerializer<T> {
 
-	String serialize(Object object);
+    String serialize(Object object);
 
 }

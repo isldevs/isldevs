@@ -29,18 +29,18 @@ import lombok.*;
 @NoArgsConstructor
 public class ProvinceDTO {
 
-	private Long id;
+    private Long id;
 
-	private String type;
+    private String type;
 
-	private String nameEn;
+    private String nameEn;
 
-	private String nameKm;
+    private String nameKm;
 
-	private String nameZh;
+    private String nameZh;
 
-	private String postalCode;
+    private String postalCode;
 
-	private List<DistrictDTO> districts;
+    private List<DistrictDTO> districts;
 
 }

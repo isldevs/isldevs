@@ -33,16 +33,17 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "UPDATE", entity = VillageConstants.PERMISSION)
 public class UpdateVillageHandlerProcessing implements CommandHandlerProcessing {
 
-	private final VillageService service;
+    private final VillageService service;
 
-	@Autowired
-	public UpdateVillageHandlerProcessing(VillageService service) {
-		this.service = service;
-	}
+    @Autowired
+    public UpdateVillageHandlerProcessing(VillageService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.updateVillage(command.getId(), command);
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.updateVillage(command.getId(),
+                                          command);
+    }
 
 }

@@ -27,37 +27,34 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
  */
 public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
-	private final String username;
+    private final String username;
 
-	private final String password;
+    private final String password;
 
-	private final String clientId;
+    private final String clientId;
 
-	private final Set<String> scopes;
+    private final Set<String> scopes;
 
-	public OAuth2PasswordAuthenticationToken(String username, String password, Authentication clientPrincipal,
-			Set<String> scopes, Map<String, Object> additionalParameters) {
-		super(new AuthorizationGrantType("password"), clientPrincipal, additionalParameters);
-		this.username = username;
-		this.password = password;
-		this.clientId = clientPrincipal.getName();
-		this.scopes = (scopes != null) ? Collections.unmodifiableSet(scopes) : Collections.emptySet();
-	}
+    public OAuth2PasswordAuthenticationToken(String username,
+                                             String password,
+                                             Authentication clientPrincipal,
+                                             Set<String> scopes,
+                                             Map<String, Object> additionalParameters) {
+        super(new AuthorizationGrantType("password"),
+              clientPrincipal,
+              additionalParameters);
+        this.username = username;
+        this.password = password;
+        this.clientId = clientPrincipal.getName();
+        this.scopes = (scopes != null) ? Collections.unmodifiableSet(scopes) : Collections.emptySet();
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() { return username; }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() { return password; }
 
-	public Set<String> getScopes() {
-		return scopes;
-	}
+    public Set<String> getScopes() { return scopes; }
 
-	public String getClientId() {
-		return clientId;
-	}
+    public String getClientId() { return clientId; }
 
 }

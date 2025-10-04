@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = UserConstants.PERMISSION)
 public class DeleteUserHandlerProcessing implements CommandHandlerProcessing {
 
-	private final UserService service;
+    private final UserService service;
 
-	@Autowired
-	public DeleteUserHandlerProcessing(UserService service) {
-		this.service = service;
-	}
+    @Autowired
+    public DeleteUserHandlerProcessing(UserService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.deleteUser(command.getId());
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.deleteUser(command.getId());
+    }
 
 }

@@ -26,22 +26,27 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public interface AuthenticationService {
 
-	String extractUsername(String token);
+    String extractUsername(String token);
 
-	<T> T extractClaim(String token, Function<Claims, T> claimsResolver);
+    <T> T extractClaim(String token,
+                       Function<Claims, T> claimsResolver);
 
-	String generateToken(UserDetails userDetails);
+    String generateToken(UserDetails userDetails);
 
-	String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
+    String generateToken(Map<String, Object> extraClaims,
+                         UserDetails userDetails);
 
-	String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration);
+    String buildToken(Map<String, Object> extraClaims,
+                      UserDetails userDetails,
+                      long expiration);
 
-	boolean isTokenValid(String token, UserDetails userDetails);
+    boolean isTokenValid(String token,
+                         UserDetails userDetails);
 
-	boolean isTokenExpired(String token);
+    boolean isTokenExpired(String token);
 
-	Date extractExpiration(String token);
+    Date extractExpiration(String token);
 
-	Claims extractAllClaims(String token);
+    Claims extractAllClaims(String token);
 
 }

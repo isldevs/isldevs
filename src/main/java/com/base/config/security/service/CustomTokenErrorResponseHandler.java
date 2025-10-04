@@ -34,31 +34,36 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomTokenErrorResponseHandler implements AuthenticationFailureHandler {
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-	private final MessageSource messageSource;
+    private final MessageSource messageSource;
 
-	public CustomTokenErrorResponseHandler(MessageSource messageSource) {
-		this.messageSource = messageSource;
-	}
+    public CustomTokenErrorResponseHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
-	@Override
-	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException exception) throws IOException {
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        AuthenticationException exception) throws IOException {
 
-		Locale locale = request.getLocale();
-		String message = messageSource.getMessage("msg.unauthorized.description", null, "Please login again.", locale);
+        Locale locale = request.getLocale();
+        String message = messageSource.getMessage("msg.unauthorized.description",
+                                                  null,
+                                                  "Please login again.",
+                                                  locale);
 
-		ErrorData errorData = ErrorData.builder()
-			.status(HttpStatus.UNAUTHORIZED.value())
-			.error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-			.description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-			.message(message)
-			.build();
+        ErrorData errorData = ErrorData.builder()
+                                       .status(HttpStatus.UNAUTHORIZED.value())
+                                       .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                                       .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                                       .message(message)
+                                       .build();
 
-		response.setStatus(HttpStatus.UNAUTHORIZED.value());
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		objectMapper.writeValue(response.getOutputStream(), errorData);
-	}
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getOutputStream(),
+                                errorData);
+    }
 
 }

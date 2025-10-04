@@ -33,16 +33,16 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(action = "DELETE", entity = ProvinceConstants.PERMISSION)
 public class DeleteProvinceHandlerProcessing implements CommandHandlerProcessing {
 
-	private final ProvinceService service;
+    private final ProvinceService service;
 
-	@Autowired
-	public DeleteProvinceHandlerProcessing(ProvinceService service) {
-		this.service = service;
-	}
+    @Autowired
+    public DeleteProvinceHandlerProcessing(ProvinceService service) {
+        this.service = service;
+    }
 
-	@Override
-	public Map<String, Object> process(JsonCommand command) {
-		return this.service.deleteProvince(command.getId());
-	}
+    @Override
+    public Map<String, Object> process(JsonCommand command) {
+        return this.service.deleteProvince(command.getId());
+    }
 
 }
