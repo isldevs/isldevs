@@ -520,16 +520,6 @@ echo -n "isldevs" | xxd -p
 # Use the hex string 69736c64657673 as your salt value.
 ```
 
-### 4. Application Properties
-Configure your application.properties or application.yml with the following properties:
-```
-jwt.key.public=classpath:key.public
-jwt.key.private=classpath:key.private
-jwt.key.id=isldevs
-jwt.persistence.password=iamsldevs
-jwt.persistence.salt=69736c64657673
-```
-
 ## 🔒 Dependency Locking
 This project uses Gradle dependency locking to ensure consistent builds across all environments.
 A gradle.lockfile is automatically generated and tracked in version control.
@@ -623,12 +613,6 @@ You can configure the application via Spring properties files or environment var
   - SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=30000
   - SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=600000
   - SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1800000
-
-- OAuth2 / Security
-  - SPRING_SECURITY_OAUTH2_ISSUER_URI=https://localhost:8443/api/v1
-  - JWT key locations can be set via properties (see `application-dev.properties`):
-    - jwt.key.public=classpath:key.public
-    - jwt.key.private=classpath:key.private
 
 - TODO: Social login client IDs/secrets for GitHub/Google/Facebook should be documented with exact property names once configured.
 - NOTE: A custom `DB_*` variable approach is described earlier in this README; consider unifying on Spring’s standard env names. TODO: consolidate configuration docs.
