@@ -45,33 +45,44 @@ Simplifies secure backend development with:
    ```
 
 ## JWT Key Management
-JWT keys are stored in a PostgreSQL table (`jwt_keys`) and encrypted with AES-256.
+JWT keys are encrypted with AES-256 and stored in a PostgreSQL `rsa_key_pairs` table, fetched dynamically for signing/verification. Encryption uses `JWT_PASSWORD` and `JWT_SALT` from the `config` table.
 
 ### Table Setup
 ```sql
-CREATE TABLE rsa_key_pairs (
-    id SERIAL PRIMARY KEY,
-    private_key TEXT NOT NULL, -- Encrypted
-    public_key TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE rsa_key_pairs
+(
+   id          VARCHAR(36) PRIMARY KEY, -- UUID
+   private_key TEXT NOT NULL,           -- AES-256 encrypted
+   public_key  TEXT NOT NULL,           -- AES-256 encrypted
+   created     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE config
+(
+   id           SERIAL PRIMARY KEY,
+   name         VARCHAR(255) NOT NULL,
+   key_name     VARCHAR(255) NOT NULL,
+   value        TEXT         NOT NULL,
+   active       BOOLEAN DEFAULT true,
+   created_by   VARCHAR(255),
+   created_date TIMESTAMP,
+   updated_by   VARCHAR(255),
+   updated_date TIMESTAMP
 );
 ```
-
-### Generate Keys
-```bash
-openssl genrsa -out key.private 2048
-openssl rsa -in key.private -pubout -out key.public
-```
+### Generate and Store Keys
+Keys are generated programmatically (RSA 2048-bit) via the `Keys` class and stored in `rsa_key_pairs` on startup if none exist.
 
 ### Configure
-In `application.properties`:
-```properties
-jwt.persistence.password=${JWT_PERSISTENCE_PASSWORD}
-jwt.persistence.salt=${JWT_PERSISTENCE_SALT}
+Populate the `config` table with secure values:
+```sql
+INSERT INTO config (name, key_name, value, active, created_by, created_date, updated_by, updated_date)
+VALUES ('JWT Password', 'JWT_PASSWORD', '$(openssl rand -base64 32)', true, 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP),
+       ('JWT Salt', 'JWT_SALT', '$(openssl rand -hex 16)', true, 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP);
 ```
 
 ### Key Loading
-Keys are retrieved from the `jwt_keys` table using Spring Data JPA, decrypted with `JWT_PERSISTENCE_PASSWORD`, and used for JWT signing/verification.
+The latest keypair (`id` as UUID) is fetched from `rsa_key_pairs` via JDBC, decrypted using `JWT_PASSWORD` and `JWT_SALT` from `config`, and used for JWT operations. The `id` is included as `kid` in JWT headers.
 
 ## SSL/TLS Setup
 Generate a self-signed certificate for dev:
