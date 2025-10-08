@@ -88,7 +88,7 @@ keytool -genkeypair -alias yourserver -keyalg RSA -keysize 4096 -validity 365 \
 - **JWT Bearer**: POST `/oauth2/token` with `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer`
 - **Device Code**: POST `/oauth2/device_authorization`
 
-[Full Postman configs](https://github.com/isldevs/isldevs/blob/main/docs/postman.md).
+[Full Postman configs](https://github.com/isldevs/isldevs/blob/master/docs/postman.md).
 
 ## Project Structure
 ```
