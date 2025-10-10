@@ -28,20 +28,57 @@ Simplifies secure backend development with:
    ```bash
    ./gradlew dependencies
    ```
-3. Set environment variables:
-   ```bash
-   export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/isldevs_db
-   export SPRING_DATASOURCE_USERNAME=postgres
-   export SPRING_DATASOURCE_PASSWORD=your-secure-password
-   export JWT_PRIVATE_KEY_PATH=/secure/path/key.private
-   export JWT_PERSISTENCE_PASSWORD=$(openssl rand -base64 32)
-   export JWT_PERSISTENCE_SALT=$(openssl rand -hex 16)
-   ```
-
-4. Run:
+3. Run:
    ```bash
    ./gradlew clean build
    ./gradlew bootRun -Pspring.profiles.active=dev
+   ```
+
+## Docker Setup
+You can run iSLDevs using Docker and Docker Compose for a containerized deployment with PostgreSQL.
+
+### Prerequisites
+- Install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+- Ensure the `Dockerfile` and `docker-compose.yml` files are in the project root.
+
+### Dockerfile
+The `Dockerfile` uses a multi-stage build:
+- Builds the application with Java 25 JDK.
+- Runs the standalone JAR with Java 25 JRE.
+- Exposes port 8443 and sets up environment variables for PostgreSQL and Spring profiles.
+
+### Docker Compose
+The `docker-compose.yml` defines two services:
+- `isldevs`: The iSLDevs Spring Boot application.
+- `db`: A PostgreSQL 15 database (compatible with JDBC driver 42.7.5).
+
+### Running with Docker Compose
+1. Build and run the services:
+   ```bash
+   docker-compose up --build
+   ```
+2. Access API at base url `https://localhost:8443/api/v1`.
+   ### Stopping the Containers
+   To stop the services:
+   ```bash
+   docker-compose down
+   ```
+   To stop and remove volumes (including database data):
+   ```bash
+   docker-compose down -v
+   ```
+3. Restart Services:
+   ###### Application
+   ```bash
+   sudo docker-compose restart isldevs
+   ```
+   ###### Database
+   ```bash
+   sudo docker-compose restart db
+   ```
+4. Log Services:
+   ```bash
+   sudo docker-compose logs isldevs
    ```
 
 ## JWT Key Management
@@ -76,9 +113,9 @@ Keys are generated programmatically (RSA 2048-bit) via the `Keys` class and stor
 ### Configure
 Populate the `config` table with secure values:
 ```sql
-INSERT INTO config (name, key_name, value, active, created_by, created_date, updated_by, updated_date)
-VALUES ('JWT Password', 'JWT_PASSWORD', '$(openssl rand -base64 32)', true, 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP),
-       ('JWT Salt', 'JWT_SALT', '$(openssl rand -hex 16)', true, 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP);
+INSERT INTO config (name, code, value, created_by, created_at, updated_by, updated_at)
+VALUES ('JWT Password', 'JWT_PASSWORD', '$(openssl rand -base64 32)', 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP),
+       ('JWT Salt', 'JWT_SALT', '$(openssl rand -hex 16)', 'system', CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP);
 ```
 
 ### Key Loading
@@ -120,11 +157,6 @@ keytool -genkeypair -alias yourserver -keyalg RSA -keysize 4096 -validity 365 \
 - Run: `./gradlew bootRun`
 - Test: `./gradlew test`
 - Format: `./gradlew spotlessApply`
-
-## Environment Variables
-- `SPRING_PROFILES_ACTIVE=dev|prod`
-- `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
-- `JWT_PRIVATE_KEY_PATH`, `JWT_PERSISTENCE_PASSWORD`, `JWT_PERSISTENCE_SALT`
 
 ## License
 Apache 2.0. See [LICENSE](LICENSE).
