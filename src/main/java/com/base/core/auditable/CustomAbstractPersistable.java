@@ -34,15 +34,21 @@ public abstract class CustomAbstractPersistable implements Persistable<Long>, Se
     private Long id;
 
     @Override
-    public Long getId() { return this.id; }
+    public Long getId() {
+        return this.id;
+    }
 
     @Override
-    public boolean isNew() { return this.getId() == null; }
+    public boolean isNew() {
+        return this.getId() == null;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         CustomAbstractPersistable that = (CustomAbstractPersistable) o;
         return id != null && id.equals(that.id);
     }

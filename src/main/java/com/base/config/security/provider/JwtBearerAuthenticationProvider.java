@@ -44,11 +44,8 @@ public class JwtBearerAuthenticationProvider implements AuthenticationProvider {
     private String issuerUri;
 
     private final JwtDecoder jwtDecoder;
-
     private final RegisteredClientRepository registeredClientRepository;
-
     private final OAuth2AuthorizationService authorizationService;
-
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
     public JwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
@@ -70,83 +67,56 @@ public class JwtBearerAuthenticationProvider implements AuthenticationProvider {
 
         var registeredClient = registeredClientRepository.findByClientId(clientId);
         if (registeredClient == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT,
-                                                                    "Invalid client",
-                                                                    null));
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, "Invalid client", null));
         }
         Jwt jwt;
         try {
             jwt = jwtDecoder.decode(assertion);
         } catch (JwtException ex) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                                                                    "Your client assertion has expired. Please generate a new JWT using your private key and try again.",
-                                                                    null));
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "Your client assertion has expired. Please generate a new JWT using your private key and try again.", null));
         }
         if (!issuerUri.equals(jwt.getIssuer()
-                                 .toString())) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                                                                    "Invalid issuer",
-                                                                    null));
+                .toString())) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "Invalid issuer", null));
         }
         if (!jwt.getSubject()
                 .contains(registeredClient.getClientId())) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-                                                                    "Invalid client",
-                                                                    null));
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "Invalid client", null));
         }
         if (jwt.getExpiresAt() == null || Instant.now()
-                                                 .isAfter(jwt.getExpiresAt())) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN,
-                                                                    "Invalid token",
-                                                                    null));
+                .isAfter(jwt.getExpiresAt())) {
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_TOKEN, "Invalid token", null));
         }
         var accessTokenValue = UUID.randomUUID()
-                                   .toString();
+                .toString();
         var authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
-                                                      .principalName(clientId)
-                                                      .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-                                                      .attribute("scopes",
-                                                                 registeredClient.getScopes())
-                                                      .token(new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
-                                                                                   accessTokenValue,
-                                                                                   Instant.now(),
-                                                                                   Instant.now()
-                                                                                          .plusSeconds(3600)),
-                                                             (_) -> {
-                                                             });
+                .principalName(clientId)
+                .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
+                .attribute("scopes", registeredClient.getScopes())
+                .token(new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, accessTokenValue, Instant.now(), Instant.now()
+                        .plusSeconds(3600)), (_) -> {
+                        });
         var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
         var tokenContext = DefaultOAuth2TokenContext.builder()
-                                                    .registeredClient(registeredClient)
-                                                    .principal(new JwtAuthenticationToken(jwt))
-                                                    .authorization(authorizationBuilder.build())
-                                                    .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-                                                    .authorizationGrant(new JwtBearerAuthenticationToken(clientId,
-                                                                                                         assertion))
-                                                    .tokenType(OAuth2TokenType.ACCESS_TOKEN)
-                                                    .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                                                    .build();
+                .registeredClient(registeredClient)
+                .principal(new JwtAuthenticationToken(jwt))
+                .authorization(authorizationBuilder.build())
+                .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
+                .authorizationGrant(new JwtBearerAuthenticationToken(clientId, assertion))
+                .tokenType(OAuth2TokenType.ACCESS_TOKEN)
+                .authorizationServerContext(AuthorizationServerContextHolder.getContext())
+                .build();
         var oAuth2Token = tokenGenerator.generate(tokenContext);
         if (oAuth2Token == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
-                                                                    "Failed to generate access token",
-                                                                    null));
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate access token", null));
         }
-        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
-                                                oAuth2Token.getTokenValue(),
-                                                oAuth2Token.getIssuedAt(),
-                                                oAuth2Token.getExpiresAt());
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token
+                .getExpiresAt());
         Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put("scope",
-                                 String.join(" ",
-                                             registeredClient.getScopes()));
-        additionalParameters.put("client_id",
-                                 clientId);
-        return new OAuth2AccessTokenAuthenticationToken(registeredClient,
-                                                        jwtBearerToken,
-                                                        accessToken,
-                                                        null,
-                                                        additionalParameters);
+        additionalParameters.put("scope", String.join(" ", registeredClient.getScopes()));
+        additionalParameters.put("client_id", clientId);
+        return new OAuth2AccessTokenAuthenticationToken(registeredClient, jwtBearerToken, accessToken, null, additionalParameters);
     }
 
     @Override

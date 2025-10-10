@@ -73,32 +73,34 @@ public class Role extends CustomAbstractPersistable {
     public Map<String, Object> changed(final JsonCommand command) {
         final Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsString(RoleConstants.NAME,
-                                     this.name)) {
+        if (command.isChangeAsString(RoleConstants.NAME, this.name)) {
             final var value = command.extractString(RoleConstants.NAME);
             this.name = value;
-            changes.put(RoleConstants.NAME,
-                        value);
+            changes.put(RoleConstants.NAME, value);
         }
-        if (command.isChangeAsArray(RoleConstants.AUTHORITIES,
-                                    this.authorities,
-                                    Authority.class)) {
-            final var value = command.extractArrayAs(RoleConstants.AUTHORITIES,
-                                                     Authority.class);
+        if (command.isChangeAsArray(RoleConstants.AUTHORITIES, this.authorities, Authority.class)) {
+            final var value = command.extractArrayAs(RoleConstants.AUTHORITIES, Authority.class);
             this.authorities = value;
-            changes.put(RoleConstants.AUTHORITIES,
-                        value);
+            changes.put(RoleConstants.AUTHORITIES, value);
         }
 
         return changes;
     }
 
-    public Set<Authority> getAuthorities() { return authorities; }
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
 
-    public void setAuthorities(Set<Authority> authorities) { this.authorities = authorities; }
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

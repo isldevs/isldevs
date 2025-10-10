@@ -44,37 +44,39 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByUsername(username)
-                                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         var roles = user.getRoles()
-                        .stream()
-                        .map(role -> role.getName()
-                                         .startsWith("ROLE_") ? role.getName() : "ROLE_" + role.getName())
-                        .toArray(String[]::new);
+                .stream()
+                .map(role -> role.getName()
+                        .startsWith("ROLE_")
+                                ? role.getName()
+                                : "ROLE_" + role.getName())
+                .toArray(String[]::new);
 
         var authorities = user.getRoles()
-                              .stream()
-                              .flatMap(role -> role.getAuthorities()
-                                                   .stream())
-                              .map(Authority::getAuthority)
-                              .toArray(String[]::new);
+                .stream()
+                .flatMap(role -> role.getAuthorities()
+                        .stream())
+                .map(Authority::getAuthority)
+                .toArray(String[]::new);
 
         var allAuthorities = Arrays.stream(roles)
-                                   .map(SimpleGrantedAuthority::new)
-                                   .collect(Collectors.toList());
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
         Arrays.stream(authorities)
-              .map(SimpleGrantedAuthority::new)
-              .forEach(allAuthorities::add);
+                .map(SimpleGrantedAuthority::new)
+                .forEach(allAuthorities::add);
 
         return org.springframework.security.core.userdetails.User.builder()
-                                                                 .username(user.getUsername())
-                                                                 .password(user.getPassword())
-                                                                 .authorities(allAuthorities)
-                                                                 .accountExpired(!user.isAccountNonExpired())
-                                                                 .accountLocked(!user.isAccountNonLocked())
-                                                                 .credentialsExpired(!user.isCredentialsNonExpired())
-                                                                 .disabled(!user.isEnabled())
-                                                                 .build();
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(allAuthorities)
+                .accountExpired(!user.isAccountNonExpired())
+                .accountLocked(!user.isAccountNonLocked())
+                .credentialsExpired(!user.isCredentialsNonExpired())
+                .disabled(!user.isEnabled())
+                .build();
     }
 
 }

@@ -21,13 +21,9 @@ package com.base.core.data;
 public final class ErrorData {
 
     private final Integer status;
-
     private final String error;
-
     private final String description;
-
     private final String message;
-
     private final Object[] args;
 
     public ErrorData(Builder builder) {
@@ -85,14 +81,24 @@ public final class ErrorData {
 
     }
 
-    public Integer getStatus() { return status; }
+    public Integer getStatus() {
+        return status;
+    }
 
-    public String getError() { return error; }
+    public String getError() {
+        return error;
+    }
 
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getMessage() { return message; }
+    public String getMessage() {
+        return message;
+    }
 
-    public Object[] getArgs() { return args; }
+    public Object[] getArgs() {
+        return args;
+    }
 
 }

@@ -38,9 +38,7 @@ import java.util.Map;
 public class FileController {
 
     private final JsonSerializerImpl<FileDTO> serializer;
-
     private final FileService service;
-
     private final LogService logService;
 
     @Autowired
@@ -53,81 +51,62 @@ public class FileController {
     }
 
     @PostMapping(value = "/{entity}/{entityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String uploadFile(@PathVariable("entity")
-    final String entity,
-                             @PathVariable("entityId")
-                             final Long entityId,
-                             @RequestParam("file")
-                             final MultipartFile file) {
+    public String uploadFile(@PathVariable("entity") final String entity,
+                             @PathVariable("entityId") final Long entityId,
+                             @RequestParam("file") final MultipartFile file) {
 
         FileUtils.isValidEntityName(entity);
         FileUtils.isValidateMimeType(file.getContentType());
 
-        final var command = new FileCommandHandler().upload(entity,
-                                                            entityId)
-                                                    .file(file)
-                                                    .build();
+        final var command = new FileCommandHandler().upload(entity, entityId)
+                .file(file)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping(value = "/{entity}/{entityId}")
-    public String deleteFile(@PathVariable("entity")
-    final String entity,
-                             @PathVariable("entityId")
-                             final Long entityId) {
+    public String deleteFile(@PathVariable("entity") final String entity,
+                             @PathVariable("entityId") final Long entityId) {
 
         FileUtils.isValidEntityName(entity);
-        final var command = new FileCommandHandler().delete(entity,
-                                                            entityId)
-                                                    .build();
+        final var command = new FileCommandHandler().delete(entity, entityId)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping("{entity}/{entityId}/url")
-    public String fileURL(@PathVariable("entity")
-    final String entity,
-                          @PathVariable("entityId")
-                          final Long entityId) {
+    public String fileURL(@PathVariable("entity") final String entity,
+                          @PathVariable("entityId") final Long entityId) {
         FileUtils.isValidEntityName(entity);
-        Map<String, Object> url = this.service.fileURL(entity,
-                                                       entityId);
+        Map<String, Object> url = this.service.fileURL(entity, entityId);
         return this.serializer.serialize(url);
     }
 
     @GetMapping("{entity}/{entityId}/base64")
-    public String fileBase64(@PathVariable("entity")
-    final String entity,
-                             @PathVariable("entityId")
-                             final Long entityId) {
+    public String fileBase64(@PathVariable("entity") final String entity,
+                             @PathVariable("entityId") final Long entityId) {
         FileUtils.isValidEntityName(entity);
-        Map<String, Object> url = this.service.fileBase64(entity,
-                                                          entityId);
+        Map<String, Object> url = this.service.fileBase64(entity, entityId);
         return this.serializer.serialize(url);
     }
 
     @GetMapping("{entity}/{entityId}/byte")
-    public String fileByte(@PathVariable("entity")
-    final String entity,
-                           @PathVariable("entityId")
-                           final Long entityId) {
+    public String fileByte(@PathVariable("entity") final String entity,
+                           @PathVariable("entityId") final Long entityId) {
         FileUtils.isValidEntityName(entity);
-        Map<String, Object> url = this.service.fileByte(entity,
-                                                        entityId);
+        Map<String, Object> url = this.service.fileByte(entity, entityId);
         return this.serializer.serialize(url);
     }
 
     @GetMapping("{entity}/{entityId}/inputstream")
-    public String fileInputStream(@PathVariable("entity")
-    final String entity,
-                                  @PathVariable("entityId")
-                                  final Long entityId) {
+    public String fileInputStream(@PathVariable("entity") final String entity,
+                                  @PathVariable("entityId") final Long entityId) {
         FileUtils.isValidEntityName(entity);
-        Map<String, Object> url = this.service.fileInputStream(entity,
-                                                               entityId);
+        Map<String, Object> url = this.service.fileInputStream(entity, entityId);
         return this.serializer.serialize(url);
     }
 

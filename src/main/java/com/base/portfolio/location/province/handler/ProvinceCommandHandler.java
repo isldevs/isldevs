@@ -25,22 +25,22 @@ public class ProvinceCommandHandler extends CommandBuilder {
 
     public CommandBuilder create() {
         return this.action("CREATE")
-                   .entity(ProvinceConstants.PERMISSION)
-                   .href(ProvinceConstants.API_PATH);
+                .entity(ProvinceConstants.PERMISSION)
+                .href(ProvinceConstants.API_PATH);
     }
 
     public CommandBuilder update(final Long id) {
         return this.action("UPDATE")
-                   .entity(ProvinceConstants.PERMISSION)
-                   .id(id)
-                   .href(ProvinceConstants.API_PATH + "/" + id);
+                .entity(ProvinceConstants.PERMISSION)
+                .id(id)
+                .href(ProvinceConstants.API_PATH + "/" + id);
     }
 
     public CommandBuilder delete(final Long id) {
         return this.action("DELETE")
-                   .entity(ProvinceConstants.PERMISSION)
-                   .id(id)
-                   .href(ProvinceConstants.API_PATH + "/" + id);
+                .entity(ProvinceConstants.PERMISSION)
+                .id(id)
+                .href(ProvinceConstants.API_PATH + "/" + id);
     }
 
 }

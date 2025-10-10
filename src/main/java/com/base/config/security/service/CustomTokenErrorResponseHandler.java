@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 public class CustomTokenErrorResponseHandler implements AuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     private final MessageSource messageSource;
 
     public CustomTokenErrorResponseHandler(MessageSource messageSource) {
@@ -48,22 +47,18 @@ public class CustomTokenErrorResponseHandler implements AuthenticationFailureHan
                                         AuthenticationException exception) throws IOException {
 
         Locale locale = request.getLocale();
-        String message = messageSource.getMessage("msg.unauthorized.description",
-                                                  null,
-                                                  "Please login again.",
-                                                  locale);
+        String message = messageSource.getMessage("msg.unauthorized.description", null, "Please login again.", locale);
 
         ErrorData errorData = ErrorData.builder()
-                                       .status(HttpStatus.UNAUTHORIZED.value())
-                                       .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                                       .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                                       .message(message)
-                                       .build();
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(message)
+                .build();
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(),
-                                errorData);
+        objectMapper.writeValue(response.getOutputStream(), errorData);
     }
 
 }

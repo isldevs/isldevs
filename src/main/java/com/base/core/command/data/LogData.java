@@ -43,7 +43,9 @@ public class LogData implements Serializable {
         return new Builder();
     }
 
-    public Long getId() { return (Long) this.claims.get("id"); }
+    public Long getId() {
+        return (Long) this.claims.get("id");
+    }
 
     public static class Builder {
 
@@ -54,8 +56,7 @@ public class LogData implements Serializable {
 
         public Builder claim(String name,
                              Object value) {
-            this.claims.put(name,
-                            value);
+            this.claims.put(name, value);
             return this;
         }
 
@@ -64,28 +65,22 @@ public class LogData implements Serializable {
         }
 
         public Builder id(Long id) {
-            return this.claim("id",
-                              id);
+            return this.claim("id", id);
         }
 
         public Builder file(Object file) {
-            return this.claim("file",
-                              file);
+            return this.claim("file", file);
         }
 
         public Builder changes(Map<String, Object> changes) {
-            return this.claim("changes",
-                              changes);
+            return this.claim("changes", changes);
         }
 
         public Builder success(String msgCde,
                                MessageSource messageSource,
                                Object... args) {
-            String localizedMessage = messageSource.getMessage(msgCde,
-                                                               args,
-                                                               LocaleContextHolder.getLocale());
-            return this.claim("message",
-                              localizedMessage);
+            String localizedMessage = messageSource.getMessage(msgCde, args, LocaleContextHolder.getLocale());
+            return this.claim("message", localizedMessage);
         }
 
     }

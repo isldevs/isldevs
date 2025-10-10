@@ -35,19 +35,19 @@ public class GlobalConfig {
     public GlobalConfig(ConfigRepository configRepository) {
         List<Config> configs = configRepository.findAllByEnabled(true);
         this.configMap = configs.stream()
-                                .collect(Collectors.toMap(Config::getCode,
-                                                          Config::getValue));
+                .collect(Collectors.toMap(Config::getCode, Config::getValue));
     }
 
-    public String getJwtPassword() { return configMap.getOrDefault("JWT_PASSWORD",
-                                                                   null); }
+    public String getJwtPassword() {
+        return configMap.getOrDefault("JWT_PASSWORD", null);
+    }
 
-    public String getJwtSalt() { return configMap.getOrDefault("JWT_SALT",
-                                                               null); }
+    public String getJwtSalt() {
+        return configMap.getOrDefault("JWT_SALT", null);
+    }
 
     public String getConfigValue(String key) {
-        return configMap.getOrDefault(key,
-                                      null);
+        return configMap.getOrDefault(key, null);
     }
 
 }

@@ -41,36 +41,36 @@ public class UserInfoService {
 
     public OidcUserInfo loadUser(OidcUserInfoAuthenticationContext context) {
         var username = context.getAuthorization()
-                              .getPrincipalName();
+                .getPrincipalName();
 
         var user = userRepository.findByUsername(username)
-                                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         var roles = user.getRoles()
-                        .stream()
-                        .map(Role::getName)
-                        .collect(Collectors.toSet());
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
         var authorities = user.getRoles()
-                              .stream()
-                              .flatMap(role -> role.getAuthorities()
-                                                   .stream())
-                              .map(Authority::getAuthority)
-                              .collect(Collectors.toSet());
+                .stream()
+                .flatMap(role -> role.getAuthorities()
+                        .stream())
+                .map(Authority::getAuthority)
+                .collect(Collectors.toSet());
 
         var userInfo = UserInfoData.builder()
-                                   .id(user.getId())
-                                   .username(username)
-                                   .name(user.getName())
-                                   .email(user.getEmail())
-                                   .enabled(user.isEnabled())
-                                   .authenticated(true)
-                                   .isAccountNonExpired(user.isAccountNonExpired())
-                                   .isAccountNonLocked(user.isAccountNonLocked())
-                                   .isCredentialsNonExpired(user.isCredentialsNonExpired())
-                                   .roles(roles)
-                                   .authorities(authorities)
-                                   .build()
-                                   .getClaims();
+                .id(user.getId())
+                .username(username)
+                .name(user.getName())
+                .email(user.getEmail())
+                .enabled(user.isEnabled())
+                .authenticated(true)
+                .isAccountNonExpired(user.isAccountNonExpired())
+                .isAccountNonLocked(user.isAccountNonLocked())
+                .isCredentialsNonExpired(user.isCredentialsNonExpired())
+                .roles(roles)
+                .authorities(authorities)
+                .build()
+                .getClaims();
 
         return new OidcUserInfo(userInfo);
     }

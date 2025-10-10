@@ -48,12 +48,10 @@ public class SpringProfileConfig implements EnvironmentAware {
                     var props = new Properties();
                     props.load(new FileInputStream(file));
                     props.forEach((key,
-                                   value) -> System.setProperty(key.toString(),
-                                                                value.toString()));
+                                   value) -> System.setProperty(key.toString(), value.toString()));
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Failed to load ." + profile + " file",
-                                           e);
+                throw new RuntimeException("Failed to load ." + profile + " file", e);
             }
         }
     }

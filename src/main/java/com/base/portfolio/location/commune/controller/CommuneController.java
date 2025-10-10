@@ -36,11 +36,8 @@ import org.springframework.web.bind.annotation.*;
 public class CommuneController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<CommuneDTO> serializer;
-
     private final CommuneService service;
-
     private final LogService logService;
 
     @Autowired
@@ -55,54 +52,46 @@ public class CommuneController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createCommune(@RequestBody
-    String json) {
+    public String createCommune(@RequestBody String json) {
         final var command = new CommuneCommandHandler().create()
-                                                       .json(json)
-                                                       .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateCommune(@RequestBody
-    String json,
-                                @PathVariable
-                                Long id) {
+    public String updateCommune(@RequestBody String json,
+                                @PathVariable Long id) {
         final var command = new CommuneCommandHandler().update(id)
-                                                       .json(json)
-                                                       .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public String deleteCommune(@PathVariable
-    Long id) {
+    public String deleteCommune(@PathVariable Long id) {
         final var command = new CommuneCommandHandler().delete(id)
-                                                       .build();
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getCommune(@PathVariable
-    Long id) {
+    public String getCommune(@PathVariable Long id) {
         var data = this.service.getCommuneById(id);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> listCommunes(@RequestParam(required = false)
-    Integer page,
-                                          @RequestParam(required = false)
-                                          Integer size,
-                                          @RequestParam(required = false)
-                                          String search) {
-        var communes = this.service.listCommunes(page,
-                                                 size,
-                                                 search);
-        var response = (page == null || size == null) ? pageable.unpaged(communes) : pageable.toModel(communes);
+    public ResponseEntity<?> listCommunes(@RequestParam(required = false) Integer page,
+                                          @RequestParam(required = false) Integer size,
+                                          @RequestParam(required = false) String search) {
+        var communes = this.service.listCommunes(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(communes)
+                : pageable.toModel(communes);
         return ResponseEntity.ok(response);
     }
 

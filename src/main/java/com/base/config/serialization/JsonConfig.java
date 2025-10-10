@@ -43,12 +43,9 @@ public class JsonConfig {
 
             builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
             builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-            builder.visibility(PropertyAccessor.FIELD,
-                               JsonAutoDetect.Visibility.ANY);
-            builder.visibility(PropertyAccessor.GETTER,
-                               JsonAutoDetect.Visibility.NONE);
-            builder.visibility(PropertyAccessor.SETTER,
-                               JsonAutoDetect.Visibility.NONE);
+            builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+            builder.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
             builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
         };
     }

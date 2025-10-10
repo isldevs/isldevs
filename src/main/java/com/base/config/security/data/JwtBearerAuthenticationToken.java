@@ -29,18 +29,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class JwtBearerAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String clientId;
-
     private final String assertion;
-
     private final Set<String> scopes;
-
     private Object principal;
 
     public JwtBearerAuthenticationToken(String clientId,
                                         String assertion) {
-        this(clientId,
-             assertion,
-             Collections.emptySet());
+        this(clientId, assertion, Collections.emptySet());
     }
 
     public JwtBearerAuthenticationToken(String clientId,
@@ -49,7 +44,9 @@ public class JwtBearerAuthenticationToken extends AbstractAuthenticationToken {
         super(null);
         this.clientId = clientId;
         this.assertion = assertion;
-        this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
+        this.scopes = scopes == null
+                ? Collections.emptySet()
+                : Collections.unmodifiableSet(scopes);
         this.setAuthenticated(false);
         this.principal = clientId;
     }
@@ -60,22 +57,34 @@ public class JwtBearerAuthenticationToken extends AbstractAuthenticationToken {
         super(authorities);
         this.clientId = null;
         this.assertion = null;
-        this.scopes = scopes == null ? Collections.emptySet() : Collections.unmodifiableSet(scopes);
+        this.scopes = scopes == null
+                ? Collections.emptySet()
+                : Collections.unmodifiableSet(scopes);
         this.setAuthenticated(true);
         this.principal = principal;
     }
 
-    public String getClientId() { return clientId; }
+    public String getClientId() {
+        return clientId;
+    }
 
-    public String getAssertion() { return assertion; }
+    public String getAssertion() {
+        return assertion;
+    }
 
-    public Set<String> getScopes() { return scopes; }
+    public Set<String> getScopes() {
+        return scopes;
+    }
 
     @Override
-    public Object getCredentials() { return assertion; }
+    public Object getCredentials() {
+        return assertion;
+    }
 
     @Override
-    public Object getPrincipal() { return principal; }
+    public Object getPrincipal() {
+        return principal;
+    }
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {
@@ -85,8 +94,8 @@ public class JwtBearerAuthenticationToken extends AbstractAuthenticationToken {
         }
 
         return scopes.stream()
-                     .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
-                     .collect(Collectors.toSet());
+                .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
+                .collect(Collectors.toSet());
     }
 
 }

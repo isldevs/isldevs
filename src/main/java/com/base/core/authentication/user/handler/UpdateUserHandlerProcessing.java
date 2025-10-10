@@ -42,8 +42,7 @@ public class UpdateUserHandlerProcessing implements CommandHandlerProcessing {
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateUser(command.getId(),
-                                       command);
+        return this.service.updateUser(command.getId(), command);
     }
 
 }

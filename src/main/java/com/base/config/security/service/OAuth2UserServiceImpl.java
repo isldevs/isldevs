@@ -42,11 +42,8 @@ import org.springframework.stereotype.Component;
 public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final FacebookOAuth2UserService facebookOAuth2UserService;
-
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -64,8 +61,8 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         try {
             String registrationId = userRequest.getClientRegistration()
-                                               .getRegistrationId()
-                                               .toLowerCase();
+                    .getRegistrationId()
+                    .toLowerCase();
 
             OAuth2User oauth2User;
             if ("facebook".equals(registrationId)) {
@@ -76,42 +73,38 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
 
             Map<String, Object> attributes = oauth2User.getAttributes();
 
-            String username = extractUsername(attributes,
-                                              registrationId);
+            String username = extractUsername(attributes, registrationId);
             String fullName = (String) attributes.get("name");
             String email = (String) attributes.get("email");
-            String avatarUrl = extractAvatarUrl(attributes,
-                                                registrationId);
+            String avatarUrl = extractAvatarUrl(attributes, registrationId);
 
             User user = userRepository.findByUsername(username)
-                                      .orElse(null);
+                    .orElse(null);
             if (user == null) {
                 user = User.builder()
-                           .username(username)
-                           .email(email)
-                           .name(fullName)
-                           .password(passwordEncoder.encode(UUID.randomUUID()
-                                                                .toString()))
-                           .providerId(oauth2User.getName())
-                           .provider(registrationId.toUpperCase())
-                           .providerAvatarUrl(avatarUrl)
-                           .roles(resolveRoles(new HashSet<>(Set.of("USER")),
-                                               roleRepository))
-                           .build();
+                        .username(username)
+                        .email(email)
+                        .name(fullName)
+                        .password(passwordEncoder.encode(UUID.randomUUID()
+                                .toString()))
+                        .providerId(oauth2User.getName())
+                        .provider(registrationId.toUpperCase())
+                        .providerAvatarUrl(avatarUrl)
+                        .roles(resolveRoles(new HashSet<>(Set.of("USER")), roleRepository))
+                        .build();
             } else {
                 user.setProviderAvatarUrl(avatarUrl);
-                if (fullName != null) user.setName(fullName);
-                if (email != null) user.setEmail(email);
+                if (fullName != null)
+                    user.setName(fullName);
+                if (email != null)
+                    user.setEmail(email);
             }
 
             userRepository.save(user);
 
             return oauth2User;
         } catch (Exception e) {
-            throw new ErrorException(HttpStatus.FORBIDDEN,
-                                     "msg.internal.error",
-                                     "OAuth2 user loading fails",
-                                     e.getMessage());
+            throw new ErrorException(HttpStatus.FORBIDDEN, "msg.internal.error", "OAuth2 user loading fails", e.getMessage());
         }
     }
 
@@ -122,7 +115,7 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
             case "google" -> (String) attributes.get("sub");
             case "facebook" -> (String) attributes.get("id");
             default -> UUID.randomUUID()
-                           .toString();
+                    .toString();
         };
     }
 

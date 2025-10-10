@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 public class CommuneDataValidation {
 
     private final JsonHelper jsonHelper;
-
     private final ApiDataValidator validator;
 
     @Autowired
@@ -44,129 +43,95 @@ public class CommuneDataValidation {
 
         final var typeOfMap = new TypeToken<Map<String, String>>() {
         }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap,
-                                              json,
-                                              CommuneConstants.SUPPORTED_PARAMETERS);
+        this.jsonHelper.unsupportedParameters(typeOfMap, json, CommuneConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
-        final var district = this.jsonHelper.extractLong(CommuneConstants.DISTRICT,
-                                                         jsonElement);
-        validator.parameter(CommuneConstants.DISTRICT,
-                            district)
-                 .isNumber()
-                 .notNull()
-                 .maxLength(20);
+        final var district = this.jsonHelper.extractLong(CommuneConstants.DISTRICT, jsonElement);
+        validator.parameter(CommuneConstants.DISTRICT, district)
+                .isNumber()
+                .notNull()
+                .maxLength(20);
 
-        final var type = this.jsonHelper.extractString(CommuneConstants.TYPE,
-                                                       jsonElement);
-        validator.parameter(CommuneConstants.TYPE,
-                            type)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(50);
+        final var type = this.jsonHelper.extractString(CommuneConstants.TYPE, jsonElement);
+        validator.parameter(CommuneConstants.TYPE, type)
+                .isString()
+                .notEmpty()
+                .maxLength(50);
 
-        final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN,
-                                                         jsonElement);
-        validator.parameter(CommuneConstants.NAME_EN,
-                            nameEn)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(100);
+        final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN, jsonElement);
+        validator.parameter(CommuneConstants.NAME_EN, nameEn)
+                .isString()
+                .notEmpty()
+                .maxLength(100);
 
-        final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM,
-                                                         jsonElement);
-        validator.parameter(CommuneConstants.NAME_KM,
-                            nameKm)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(100);
+        final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM, jsonElement);
+        validator.parameter(CommuneConstants.NAME_KM, nameKm)
+                .isString()
+                .notEmpty()
+                .maxLength(100);
 
-        final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH,
-                                                         jsonElement);
-        validator.parameter(CommuneConstants.NAME_ZH,
-                            nameZh)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(100);
+        final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH, jsonElement);
+        validator.parameter(CommuneConstants.NAME_ZH, nameZh)
+                .isString()
+                .notEmpty()
+                .maxLength(100);
 
-        final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE,
-                                                             jsonElement);
-        validator.parameter(CommuneConstants.POSTAL_CODE,
-                            postalCode)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(50);
+        final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE, jsonElement);
+        validator.parameter(CommuneConstants.POSTAL_CODE, postalCode)
+                .isString()
+                .notEmpty()
+                .maxLength(50);
     }
 
     public void update(String json) {
         final var typeOfMap = new TypeToken<Map<String, String>>() {
         }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap,
-                                              json,
-                                              CommuneConstants.SUPPORTED_PARAMETERS);
+        this.jsonHelper.unsupportedParameters(typeOfMap, json, CommuneConstants.SUPPORTED_PARAMETERS);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
-        if (this.jsonHelper.parameterExists(CommuneConstants.DISTRICT,
-                                            jsonElement)) {
-            final var district = this.jsonHelper.extractLong(CommuneConstants.DISTRICT,
-                                                             jsonElement);
-            validator.parameter(CommuneConstants.DISTRICT,
-                                district)
-                     .isNumber()
-                     .notNull()
-                     .maxLength(20);
+        if (this.jsonHelper.parameterExists(CommuneConstants.DISTRICT, jsonElement)) {
+            final var district = this.jsonHelper.extractLong(CommuneConstants.DISTRICT, jsonElement);
+            validator.parameter(CommuneConstants.DISTRICT, district)
+                    .isNumber()
+                    .notNull()
+                    .maxLength(20);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.TYPE,
-                                            jsonElement)) {
-            final var type = this.jsonHelper.extractString(CommuneConstants.TYPE,
-                                                           jsonElement);
-            validator.parameter(CommuneConstants.TYPE,
-                                type)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(50);
+        if (this.jsonHelper.parameterExists(CommuneConstants.TYPE, jsonElement)) {
+            final var type = this.jsonHelper.extractString(CommuneConstants.TYPE, jsonElement);
+            validator.parameter(CommuneConstants.TYPE, type)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(50);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_EN,
-                                            jsonElement)) {
-            final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN,
-                                                             jsonElement);
-            validator.parameter(CommuneConstants.NAME_EN,
-                                nameEn)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(100);
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_EN, jsonElement)) {
+            final var nameEn = this.jsonHelper.extractString(CommuneConstants.NAME_EN, jsonElement);
+            validator.parameter(CommuneConstants.NAME_EN, nameEn)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(100);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_KM,
-                                            jsonElement)) {
-            final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM,
-                                                             jsonElement);
-            validator.parameter(CommuneConstants.NAME_KM,
-                                nameKm)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(100);
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_KM, jsonElement)) {
+            final var nameKm = this.jsonHelper.extractString(CommuneConstants.NAME_KM, jsonElement);
+            validator.parameter(CommuneConstants.NAME_KM, nameKm)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(100);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_ZH,
-                                            jsonElement)) {
-            final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH,
-                                                             jsonElement);
-            validator.parameter(CommuneConstants.NAME_ZH,
-                                nameZh)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(100);
+        if (this.jsonHelper.parameterExists(CommuneConstants.NAME_ZH, jsonElement)) {
+            final var nameZh = this.jsonHelper.extractString(CommuneConstants.NAME_ZH, jsonElement);
+            validator.parameter(CommuneConstants.NAME_ZH, nameZh)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(100);
         }
-        if (this.jsonHelper.parameterExists(CommuneConstants.POSTAL_CODE,
-                                            jsonElement)) {
-            final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE,
-                                                                 jsonElement);
-            validator.parameter(CommuneConstants.POSTAL_CODE,
-                                postalCode)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(50);
+        if (this.jsonHelper.parameterExists(CommuneConstants.POSTAL_CODE, jsonElement)) {
+            final var postalCode = this.jsonHelper.extractString(CommuneConstants.POSTAL_CODE, jsonElement);
+            validator.parameter(CommuneConstants.POSTAL_CODE, postalCode)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(50);
         }
     }
 

@@ -52,8 +52,7 @@ public class KeyConfiguration {
 
     @Bean
     TextEncryptor textEncryptor() {
-        return Encryptors.text(config.getJwtPassword(),
-                               config.getJwtSalt());
+        return Encryptors.text(config.getJwtPassword(), config.getJwtSalt());
     }
 
     @Bean
@@ -66,23 +65,20 @@ public class KeyConfiguration {
                                                      OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
         var generator = new JwtGenerator(encoder);
         generator.setJwtCustomizer(customTokenCustomizer);
-        return new DelegatingOAuth2TokenGenerator(generator,
-                                                  new OAuth2AccessTokenGenerator(),
-                                                  new OAuth2RefreshTokenGenerator());
+        return new DelegatingOAuth2TokenGenerator(generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
     }
 
     @Bean
     ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairRepository repository) {
         return _ -> {
             var existingKey = repository.findKeyPairs()
-                                        .stream()
-                                        .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+                    .stream()
+                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
 
             if (existingKey.isEmpty()) {
                 var keys = new Keys();
                 var keyPair = keys.generateKeyPair(UUID.randomUUID()
-                                                       .toString(),
-                                                   new Timestamp(System.currentTimeMillis()));
+                        .toString(), new Timestamp(System.currentTimeMillis()));
                 repository.save(keyPair);
                 logger.info("Initial RSA Key created at startup");
             }

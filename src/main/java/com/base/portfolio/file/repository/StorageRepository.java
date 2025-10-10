@@ -30,7 +30,9 @@ import org.springframework.http.HttpStatus;
 public class StorageRepository implements StorageUtils {
 
     @Override
-    public StorageType getStorageType() { return StorageType.FILE_SYSTEM; }
+    public StorageType getStorageType() {
+        return StorageType.FILE_SYSTEM;
+    }
 
     @Override
     public String writeFile(InputStream inputStream,
@@ -40,9 +42,7 @@ public class StorageRepository implements StorageUtils {
                             String oldFileName,
                             StorageRepository storageRepository) {
 
-        Path dir = Paths.get(FileConstants.DIR,
-                             entityName,
-                             String.valueOf(entityId));
+        Path dir = Paths.get(FileConstants.DIR, entityName, String.valueOf(entityId));
         Path path = dir.resolve(fileName);
         try {
             Files.createDirectories(dir);
@@ -51,10 +51,7 @@ public class StorageRepository implements StorageUtils {
                 try {
                     Files.deleteIfExists(oldPath);
                 } catch (IOException e) {
-                    throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                             "msg.internal.error",
-                                             "Deleting previous file failed",
-                                             oldPath);
+                    throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Deleting previous file failed", oldPath);
                 }
             }
 
@@ -64,18 +61,12 @@ public class StorageRepository implements StorageUtils {
                 extension = fileName.substring(dotIndex + 1);
             }
 
-            InputStream resizedStream = FileUtils.resize(extension,
-                                                         inputStream);
-            Files.copy(resizedStream,
-                       path,
-                       StandardCopyOption.REPLACE_EXISTING);
+            InputStream resizedStream = FileUtils.resize(extension, inputStream);
+            Files.copy(resizedStream, path, StandardCopyOption.REPLACE_EXISTING);
             return path.toAbsolutePath()
-                       .toString();
+                    .toString();
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Writing file failed",
-                                     path);
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Writing file failed", path);
         }
     }
 
@@ -83,18 +74,13 @@ public class StorageRepository implements StorageUtils {
     public String readBase64(Path path) {
         try {
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
-                throw new ErrorException(HttpStatus.NOT_FOUND,
-                                         "msg.not.found",
-                                         path);
+                throw new ErrorException(HttpStatus.NOT_FOUND, "msg.not.found", path);
             }
             byte[] bytes = Files.readAllBytes(path);
             return Base64.getEncoder()
-                         .encodeToString(bytes);
+                    .encodeToString(bytes);
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Reading file failed",
-                                     path);
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Reading file failed", path);
         }
     }
 
@@ -102,17 +88,11 @@ public class StorageRepository implements StorageUtils {
     public InputStream readInputStream(Path path) {
         try {
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
-                throw new ErrorException(HttpStatus.NOT_FOUND,
-                                         "msg.not.found",
-                                         path);
+                throw new ErrorException(HttpStatus.NOT_FOUND, "msg.not.found", path);
             }
-            return Files.newInputStream(path,
-                                        StandardOpenOption.READ);
+            return Files.newInputStream(path, StandardOpenOption.READ);
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Failed to read file as InputStream",
-                                     path);
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Failed to read file as InputStream", path);
         }
     }
 
@@ -120,29 +100,21 @@ public class StorageRepository implements StorageUtils {
     public byte[] readByte(Path path) {
         try {
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
-                throw new ErrorException(HttpStatus.NOT_FOUND,
-                                         "msg.not.found",
-                                         path);
+                throw new ErrorException(HttpStatus.NOT_FOUND, "msg.not.found", path);
             }
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Reading file failed",
-                                     path);
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Reading file failed", path);
         }
     }
 
     @Override
     public String readUrl(Path path) {
         if (path == null || !Files.exists(path) || !Files.isRegularFile(path)) {
-            throw new ErrorException(HttpStatus.NOT_FOUND,
-                                     "msg.not.found",
-                                     "File does not exist",
-                                     path);
+            throw new ErrorException(HttpStatus.NOT_FOUND, "msg.not.found", "File does not exist", path);
         }
         return path.toAbsolutePath()
-                   .toString();
+                .toString();
     }
 
     @Override
@@ -150,10 +122,7 @@ public class StorageRepository implements StorageUtils {
         try {
             Files.deleteIfExists(path);
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Deleting file failed",
-                                     path);
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Deleting file failed", path);
         }
     }
 

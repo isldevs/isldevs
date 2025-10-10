@@ -42,18 +42,15 @@ public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserial
     public RSAPublicKey deserialize(InputStream inputStream) {
         try {
             var pem = textEncryptor.decrypt(FileCopyUtils.copyToString(new InputStreamReader(inputStream)));
-            var publicKeyPEM = pem.replace("-----BEGIN PUBLIC KEY-----",
-                                           "")
-                                  .replace("-----END PUBLIC KEY-----",
-                                           "");
+            var publicKeyPEM = pem.replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "");
             var encoded = Base64.getMimeDecoder()
-                                .decode(publicKeyPEM);
+                    .decode(publicKeyPEM);
             var keyFactory = KeyFactory.getInstance("RSA");
             var keySpec = new X509EncodedKeySpec(encoded);
             return (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Throwable throwable) {
-            throw new IllegalArgumentException("there's been an exception",
-                                               throwable);
+            throw new IllegalArgumentException("there's been an exception", throwable);
         }
     }
 
@@ -62,9 +59,9 @@ public class RSAPublicKeyConverter implements Serializer<RSAPublicKey>, Deserial
                           OutputStream outputStream) throws IOException {
         var x509EncodedKeySpec = new X509EncodedKeySpec(object.getEncoded());
         var pem = "-----BEGIN PUBLIC KEY-----\n" + Base64.getMimeEncoder()
-                                                         .encodeToString(x509EncodedKeySpec.getEncoded()) + "\n-----END PUBLIC KEY-----";
+                .encodeToString(x509EncodedKeySpec.getEncoded()) + "\n-----END PUBLIC KEY-----";
         outputStream.write(this.textEncryptor.encrypt(pem)
-                                             .getBytes(StandardCharsets.UTF_8));
+                .getBytes(StandardCharsets.UTF_8));
     }
 
     public Key convertFromString(String keyStr) throws IOException {

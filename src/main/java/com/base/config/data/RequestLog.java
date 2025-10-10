@@ -23,13 +23,9 @@ import java.util.Map;
 public class RequestLog {
 
     private final long startTime;
-
     private final long stopTime;
-
     private final String method;
-
     private final String url;
-
     private final Map<String, String[]> parameters;
 
     public RequestLog(Builder builder) {
@@ -47,13 +43,9 @@ public class RequestLog {
     public static class Builder {
 
         private long startTime;
-
         private long stopTime;
-
         private String method;
-
         private String url;
-
         private Map<String, String[]> parameters;
 
         public RequestLog build() {
@@ -87,14 +79,24 @@ public class RequestLog {
 
     }
 
-    public long getStartTime() { return startTime; }
+    public long getStartTime() {
+        return startTime;
+    }
 
-    public long getStopTime() { return stopTime; }
+    public long getStopTime() {
+        return stopTime;
+    }
 
-    public String getMethod() { return method; }
+    public String getMethod() {
+        return method;
+    }
 
-    public String getUrl() { return url; }
+    public String getUrl() {
+        return url;
+    }
 
-    public Map<String, String[]> getParameters() { return parameters; }
+    public Map<String, String[]> getParameters() {
+        return parameters;
+    }
 
 }

@@ -25,22 +25,22 @@ public class DistrictCommandHandler extends CommandBuilder {
 
     public CommandBuilder create() {
         return this.action("CREATE")
-                   .entity(DistrictConstants.PERMISSION)
-                   .href(DistrictConstants.API_PATH);
+                .entity(DistrictConstants.PERMISSION)
+                .href(DistrictConstants.API_PATH);
     }
 
     public CommandBuilder update(final Long id) {
         return this.action("UPDATE")
-                   .entity(DistrictConstants.PERMISSION)
-                   .id(id)
-                   .href(DistrictConstants.API_PATH + "/" + id);
+                .entity(DistrictConstants.PERMISSION)
+                .id(id)
+                .href(DistrictConstants.API_PATH + "/" + id);
     }
 
     public CommandBuilder delete(final Long id) {
         return this.action("DELETE")
-                   .entity(DistrictConstants.PERMISSION)
-                   .id(id)
-                   .href(DistrictConstants.API_PATH + "/" + id);
+                .entity(DistrictConstants.PERMISSION)
+                .id(id)
+                .href(DistrictConstants.API_PATH + "/" + id);
     }
 
 }

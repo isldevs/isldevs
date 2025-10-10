@@ -33,25 +33,15 @@ import org.springframework.web.multipart.MultipartFile;
 public final class JsonCommand {
 
     private Long id;
-
     private String action;
-
     private String entity;
-
     private String entityType;
-
     private Long entityId;
-
     private String permission;
-
     private String href;
-
     private MultipartFile file;
-
     private String json;
-
     private JsonElement jsonElement;
-
     private JsonDelegator jsonDelegator;
 
     public JsonCommand() {
@@ -162,43 +152,35 @@ public final class JsonCommand {
     }
 
     public Long extractLong(String parameter) {
-        return this.jsonDelegator.extractLong(parameter,
-                                              this.jsonElement);
+        return this.jsonDelegator.extractLong(parameter, this.jsonElement);
     }
 
     public String extractString(String parameter) {
-        return this.jsonDelegator.extractString(parameter,
-                                                this.jsonElement);
+        return this.jsonDelegator.extractString(parameter, this.jsonElement);
     }
 
     public Set<String> extractStringArrays(String parameter) {
-        return this.jsonDelegator.extractStringArrays(parameter,
-                                                      this.jsonElement);
+        return this.jsonDelegator.extractStringArrays(parameter, this.jsonElement);
     }
 
     public BigDecimal extractBigDecimal(String parameter) {
-        return this.jsonDelegator.extractBigDecimal(parameter,
-                                                    this.jsonElement);
+        return this.jsonDelegator.extractBigDecimal(parameter, this.jsonElement);
     }
 
     public Boolean extractBoolean(String parameter) {
-        return this.jsonDelegator.extractBoolean(parameter,
-                                                 this.jsonElement);
+        return this.jsonDelegator.extractBoolean(parameter, this.jsonElement);
     }
 
     public Integer extractInteger(String parameter) {
-        return this.jsonDelegator.extractInteger(parameter,
-                                                 this.jsonElement);
+        return this.jsonDelegator.extractInteger(parameter, this.jsonElement);
     }
 
     public Double extractDouble(String parameter) {
-        return this.jsonDelegator.extractDouble(parameter,
-                                                this.jsonElement);
+        return this.jsonDelegator.extractDouble(parameter, this.jsonElement);
     }
 
     public Float extractFloat(String parameter) {
-        return this.jsonDelegator.extractFloat(parameter,
-                                               this.jsonElement);
+        return this.jsonDelegator.extractFloat(parameter, this.jsonElement);
     }
 
     public <T> Set<T> extractArrayAs(String parameter,
@@ -207,18 +189,16 @@ public final class JsonCommand {
         if (this.jsonElement != null && this.jsonElement.isJsonObject()) {
             var object = this.jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonArray()) {
+                    .isJsonArray()) {
                 var array = object.get(parameter)
-                                  .getAsJsonArray();
+                        .getAsJsonArray();
                 for (JsonElement element : array) {
                     T value = null;
                     if (element.isJsonPrimitive()) {
                         var primitive = element.getAsJsonPrimitive();
-                        value = convertPrimitiveToType(primitive,
-                                                       type);
+                        value = convertPrimitiveToType(primitive, type);
                     } else if (element.isJsonObject()) {
-                        value = new Gson().fromJson(element,
-                                                    type);
+                        value = new Gson().fromJson(element, type);
                     }
 
                     if (value != null) {
@@ -232,8 +212,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsString(String parameter,
                                     String existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractString(parameter);
             return value != null && !value.equals(existing);
         }
@@ -243,19 +222,16 @@ public final class JsonCommand {
     public boolean isChangePassword(String parameter,
                                     PasswordEncoder passwordEncoder,
                                     String existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractString(parameter);
-            return value != null && existing != null && !passwordEncoder.matches(value,
-                                                                                 existing);
+            return value != null && existing != null && !passwordEncoder.matches(value, existing);
         }
         return false;
     }
 
     public boolean isChangeAsLong(String parameter,
                                   Long existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractLong(parameter);
             return value != null && existing != null && !value.equals(existing);
         }
@@ -264,8 +240,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsBigDecimal(String parameter,
                                         BigDecimal existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractBigDecimal(parameter);
             return value != null && existing != null && value.compareTo(existing) != 0;
         }
@@ -274,8 +249,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsBoolean(String parameter,
                                      Boolean existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractBoolean(parameter);
             return value != null && existing != null && !value.equals(existing);
         }
@@ -284,8 +258,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsInteger(String parameter,
                                      Integer existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractInteger(parameter);
             return value != null && existing != null && !value.equals(existing);
         }
@@ -294,8 +267,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsDouble(String parameter,
                                     Double existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractDouble(parameter);
             return value != null && existing != null && !value.equals(existing);
         }
@@ -304,8 +276,7 @@ public final class JsonCommand {
 
     public boolean isChangeAsFloat(String parameter,
                                    Float existing) {
-        if (this.jsonDelegator.hasParameter(this.json,
-                                            parameter)) {
+        if (this.jsonDelegator.hasParameter(this.json, parameter)) {
             var value = this.extractFloat(parameter);
             return value != null && existing != null && !value.equals(existing);
         }
@@ -315,12 +286,10 @@ public final class JsonCommand {
     public <T> boolean isChangeAsArray(String parameter,
                                        Collection<T> existing,
                                        Class<T> type) {
-        if (!jsonDelegator.hasParameter(this.json,
-                                        parameter)) {
+        if (!jsonDelegator.hasParameter(this.json, parameter)) {
             return false;
         }
-        var extracted = this.extractArrayAs(parameter,
-                                            type);
+        var extracted = this.extractArrayAs(parameter, type);
         if (existing == null) {
             return true;
         }
@@ -351,26 +320,48 @@ public final class JsonCommand {
         return null;
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getJson() { return json; }
+    public String getJson() {
+        return json;
+    }
 
-    public MultipartFile getFile() { return file; }
+    public MultipartFile getFile() {
+        return file;
+    }
 
-    public String getHref() { return href; }
+    public String getHref() {
+        return href;
+    }
 
-    public JsonDelegator getJsonDelegator() { return jsonDelegator; }
+    public JsonDelegator getJsonDelegator() {
+        return jsonDelegator;
+    }
 
-    public String getAction() { return action; }
+    public String getAction() {
+        return action;
+    }
 
-    public String getEntity() { return entity; }
+    public String getEntity() {
+        return entity;
+    }
 
-    public String getPermission() { return permission; }
+    public String getPermission() {
+        return permission;
+    }
 
-    public JsonElement getJsonElement() { return jsonElement; }
+    public JsonElement getJsonElement() {
+        return jsonElement;
+    }
 
-    public String getEntityType() { return entityType; }
+    public String getEntityType() {
+        return entityType;
+    }
 
-    public Long getEntityId() { return entityId; }
+    public Long getEntityId() {
+        return entityId;
+    }
 
 }

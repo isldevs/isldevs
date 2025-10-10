@@ -51,13 +51,9 @@ import org.springframework.stereotype.Service;
 public class VillageServiceImpl implements VillageService {
 
     private final MessageSource messageSource;
-
     private final JdbcTemplate jdbcTemplate;
-
     private final VillageRepository repository;
-
     private final VillageDataValidation validation;
-
     private final CommuneRepository communeRepository;
 
     @Autowired
@@ -80,18 +76,16 @@ public class VillageServiceImpl implements VillageService {
 
         final Long communeId = command.extractLong(VillageConstants.COMMUNE);
         final Commune commune = this.communeRepository.findById(communeId)
-                                                      .orElseThrow(() -> new NotFoundException(VillageConstants.COMMUNE));
+                .orElseThrow(() -> new NotFoundException(VillageConstants.COMMUNE));
 
-        final var data = Village.fromJson(commune,
-                                          command);
+        final var data = Village.fromJson(commune, command);
 
         this.repository.save(data);
         return LogData.builder()
-                      .id(data.getId())
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(data.getId())
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -99,8 +93,7 @@ public class VillageServiceImpl implements VillageService {
     public Map<String, Object> updateVillage(Long id,
                                              JsonCommand command) {
         var data = this.repository.findById(id)
-                                  .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                           id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
         this.validation.update(command.getJson());
 
@@ -109,40 +102,34 @@ public class VillageServiceImpl implements VillageService {
             this.repository.save(data);
         }
         return LogData.builder()
-                      .id(data.getId())
-                      .changes(changes)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(data.getId())
+                .changes(changes)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     @CacheEvict(value = "villages", key = "#id")
     public Map<String, Object> deleteVillage(Long id) {
         final var data = this.repository.findById(id)
-                                        .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                                 id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
         this.repository.delete(data);
         this.repository.flush();
         return LogData.builder()
-                      .id(data.getId())
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(data.getId())
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     @Cacheable(value = "villages", key = "#id")
     public VillageDTO getVillageById(Long id) {
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM village WHERE id = ?",
-                                               this::mapRow,
-                                               id);
+            return jdbcTemplate.queryForObject("SELECT * FROM village WHERE id = ?", this::mapRow, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("msg.not.found",
-                                        id);
+            throw new NotFoundException("msg.not.found", id);
         }
     }
 
@@ -153,8 +140,8 @@ public class VillageServiceImpl implements VillageService {
                                          String search) {
         try {
             StringBuilder sqlBuilder = new StringBuilder("""
-                        SELECT v.id, v.commune_id, v.name_en, v.name_km, v.name_zh, v.postal_code
-                    """);
+                                                             SELECT v.id, v.commune_id, v.name_en, v.name_km, v.name_zh, v.postal_code
+                                                         """);
 
             StringBuilder countSqlBuilder = new StringBuilder(" SELECT COUNT(*) FROM village v ");
 
@@ -163,49 +150,47 @@ public class VillageServiceImpl implements VillageService {
 
             if (search != null && !search.isEmpty()) {
                 sqlBuilder.append("""
-                            , GREATEST(s.name_en_sim, s.name_km_sim, s.name_zh_sim, s.type_sim, s.postal_sim) AS max_similarity
-                            FROM village v
-                            CROSS JOIN LATERAL (
-                                SELECT
-                                    similarity(?, v.name_en) as name_en_sim,
-                                    similarity(?, v.name_km) as name_km_sim,
-                                    similarity(?, v.name_zh) as name_zh_sim,
-                                    similarity(?, v.postal_code) as postal_sim
-                            ) s
-                            WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
-                            ORDER BY max_similarity DESC
-                        """);
+                                      , GREATEST(s.name_en_sim, s.name_km_sim, s.name_zh_sim, s.type_sim, s.postal_sim) AS max_similarity
+                                      FROM village v
+                                      CROSS JOIN LATERAL (
+                                          SELECT
+                                              similarity(?, v.name_en) as name_en_sim,
+                                              similarity(?, v.name_km) as name_km_sim,
+                                              similarity(?, v.name_zh) as name_zh_sim,
+                                              similarity(?, v.postal_code) as postal_sim
+                                      ) s
+                                      WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
+                                      ORDER BY max_similarity DESC
+                                  """);
 
                 countSqlBuilder.append("""
-                            CROSS JOIN LATERAL (
-                                SELECT
-                                    similarity(?, v.name_en) as name_en_sim,
-                                    similarity(?, v.name_km) as name_km_sim,
-                                    similarity(?, v.name_zh) as name_zh_sim,
-                                    similarity(?, v.postal_code) as postal_sim
-                            ) s
-                            WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
-                        """);
+                                           CROSS JOIN LATERAL (
+                                               SELECT
+                                                   similarity(?, v.name_en) as name_en_sim,
+                                                   similarity(?, v.name_km) as name_km_sim,
+                                                   similarity(?, v.name_zh) as name_zh_sim,
+                                                   similarity(?, v.postal_code) as postal_sim
+                                           ) s
+                                           WHERE s.name_en_sim >= ? OR s.name_km_sim >= ? OR s.name_zh_sim >= ? OR s.postal_sim >= ?
+                                       """);
 
                 double threshold = 0.2;
-                IntStream.range(0,
-                                3)
-                         .forEach(_ -> {
-                             params.add(search);
-                             countParams.add(search);
-                         });
-                IntStream.range(0,
-                                3)
-                         .forEach(_ -> {
-                             params.add(threshold);
-                             countParams.add(threshold);
-                         });
+                IntStream.range(0, 3)
+                        .forEach(_ -> {
+                            params.add(search);
+                            countParams.add(search);
+                        });
+                IntStream.range(0, 3)
+                        .forEach(_ -> {
+                            params.add(threshold);
+                            countParams.add(threshold);
+                        });
 
             } else {
                 sqlBuilder.append("""
-                            FROM village v
-                            ORDER BY v.id ASC
-                        """);
+                                      FROM village v
+                                      ORDER BY v.id ASC
+                                  """);
             }
 
             final String sql = sqlBuilder.toString();
@@ -216,49 +201,38 @@ public class VillageServiceImpl implements VillageService {
                 params.add(size);
                 params.add(page * size);
 
-                List<VillageDTO> content = jdbcTemplate.query(paginatedSql,
-                                                              this::mapRow,
-                                                              params.toArray());
-                Long total = jdbcTemplate.queryForObject(countSql,
-                                                         Long.class,
-                                                         countParams.toArray());
+                List<VillageDTO> content = jdbcTemplate.query(paginatedSql, this::mapRow, params.toArray());
+                Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
 
-                Pageable pageable = PageRequest.of(page,
-                                                   size);
-                return new PageImpl<>(content,
-                                      pageable,
-                                      total != null ? total : 0);
+                Pageable pageable = PageRequest.of(page, size);
+                return new PageImpl<>(content, pageable, total != null
+                        ? total
+                        : 0);
             } else {
-                List<VillageDTO> content = jdbcTemplate.query(sql,
-                                                              this::mapRow,
-                                                              params.toArray());
-                Long total = jdbcTemplate.queryForObject(countSql,
-                                                         Long.class,
-                                                         countParams.toArray());
+                List<VillageDTO> content = jdbcTemplate.query(sql, this::mapRow, params.toArray());
+                Long total = jdbcTemplate.queryForObject(countSql, Long.class, countParams.toArray());
 
-                return new PageImpl<>(content,
-                                      Pageable.unpaged(),
-                                      total != null ? total : 0);
+                return new PageImpl<>(content, Pageable.unpaged(), total != null
+                        ? total
+                        : 0);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ErrorException("msg.internal.error",
-                                     "Error fetching villages list",
-                                     e);
+            throw new ErrorException("msg.internal.error", "Error fetching villages list", e);
         }
     }
 
     private VillageDTO mapRow(ResultSet rs,
                               int rowNum) throws SQLException {
         return VillageDTO.builder()
-                         .id(rs.getLong("id"))
-                         .communeId(rs.getLong("commune_id"))
-                         .nameEn(rs.getString("name_en"))
-                         .nameKm(rs.getString("name_km"))
-                         .nameZh(rs.getString("name_zh"))
-                         .postalCode(rs.getString("postal_code"))
-                         .build();
+                .id(rs.getLong("id"))
+                .communeId(rs.getLong("commune_id"))
+                .nameEn(rs.getString("name_en"))
+                .nameKm(rs.getString("name_km"))
+                .nameZh(rs.getString("name_zh"))
+                .postalCode(rs.getString("postal_code"))
+                .build();
     }
 
 }

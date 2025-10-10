@@ -70,59 +70,49 @@ public class Commune extends CustomAbstractAuditable {
         final var postalCode = command.extractString(CommuneConstants.POSTAL_CODE);
 
         return Commune.builder()
-                      .district(district)
-                      .nameEn(nameEn)
-                      .nameKm(nameKm)
-                      .nameZh(nameZh)
-                      .postalCode(postalCode)
-                      .type(type)
-                      .build();
+                .district(district)
+                .nameEn(nameEn)
+                .nameKm(nameKm)
+                .nameZh(nameZh)
+                .postalCode(postalCode)
+                .type(type)
+                .build();
     }
 
     public Map<String, Object> changed(JsonCommand command) {
 
         final Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsLong(CommuneConstants.DISTRICT,
-                                   this.district == null ? null : this.district.getId())) {
+        if (command.isChangeAsLong(CommuneConstants.DISTRICT, this.district == null
+                ? null
+                : this.district.getId())) {
             final var district = command.extractLong(CommuneConstants.DISTRICT);
-            changes.put(CommuneConstants.DISTRICT,
-                        district);
+            changes.put(CommuneConstants.DISTRICT, district);
         }
-        if (command.isChangeAsString(CommuneConstants.TYPE,
-                                     this.type)) {
+        if (command.isChangeAsString(CommuneConstants.TYPE, this.type)) {
             final var type = command.extractString(CommuneConstants.TYPE);
             this.type = type;
-            changes.put(CommuneConstants.TYPE,
-                        type);
+            changes.put(CommuneConstants.TYPE, type);
         }
-        if (command.isChangeAsString(CommuneConstants.NAME_EN,
-                                     this.nameEn)) {
+        if (command.isChangeAsString(CommuneConstants.NAME_EN, this.nameEn)) {
             final var nameEn = command.extractString(CommuneConstants.NAME_EN);
             this.nameEn = nameEn;
-            changes.put(CommuneConstants.NAME_EN,
-                        nameEn);
+            changes.put(CommuneConstants.NAME_EN, nameEn);
         }
-        if (command.isChangeAsString(CommuneConstants.NAME_KM,
-                                     this.nameKm)) {
+        if (command.isChangeAsString(CommuneConstants.NAME_KM, this.nameKm)) {
             final var nameKm = command.extractString(CommuneConstants.NAME_KM);
             this.nameKm = nameKm;
-            changes.put(CommuneConstants.NAME_KM,
-                        nameKm);
+            changes.put(CommuneConstants.NAME_KM, nameKm);
         }
-        if (command.isChangeAsString(CommuneConstants.NAME_ZH,
-                                     this.nameZh)) {
+        if (command.isChangeAsString(CommuneConstants.NAME_ZH, this.nameZh)) {
             final var nameZh = command.extractString(CommuneConstants.NAME_ZH);
             this.nameZh = nameZh;
-            changes.put(CommuneConstants.NAME_ZH,
-                        nameZh);
+            changes.put(CommuneConstants.NAME_ZH, nameZh);
         }
-        if (command.isChangeAsString(CommuneConstants.POSTAL_CODE,
-                                     this.postalCode)) {
+        if (command.isChangeAsString(CommuneConstants.POSTAL_CODE, this.postalCode)) {
             final var postalCode = command.extractString(CommuneConstants.POSTAL_CODE);
             this.postalCode = postalCode;
-            changes.put(CommuneConstants.POSTAL_CODE,
-                        postalCode);
+            changes.put(CommuneConstants.POSTAL_CODE, postalCode);
         }
 
         return changes;

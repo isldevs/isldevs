@@ -41,8 +41,7 @@ public class JwtAssertionApiResource {
     @GetMapping("/assertion")
     public ResponseEntity<Map<String, String>> generate() throws JOSEException {
         String assertion = service.generateClientAssertion();
-        return ResponseEntity.ok(Map.of("assertion",
-                                        assertion));
+        return ResponseEntity.ok(Map.of("assertion", assertion));
     }
 
 }

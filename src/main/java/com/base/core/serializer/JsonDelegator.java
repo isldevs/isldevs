@@ -45,7 +45,7 @@ public class JsonDelegator {
         if (StringUtils.hasText(json) && StringUtils.hasText(parameter)) {
             var element = parseString(json);
             return element != null && element.getAsJsonObject()
-                                             .has(parameter);
+                    .has(parameter);
         }
         return false;
     }
@@ -56,9 +56,9 @@ public class JsonDelegator {
         if (jsonElement.isJsonObject()) {
             final var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 final var jsonPrimitive = object.get(parameter)
-                                                .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 if (StringUtils.hasText(jsonPrimitive.getAsString())) {
                     value = Long.valueOf(jsonPrimitive.getAsString());
                 }
@@ -73,9 +73,9 @@ public class JsonDelegator {
         if (jsonElement.isJsonObject()) {
             final var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 final var jsonPrimitive = object.get(parameter)
-                                                .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 if (StringUtils.hasText(jsonPrimitive.getAsString())) {
                     value = jsonPrimitive.getAsString();
                 }
@@ -90,15 +90,15 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonArray()) {
+                    .isJsonArray()) {
                 object.get(parameter)
-                      .getAsJsonArray()
-                      .forEach(elem -> {
-                          if (elem.isJsonPrimitive() && elem.getAsJsonPrimitive()
-                                                            .isString()) {
-                              value.add(elem.getAsString());
-                          }
-                      });
+                        .getAsJsonArray()
+                        .forEach(elem -> {
+                            if (elem.isJsonPrimitive() && elem.getAsJsonPrimitive()
+                                    .isString()) {
+                                value.add(elem.getAsString());
+                            }
+                        });
             }
         }
         return value;
@@ -110,9 +110,9 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 var primitive = object.get(parameter)
-                                      .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 if (primitive.isNumber()) {
                     value = primitive.getAsBigDecimal();
                 } else if (primitive.isString() && StringUtils.hasText(primitive.getAsString())) {
@@ -132,9 +132,9 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 var primitive = object.get(parameter)
-                                      .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 if (primitive.isBoolean()) {
                     value = primitive.getAsBoolean();
                 } else if (primitive.isString() && StringUtils.hasText(primitive.getAsString())) {
@@ -151,9 +151,9 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 var primitive = object.get(parameter)
-                                      .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 try {
                     value = primitive.getAsInt();
                 } catch (NumberFormatException | UnsupportedOperationException ignored) {
@@ -169,9 +169,9 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 var primitive = object.get(parameter)
-                                      .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 try {
                     value = primitive.getAsDouble();
                 } catch (NumberFormatException | UnsupportedOperationException ignored) {
@@ -187,9 +187,9 @@ public class JsonDelegator {
         if (jsonElement != null && jsonElement.isJsonObject()) {
             var object = jsonElement.getAsJsonObject();
             if (object.has(parameter) && object.get(parameter)
-                                               .isJsonPrimitive()) {
+                    .isJsonPrimitive()) {
                 var primitive = object.get(parameter)
-                                      .getAsJsonPrimitive();
+                        .getAsJsonPrimitive();
                 try {
                     value = primitive.getAsFloat();
                 } catch (NumberFormatException | UnsupportedOperationException ignored) {

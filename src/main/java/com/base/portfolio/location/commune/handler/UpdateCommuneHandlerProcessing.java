@@ -42,8 +42,7 @@ public class UpdateCommuneHandlerProcessing implements CommandHandlerProcessing 
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateCommune(command.getId(),
-                                          command);
+        return this.service.updateCommune(command.getId(), command);
     }
 
 }

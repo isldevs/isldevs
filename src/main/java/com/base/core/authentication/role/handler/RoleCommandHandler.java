@@ -25,22 +25,22 @@ public class RoleCommandHandler extends CommandBuilder {
 
     public CommandBuilder create() {
         return this.action("CREATE")
-                   .entity(RoleConstants.PERMISSION)
-                   .href(RoleConstants.API_PATH);
+                .entity(RoleConstants.PERMISSION)
+                .href(RoleConstants.API_PATH);
     }
 
     public CommandBuilder update(final Long id) {
         return this.action("UPDATE")
-                   .entity(RoleConstants.PERMISSION)
-                   .id(id)
-                   .href(RoleConstants.API_PATH + "/" + id);
+                .entity(RoleConstants.PERMISSION)
+                .id(id)
+                .href(RoleConstants.API_PATH + "/" + id);
     }
 
     public CommandBuilder delete(final Long id) {
         return this.action("DELETE")
-                   .entity(RoleConstants.PERMISSION)
-                   .id(id)
-                   .href(RoleConstants.API_PATH + "/" + id);
+                .entity(RoleConstants.PERMISSION)
+                .id(id)
+                .href(RoleConstants.API_PATH + "/" + id);
     }
 
 }

@@ -75,32 +75,26 @@ public class Office extends CustomAbstractAuditable {
     public Map<String, Object> changed(final JsonCommand command) {
         final Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsLong(OfficeConstants.PARENT_ID,
-                                   this.parent == null ? null : this.parent.getId())) {
+        if (command.isChangeAsLong(OfficeConstants.PARENT_ID, this.parent == null
+                ? null
+                : this.parent.getId())) {
             final var value = command.extractLong(OfficeConstants.PARENT_ID);
-            changes.put(OfficeConstants.PARENT_ID,
-                        value);
+            changes.put(OfficeConstants.PARENT_ID, value);
         }
-        if (command.isChangeAsString(OfficeConstants.NAME_EN,
-                                     this.nameEn)) {
+        if (command.isChangeAsString(OfficeConstants.NAME_EN, this.nameEn)) {
             final var value = command.extractString(OfficeConstants.NAME_EN);
             this.nameEn = value;
-            changes.put(OfficeConstants.NAME_EN,
-                        value);
+            changes.put(OfficeConstants.NAME_EN, value);
         }
-        if (command.isChangeAsString(OfficeConstants.NAME_KM,
-                                     this.nameKm)) {
+        if (command.isChangeAsString(OfficeConstants.NAME_KM, this.nameKm)) {
             final var value = command.extractString(OfficeConstants.NAME_KM);
             this.nameKm = value;
-            changes.put(OfficeConstants.NAME_KM,
-                        value);
+            changes.put(OfficeConstants.NAME_KM, value);
         }
-        if (command.isChangeAsString(OfficeConstants.NAME_ZH,
-                                     this.nameZh)) {
+        if (command.isChangeAsString(OfficeConstants.NAME_ZH, this.nameZh)) {
             final var value = command.extractString(OfficeConstants.NAME_ZH);
             this.nameZh = value;
-            changes.put(OfficeConstants.NAME_ZH,
-                        value);
+            changes.put(OfficeConstants.NAME_ZH, value);
         }
 
         return changes;
@@ -142,16 +136,28 @@ public class Office extends CustomAbstractAuditable {
 
     }
 
-    public Office getParent() { return parent; }
+    public Office getParent() {
+        return parent;
+    }
 
-    public String getHierarchy() { return hierarchy; }
+    public String getHierarchy() {
+        return hierarchy;
+    }
 
-    public String getNameEn() { return nameEn; }
+    public String getNameEn() {
+        return nameEn;
+    }
 
-    public String getNameKm() { return nameKm; }
+    public String getNameKm() {
+        return nameKm;
+    }
 
-    public String getNameZh() { return nameZh; }
+    public String getNameZh() {
+        return nameZh;
+    }
 
-    public void setParent(Office parent) { this.parent = parent; }
+    public void setParent(Office parent) {
+        this.parent = parent;
+    }
 
 }

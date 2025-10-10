@@ -123,32 +123,60 @@ public class File extends CustomAbstractAuditable {
 
     }
 
-    public String getEntity() { return entity; }
+    public String getEntity() {
+        return entity;
+    }
 
-    public Long getEntityId() { return entityId; }
+    public Long getEntityId() {
+        return entityId;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public Long getSize() { return size; }
+    public Long getSize() {
+        return size;
+    }
 
-    public String getMimeType() { return mimeType; }
+    public String getMimeType() {
+        return mimeType;
+    }
 
-    public String getLocation() { return location; }
+    public String getLocation() {
+        return location;
+    }
 
-    public Integer getStorageType() { return storageType; }
+    public Integer getStorageType() {
+        return storageType;
+    }
 
-    public void setEntity(String entity) { this.entity = entity; }
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
 
-    public void setEntityId(Long entityId) { this.entityId = entityId; }
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setSize(Long size) { this.size = size; }
+    public void setSize(Long size) {
+        this.size = size;
+    }
 
-    public void setMimeType(String mimeType) { this.mimeType = mimeType; }
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
 
-    public void setLocation(String location) { this.location = location; }
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-    public void setStorageType(Integer storageType) { this.storageType = storageType; }
+    public void setStorageType(Integer storageType) {
+        this.storageType = storageType;
+    }
 
 }

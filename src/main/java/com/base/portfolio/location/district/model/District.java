@@ -92,62 +92,45 @@ public class District extends CustomAbstractAuditable {
         final var nameKm = command.extractString(DistrictConstants.NAME_KM);
         final var nameZh = command.extractString(DistrictConstants.NAME_ZH);
         final var postalCode = command.extractString(DistrictConstants.POSTAL_CODE);
-        final var communes = command.extractArrayAs(DistrictConstants.COMMUNE,
-                                                    Commune.class);
+        final var communes = command.extractArrayAs(DistrictConstants.COMMUNE, Commune.class);
 
-        return new District(province,
-                            nameEn,
-                            nameKm,
-                            nameZh,
-                            postalCode,
-                            type,
-                            communes);
+        return new District(province, nameEn, nameKm, nameZh, postalCode, type, communes);
     }
 
     public Map<String, Object> changed(JsonCommand command) {
 
         final Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsLong(DistrictConstants.PROVINCE,
-                                   this.province == null ? null : this.province.getId())) {
+        if (command.isChangeAsLong(DistrictConstants.PROVINCE, this.province == null
+                ? null
+                : this.province.getId())) {
             final var province = command.extractLong(DistrictConstants.PROVINCE);
-            changes.put(DistrictConstants.PROVINCE,
-                        province);
+            changes.put(DistrictConstants.PROVINCE, province);
         }
-        if (command.isChangeAsString(DistrictConstants.TYPE,
-                                     this.type)) {
+        if (command.isChangeAsString(DistrictConstants.TYPE, this.type)) {
             final var type = command.extractString(DistrictConstants.TYPE);
             this.type = type;
-            changes.put(DistrictConstants.TYPE,
-                        type);
+            changes.put(DistrictConstants.TYPE, type);
         }
-        if (command.isChangeAsString(DistrictConstants.NAME_EN,
-                                     this.nameEn)) {
+        if (command.isChangeAsString(DistrictConstants.NAME_EN, this.nameEn)) {
             final var nameEn = command.extractString(DistrictConstants.NAME_EN);
             this.nameEn = nameEn;
-            changes.put(DistrictConstants.NAME_EN,
-                        nameEn);
+            changes.put(DistrictConstants.NAME_EN, nameEn);
         }
-        if (command.isChangeAsString(DistrictConstants.NAME_KM,
-                                     this.nameKm)) {
+        if (command.isChangeAsString(DistrictConstants.NAME_KM, this.nameKm)) {
             final var nameKm = command.extractString(DistrictConstants.NAME_KM);
             this.nameKm = nameKm;
-            changes.put(DistrictConstants.NAME_KM,
-                        nameKm);
+            changes.put(DistrictConstants.NAME_KM, nameKm);
         }
-        if (command.isChangeAsString(DistrictConstants.NAME_ZH,
-                                     this.nameZh)) {
+        if (command.isChangeAsString(DistrictConstants.NAME_ZH, this.nameZh)) {
             final var nameZh = command.extractString(DistrictConstants.NAME_ZH);
             this.nameZh = nameZh;
-            changes.put(DistrictConstants.NAME_ZH,
-                        nameZh);
+            changes.put(DistrictConstants.NAME_ZH, nameZh);
         }
-        if (command.isChangeAsString(DistrictConstants.POSTAL_CODE,
-                                     this.postalCode)) {
+        if (command.isChangeAsString(DistrictConstants.POSTAL_CODE, this.postalCode)) {
             final var postalCode = command.extractString(DistrictConstants.POSTAL_CODE);
             this.postalCode = postalCode;
-            changes.put(DistrictConstants.POSTAL_CODE,
-                        postalCode);
+            changes.put(DistrictConstants.POSTAL_CODE, postalCode);
         }
 
         return changes;

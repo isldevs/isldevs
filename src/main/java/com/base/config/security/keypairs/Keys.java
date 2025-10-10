@@ -33,10 +33,7 @@ public class Keys {
         var keyPair = generateRsaKey();
         var publicKey = (RSAPublicKey) keyPair.getPublic();
         var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKeyPairRepository.RSAKeyPair(keyId,
-                                                   created,
-                                                   publicKey,
-                                                   privateKey);
+        return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
     }
 
     private KeyPair generateRsaKey() {

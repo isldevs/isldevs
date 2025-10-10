@@ -34,8 +34,7 @@ public class I18nConfig {
     @Primary
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames("classpath:messages",
-                                   "classpath:config/i18n/messages");
+        messageSource.setBasenames("classpath:messages", "classpath:config/i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
         return messageSource;

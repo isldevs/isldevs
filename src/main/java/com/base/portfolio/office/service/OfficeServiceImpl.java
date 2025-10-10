@@ -44,11 +44,8 @@ import java.util.Map;
 public class OfficeServiceImpl implements OfficeService {
 
     private final MessageSource messageSource;
-
     private final OfficeRepository repository;
-
     private final OfficeDataValidation validator;
-
     private final OfficeMapper officeMapper;
 
     @Autowired
@@ -68,31 +65,31 @@ public class OfficeServiceImpl implements OfficeService {
         this.validator.create(command.getJson());
 
         final var parentId = command.extractLong(OfficeConstants.PARENT_ID);
-        final var parent = parentId != null ? this.repository.findById(parentId)
-                                                             .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                                                      parentId)) : null;
+        final var parent = parentId != null
+                ? this.repository.findById(parentId)
+                        .orElseThrow(() -> new NotFoundException("msg.not.found", parentId))
+                : null;
 
         final var nameEn = command.extractString(OfficeConstants.NAME_EN);
         final var nameKm = command.extractString(OfficeConstants.NAME_KM);
         final var nameZh = command.extractString(OfficeConstants.NAME_ZH);
 
         var data = Office.builder()
-                         .parent(parent)
-                         .nameEn(nameEn)
-                         .nameKm(nameKm)
-                         .nameZh(nameZh)
-                         .build();
+                .parent(parent)
+                .nameEn(nameEn)
+                .nameKm(nameKm)
+                .nameZh(nameZh)
+                .build();
 
         var office = this.repository.saveAndFlush(data);
         data.generateHierarchy();
         this.repository.save(data);
 
         return LogData.builder()
-                      .id(office.getId())
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(office.getId())
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -100,8 +97,7 @@ public class OfficeServiceImpl implements OfficeService {
     public Map<String, Object> updateOffice(Long id,
                                             JsonCommand command) {
         var exist = this.repository.findById(id)
-                                   .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                            id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
         this.validator.update(command.getJson());
 
@@ -110,20 +106,18 @@ public class OfficeServiceImpl implements OfficeService {
             if (changes.containsKey(OfficeConstants.PARENT_ID)) {
                 final var parentId = command.extractLong(OfficeConstants.PARENT_ID);
                 final Office parent = this.repository.findById(parentId)
-                                                     .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                                              id));
+                        .orElseThrow(() -> new NotFoundException("msg.not.found", id));
                 exist.setParent(parent);
             }
             this.repository.save(exist);
         }
 
         return LogData.builder()
-                      .id(id)
-                      .changes(changes)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .changes(changes)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -131,26 +125,23 @@ public class OfficeServiceImpl implements OfficeService {
     public Map<String, Object> deleteOffice(Long id) {
 
         var exist = this.repository.findById(id)
-                                   .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                            id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
 
         this.repository.delete(exist);
         this.repository.flush();
 
         return LogData.builder()
-                      .id(id)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     @Cacheable(value = "offices", key = "#id")
     public OfficeDTO getOfficeById(Long id) {
         var office = this.repository.findById(id)
-                                    .orElseThrow(() -> new NotFoundException("msg.not.found",
-                                                                             id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found", id));
         return officeMapper.toDTOWithProfile(office);
     }
 
@@ -165,31 +156,21 @@ public class OfficeServiceImpl implements OfficeService {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
                 var likeSearch = "%" + search.toLowerCase() + "%";
-                predicates.add(sp.or(sp.like(sp.lower(root.get("nameEn")),
-                                             likeSearch),
-                                     sp.like(sp.lower(root.get("nameKm")),
-                                             likeSearch),
-                                     sp.like(sp.lower(root.get("nameZh")),
-                                             likeSearch)));
+                predicates.add(sp.or(sp.like(sp.lower(root.get("nameEn")), likeSearch), sp.like(sp.lower(root.get("nameKm")), likeSearch), sp.like(sp.lower(root
+                        .get("nameZh")), likeSearch)));
             }
             return sp.and(predicates.toArray(new Predicate[0]));
         };
         var sort = Sort.by("hierarchy")
-                       .ascending();
+                .ascending();
         if (page == null || size == null) {
-            var allOffices = repository.findAll(specification,
-                                                sort);
+            var allOffices = repository.findAll(specification, sort);
             List<OfficeDTO> dto = officeMapper.toDTOList(allOffices);
-            return new PageImpl<>(dto,
-                                  Pageable.unpaged(),
-                                  allOffices.size());
+            return new PageImpl<>(dto, Pageable.unpaged(), allOffices.size());
         }
 
-        var pageable = PageRequest.of(page,
-                                      size,
-                                      sort);
-        var officesPage = repository.findAll(specification,
-                                             pageable);
+        var pageable = PageRequest.of(page, size, sort);
+        var officesPage = repository.findAll(specification, pageable);
         return officeMapper.toDTOPage(officesPage);
     }
 

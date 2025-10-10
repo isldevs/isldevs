@@ -38,11 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class LogServiceImpl implements LogService {
 
     private final LogRepository logRepository;
-
     private final CommandTypeProvider commandTypeProvider;
-
     private final JsonDelegator jsonDelegator;
-
     private final SecurityContext securityContext;
 
     @Autowired
@@ -58,31 +55,26 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public Map<String, Object> log(Command command) {
-        CommandHandlerProcessing handler = getHandler(command.getAction(),
-                                                      command.getEntity());
+        CommandHandlerProcessing handler = getHandler(command.getAction(), command.getEntity());
         JsonElement jsonElement = jsonDelegator.parseString(command.getJson());
         JsonCommand jsonCommand = JsonCommand.builder()
-                                             .id(command.getId())
-                                             .action(command.getAction())
-                                             .entity(command.getEntity())
-                                             .entityType(command.getEntityType())
-                                             .entityId(command.getEntityId())
-                                             .permission(command.getAction() + "_" + command.getEntity())
-                                             .file(command.getFile())
-                                             .json(command.getJson())
-                                             .href(command.getHref())
-                                             .jsonDelegator(jsonDelegator)
-                                             .jsonElement(jsonElement)
-                                             .build();
+                .id(command.getId())
+                .action(command.getAction())
+                .entity(command.getEntity())
+                .entityType(command.getEntityType())
+                .entityId(command.getEntityId())
+                .permission(command.getAction() + "_" + command.getEntity())
+                .file(command.getFile())
+                .json(command.getJson())
+                .href(command.getHref())
+                .jsonDelegator(jsonDelegator)
+                .jsonElement(jsonElement)
+                .build();
         Map<String, Object> logData = handler.process(jsonCommand);
         User createdBy = this.securityContext.authenticatedUser();
-        Logs logs = new Logs(logData.get("id") != null ? (Long) logData.get("id") : command.getEntityId(),
-                             command.getAction(),
-                             command.getEntity(),
-                             command.getHref(),
-                             command.getJson(),
-                             createdBy.getName(),
-                             new Date());
+        Logs logs = new Logs(logData.get("id") != null
+                ? (Long) logData.get("id")
+                : command.getEntityId(), command.getAction(), command.getEntity(), command.getHref(), command.getJson(), createdBy.getName(), new Date());
         this.logRepository.save(logs);
 
         return logData;
@@ -90,8 +82,7 @@ public class LogServiceImpl implements LogService {
 
     private CommandHandlerProcessing getHandler(String action,
                                                 String entity) {
-        return this.commandTypeProvider.allHandler(action,
-                                                   entity);
+        return this.commandTypeProvider.allHandler(action, entity);
     }
 
 }

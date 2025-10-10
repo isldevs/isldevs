@@ -25,22 +25,22 @@ public class VillageCommandHandler extends CommandBuilder {
 
     public CommandBuilder create() {
         return this.action("CREATE")
-                   .entity(VillageConstants.PERMISSION)
-                   .href(VillageConstants.API_PATH);
+                .entity(VillageConstants.PERMISSION)
+                .href(VillageConstants.API_PATH);
     }
 
     public CommandBuilder update(final Long id) {
         return this.action("UPDATE")
-                   .entity(VillageConstants.PERMISSION)
-                   .id(id)
-                   .href(VillageConstants.API_PATH + "/" + id);
+                .entity(VillageConstants.PERMISSION)
+                .id(id)
+                .href(VillageConstants.API_PATH + "/" + id);
     }
 
     public CommandBuilder delete(final Long id) {
         return this.action("DELETE")
-                   .entity(VillageConstants.PERMISSION)
-                   .id(id)
-                   .href(VillageConstants.API_PATH + "/" + id);
+                .entity(VillageConstants.PERMISSION)
+                .id(id)
+                .href(VillageConstants.API_PATH + "/" + id);
     }
 
 }

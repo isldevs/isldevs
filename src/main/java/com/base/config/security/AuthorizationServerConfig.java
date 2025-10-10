@@ -62,25 +62,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class AuthorizationServerConfig {
 
     private final MessageSource messageSource;
-
     private final AuthenticationProvider authenticationProvider;
-
     private final OAuth2AuthorizationService authorizationService;
-
     private final OAuth2TokenGenerator<?> tokenGenerator;
-
     private final RegisteredClientRepository registeredClientRepository;
-
     private final HttpAuthenticationFilter httpAuthenticationFilter;
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider;
-
     private final CorsConfigurationSource corsConfigurationSource;
-
     private final UserInfoService userInfoService;
-
     private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
 
     @Autowired
@@ -114,71 +104,50 @@ public class AuthorizationServerConfig {
 
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = this.userInfoService::loadUser;
         var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
-        http.with(configurer,
-                  (authorizationServer) -> authorizationServer.oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo.userInfoMapper(userInfoMapper)))
-                                                              .clientAuthentication(Customizer.withDefaults())
-                                                              .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(new DelegatingAuthenticationConverter(Arrays.asList(new CustomAuthenticationConverter(),
-                                                                                                                                                                                            new OAuth2PasswordAuthenticationConverter(),
-                                                                                                                                                                                            new OAuth2RefreshTokenAuthenticationConverter(),
-                                                                                                                                                                                            new OAuth2AuthorizationCodeAuthenticationConverter(),
-                                                                                                                                                                                            new OAuth2ClientCredentialsAuthenticationConverter())))
-                                                                                                           .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
-                                                                                                           .authenticationProviders(providers -> {
-                                                                                                               providers.add(jwtBearerAuthenticationProvider);
-                                                                                                               providers.add(new OAuth2PasswordAuthenticationProvider(authenticationProvider,
-                                                                                                                                                                      authorizationService,
-                                                                                                                                                                      tokenGenerator,
-                                                                                                                                                                      registeredClientRepository));
-                                                                                                               providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService,
-                                                                                                                                                                          tokenGenerator));
-                                                                                                               providers.add(new OAuth2ClientCredentialsAuthenticationProvider(authorizationService,
-                                                                                                                                                                               tokenGenerator));
-                                                                                                           })));
+        http.with(configurer, (authorizationServer) -> authorizationServer.oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo
+                .userInfoMapper(userInfoMapper)))
+                .clientAuthentication(Customizer.withDefaults())
+                .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(new DelegatingAuthenticationConverter(Arrays
+                        .asList(new CustomAuthenticationConverter(), new OAuth2PasswordAuthenticationConverter(), new OAuth2RefreshTokenAuthenticationConverter(), new OAuth2AuthorizationCodeAuthenticationConverter(), new OAuth2ClientCredentialsAuthenticationConverter())))
+                        .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
+                        .authenticationProviders(providers -> {
+                            providers.add(jwtBearerAuthenticationProvider);
+                            providers
+                                    .add(new OAuth2PasswordAuthenticationProvider(authenticationProvider, authorizationService, tokenGenerator, registeredClientRepository));
+                            providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService, tokenGenerator));
+                            providers.add(new OAuth2ClientCredentialsAuthenticationProvider(authorizationService, tokenGenerator));
+                        })));
 
         http.securityMatcher(configurer.getEndpointsMatcher())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/oauth2/token",
-                                                       "/api/v1/oauth2/device_authorization",
-                                                       "/api/v1/oauth2/token/introspect",
-                                                       "/api/v1/oauth2/token/revoke"))
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/v1/oauth2/token",
-                                                                          "/api/v1/oauth2/device_authorization",
-                                                                          "/api/v1/oauth2/token/introspect",
-                                                                          "/api/v1/oauth2/token/revoke",
-                                                                          "/.well-known/oauth-authorization-server",
-                                                                          "/.well-known/openid-configuration",
-                                                                          "/jwks",
-                                                                          "/api/v1/device/**",
-                                                                          "/css/**",
-                                                                          "/js/**",
-                                                                          "/api/v1/login/**",
-                                                                          "/api/v1/error/**",
-                                                                          "/api/v1/public/**")
-                                                         .permitAll()
-                                                         .anyRequest()
-                                                         .authenticated())
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(form -> form.loginPage("/login")
-                                   .defaultSuccessUrl("/home",
-                                                      true)
-                                   .successHandler(authenticationSuccessHandler)
-                                   .permitAll())
-            .addFilterBefore(httpAuthenticationFilter,
-                             BasicAuthenticationFilter.class)
-            .addFilterAfter(jwtAuthenticationFilter,
-                            HttpAuthenticationFilter.class)
-            .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"),
-                                                                                           new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
-            .headers(headers -> headers.xssProtection(Customizer.withDefaults())
-                                       .cacheControl(Customizer.withDefaults())
-                                       .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; " + "script-src 'self'; " + "style-src 'self'; " + "img-src 'self' data:; " + "font-src 'self'; " + "connect-src 'self'; " + "form-action 'self'; " + "frame-ancestors 'none'; " + "block-all-mixed-content"))
-                                       .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-                                       .contentTypeOptions(Customizer.withDefaults())
-                                       .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true)
-                                                                                .maxAgeInSeconds(31536000))
-                                       .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'"))
-                                       .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
-            .redirectToHttps(redirectToHttp -> redirectToHttp.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null));
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/v1/oauth2/token", "/api/v1/oauth2/device_authorization", "/api/v1/oauth2/token/introspect", "/api/v1/oauth2/token/revoke"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/v1/oauth2/token", "/api/v1/oauth2/device_authorization", "/api/v1/oauth2/token/introspect", "/api/v1/oauth2/token/revoke", "/.well-known/oauth-authorization-server", "/.well-known/openid-configuration", "/jwks", "/api/v1/device/**", "/css/**", "/js/**", "/api/v1/login/**", "/api/v1/error/**", "/api/v1/public/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll())
+                .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, HttpAuthenticationFilter.class)
+                .exceptionHandling((exception) -> exception
+                        .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+                .headers(headers -> headers.xssProtection(Customizer.withDefaults())
+                        .cacheControl(Customizer.withDefaults())
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; " + "script-src 'self'; " + "style-src 'self'; " + "img-src 'self' data:; " + "font-src 'self'; " + "connect-src 'self'; " + "form-action 'self'; " + "frame-ancestors 'none'; " + "block-all-mixed-content"))
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'"))
+                        .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
+                .redirectToHttps(redirectToHttp -> redirectToHttp.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null));
 
         return http.build();
     }

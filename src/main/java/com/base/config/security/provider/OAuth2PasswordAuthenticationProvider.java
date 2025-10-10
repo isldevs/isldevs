@@ -43,11 +43,8 @@ import org.springframework.stereotype.Service;
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
 
     private final AuthenticationProvider authenticationProvider;
-
     private final OAuth2AuthorizationService authorizationService;
-
     private final OAuth2TokenGenerator<?> tokenGenerator;
-
     private final RegisteredClientRepository registeredClientRepository;
 
     @Autowired
@@ -69,59 +66,51 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         if (registeredClient == null) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
         }
-        var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(),
-                                                                                          authRequest.getPassword());
+        var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
         var userAuthentication = authenticationProvider.authenticate(usernamePasswordAuthenticationToken);
         if (userAuthentication == null || !userAuthentication.isAuthenticated()) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT),
-                                                    "User authentication failed");
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT), "User authentication failed");
         }
         var authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
-                                                      .principalName(userAuthentication.getName())
-                                                      .authorizationGrantType(new AuthorizationGrantType("password"))
-                                                      .attribute(Principal.class.getName(),
-                                                                 userAuthentication);
+                .principalName(userAuthentication.getName())
+                .authorizationGrantType(new AuthorizationGrantType("password"))
+                .attribute(Principal.class.getName(), userAuthentication);
 
         Set<String> authorizedScopes = authRequest.getScopes();
         if (authorizedScopes == null || authorizedScopes.isEmpty()) {
             authorizedScopes = registeredClient.getScopes();
         }
-        authorizationBuilder.attribute("authorized_scopes",
-                                       authorizedScopes);
+        authorizationBuilder.attribute("authorized_scopes", authorizedScopes);
 
         var tokenContext = DefaultOAuth2TokenContext.builder()
-                                                    .registeredClient(registeredClient)
-                                                    .principal(userAuthentication)
-                                                    .authorizedScopes(authorizedScopes)
-                                                    .authorization(authorizationBuilder.build())
-                                                    .authorizationGrantType(new AuthorizationGrantType("password"))
-                                                    .authorizationGrant(authRequest)
-                                                    .tokenType(OAuth2TokenType.ACCESS_TOKEN)
-                                                    .authorizationServerContext(AuthorizationServerContextHolder.getContext())
-                                                    .build();
+                .registeredClient(registeredClient)
+                .principal(userAuthentication)
+                .authorizedScopes(authorizedScopes)
+                .authorization(authorizationBuilder.build())
+                .authorizationGrantType(new AuthorizationGrantType("password"))
+                .authorizationGrant(authRequest)
+                .tokenType(OAuth2TokenType.ACCESS_TOKEN)
+                .authorizationServerContext(AuthorizationServerContextHolder.getContext())
+                .build();
 
         var oAuth2Token = tokenGenerator.generate(tokenContext);
         if (oAuth2Token == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR),
-                                                    "Access token generation failed");
+            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR), "Access token generation failed");
         }
-        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
-                                                oAuth2Token.getTokenValue(),
-                                                oAuth2Token.getIssuedAt(),
-                                                oAuth2Token.getExpiresAt(),
-                                                authorizedScopes);
+        var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, oAuth2Token.getTokenValue(), oAuth2Token.getIssuedAt(), oAuth2Token
+                .getExpiresAt(), authorizedScopes);
 
         OAuth2RefreshToken refreshToken = null;
         if (registeredClient.getAuthorizationGrantTypes()
-                            .contains(AuthorizationGrantType.REFRESH_TOKEN)) {
+                .contains(AuthorizationGrantType.REFRESH_TOKEN)) {
             tokenContext = DefaultOAuth2TokenContext.builder()
-                                                    .registeredClient(registeredClient)
-                                                    .principal(userAuthentication)
-                                                    .authorization(authorizationBuilder.build())
-                                                    .authorizationGrantType(new AuthorizationGrantType("password"))
-                                                    .authorizationGrant(authRequest)
-                                                    .tokenType(OAuth2TokenType.REFRESH_TOKEN)
-                                                    .build();
+                    .registeredClient(registeredClient)
+                    .principal(userAuthentication)
+                    .authorization(authorizationBuilder.build())
+                    .authorizationGrantType(new AuthorizationGrantType("password"))
+                    .authorizationGrant(authRequest)
+                    .tokenType(OAuth2TokenType.REFRESH_TOKEN)
+                    .build();
 
             refreshToken = (OAuth2RefreshToken) tokenGenerator.generate(tokenContext);
         }
@@ -133,17 +122,10 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
         var authorization = authorizationBuilder.build();
         authorizationService.save(authorization);
         Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put("scope",
-                                 String.join(" ",
-                                             authorizedScopes));
-        additionalParameters.put("client_id",
-                                 registeredClient.getClientId());
+        additionalParameters.put("scope", String.join(" ", authorizedScopes));
+        additionalParameters.put("client_id", registeredClient.getClientId());
 
-        return new OAuth2AccessTokenAuthenticationToken(registeredClient,
-                                                        userAuthentication,
-                                                        accessToken,
-                                                        refreshToken,
-                                                        additionalParameters);
+        return new OAuth2AccessTokenAuthenticationToken(registeredClient, userAuthentication, accessToken, refreshToken, additionalParameters);
     }
 
     @Override

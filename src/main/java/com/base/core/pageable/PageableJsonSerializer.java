@@ -35,8 +35,7 @@ public class PageableJsonSerializer extends StdSerializer<Link> {
                           JsonGenerator generator,
                           SerializerProvider serializerProvider) throws IOException {
         generator.writeStartObject();
-        generator.writeStringField("href",
-                                   link.getHref());
+        generator.writeStringField("href", link.getHref());
         generator.writeEndObject();
     }
 

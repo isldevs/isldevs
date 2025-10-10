@@ -25,22 +25,22 @@ public class UserCommandBuilder extends CommandBuilder {
 
     public CommandBuilder create() {
         return this.action("CREATE")
-                   .entity(UserConstants.PERMISSION)
-                   .href(UserConstants.API_PATH);
+                .entity(UserConstants.PERMISSION)
+                .href(UserConstants.API_PATH);
     }
 
     public CommandBuilder update(final Long id) {
         return this.action("UPDATE")
-                   .entity(UserConstants.PERMISSION)
-                   .id(id)
-                   .href(UserConstants.API_PATH + "/" + id);
+                .entity(UserConstants.PERMISSION)
+                .id(id)
+                .href(UserConstants.API_PATH + "/" + id);
     }
 
     public CommandBuilder delete(final Long id) {
         return this.action("DELETE")
-                   .entity(UserConstants.PERMISSION)
-                   .id(id)
-                   .href(UserConstants.API_PATH + "/" + id);
+                .entity(UserConstants.PERMISSION)
+                .id(id)
+                .href(UserConstants.API_PATH + "/" + id);
     }
 
 }

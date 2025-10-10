@@ -23,7 +23,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 public class ClientAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String clientId;
-
     private final String clientAssertion;
 
     public ClientAuthenticationToken(String clientId,
@@ -34,14 +33,22 @@ public class ClientAuthenticationToken extends AbstractAuthenticationToken {
         setAuthenticated(false);
     }
 
-    public String getClientId() { return clientId; }
+    public String getClientId() {
+        return clientId;
+    }
 
-    public String getClientAssertion() { return clientAssertion; }
+    public String getClientAssertion() {
+        return clientAssertion;
+    }
 
     @Override
-    public Object getCredentials() { return clientAssertion; }
+    public Object getCredentials() {
+        return clientAssertion;
+    }
 
     @Override
-    public Object getPrincipal() { return clientId; }
+    public Object getPrincipal() {
+        return clientId;
+    }
 
 }

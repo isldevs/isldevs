@@ -43,12 +43,20 @@ public class Config extends CustomAbstractAuditable {
     public Config() {
     }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getCode() { return code; }
+    public String getCode() {
+        return code;
+    }
 
-    public String getValue() { return value; }
+    public String getValue() {
+        return value;
+    }
 
-    public Boolean getEnabled() { return enabled; }
+    public Boolean getEnabled() {
+        return enabled;
+    }
 
 }

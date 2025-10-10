@@ -40,21 +40,17 @@ public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deseri
 
     @Override
     public RSAPrivateKey deserialize(InputStream inputStream) {
-        try (var reader = new BufferedReader(new InputStreamReader(inputStream,
-                                                                   StandardCharsets.UTF_8))) {
+        try (var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             var pem = this.textEncryptor.decrypt(FileCopyUtils.copyToString(reader));
-            var privateKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----",
-                                            "")
-                                   .replace("-----END PRIVATE KEY-----",
-                                            "");
+            var privateKeyPEM = pem.replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "");
             var encoded = Base64.getMimeDecoder()
-                                .decode(privateKeyPEM);
+                    .decode(privateKeyPEM);
             var keyFactory = KeyFactory.getInstance("RSA");
             var keySpec = new PKCS8EncodedKeySpec(encoded);
             return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
         } catch (Throwable throwable) {
-            throw new IllegalArgumentException("there's been an exception",
-                                               throwable);
+            throw new IllegalArgumentException("there's been an exception", throwable);
         }
     }
 
@@ -63,9 +59,9 @@ public class RSAPrivateKeyConverter implements Serializer<RSAPrivateKey>, Deseri
                           OutputStream outputStream) throws IOException {
         var pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(object.getEncoded());
         var string = "-----BEGIN PRIVATE KEY-----\n" + Base64.getMimeEncoder()
-                                                             .encodeToString(pkcs8EncodedKeySpec.getEncoded()) + "\n-----END PRIVATE KEY-----";
+                .encodeToString(pkcs8EncodedKeySpec.getEncoded()) + "\n-----END PRIVATE KEY-----";
         outputStream.write(this.textEncryptor.encrypt(string)
-                                             .getBytes(StandardCharsets.UTF_8));
+                .getBytes(StandardCharsets.UTF_8));
     }
 
     public Key convertFromString(String keyStr) throws IOException {

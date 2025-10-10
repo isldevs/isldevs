@@ -42,8 +42,7 @@ public class UpdateProvinceHandlerProcessing implements CommandHandlerProcessing
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateProvince(command.getId(),
-                                           command);
+        return this.service.updateProvince(command.getId(), command);
     }
 
 }

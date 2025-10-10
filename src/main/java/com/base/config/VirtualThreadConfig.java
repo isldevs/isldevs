@@ -35,9 +35,8 @@ public class VirtualThreadConfig {
     @Bean(value = TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
     public Executor applicationTaskExecutor() {
         int availableProcessors = Runtime.getRuntime()
-                                         .availableProcessors();
-        logger.info("Virtual thread per task executor, available processors: {}, will scale dynamically base on workload",
-                    availableProcessors);
+                .availableProcessors();
+        logger.info("Virtual thread per task executor, available processors: {}, will scale dynamically base on workload", availableProcessors);
         return Executors.newVirtualThreadPerTaskExecutor();
     }
 

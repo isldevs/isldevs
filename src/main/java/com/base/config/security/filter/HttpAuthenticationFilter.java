@@ -52,15 +52,10 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpAuthenticationFilter.class);
 
     private static final String TENANT_HEADER = "Tenant-Type";
-
     private static final String EXPECTED_TENANT = "iSLDevs";
-
     private static final String TOKEN_ENDPOINT = "/api/v1/oauth2/token";
-
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
-
     private final PasswordEncoder passwordEncoder;
-
     private final RegisteredClientRepository registeredClientRepository;
 
     @Autowired
@@ -80,31 +75,27 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
         stopWatch.start();
         try {
             if ("POST".equals(request.getMethod()) && request.getRequestURL()
-                                                             .toString()
-                                                             .contains(TOKEN_ENDPOINT)) {
+                    .toString()
+                    .contains(TOKEN_ENDPOINT)) {
                 if (!"OPTIONS".equals(request.getMethod())) {
                     var tenantHeader = request.getHeader(TENANT_HEADER);
                     if (StringUtils.isBlank(tenantHeader)) {
                         tenantHeader = request.getParameter(TENANT_HEADER);
                     }
                     if (StringUtils.isBlank(tenantHeader)) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
-                                                                "Missing Header Tenant-Type");
+                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Missing Header Tenant-Type");
                     }
                     if (!EXPECTED_TENANT.equalsIgnoreCase(tenantHeader)) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
-                                                                "Tenant-Type Value Mismatch");
+                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Tenant-Type Value Mismatch");
                     }
                     String clientId = request.getParameter("client_id");
                     if (StringUtils.isBlank(clientId)) {
                         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
                         if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith("Basic ")) {
                             String decoded = new String(Base64.getDecoder()
-                                                              .decode(authHeader.substring("Basic ".length())
-                                                                                .trim()),
-                                                        StandardCharsets.UTF_8);
-                            String[] parts = decoded.split(":",
-                                                           2);
+                                    .decode(authHeader.substring("Basic ".length())
+                                            .trim()), StandardCharsets.UTF_8);
+                            String[] parts = decoded.split(":", 2);
                             if (parts.length == 2) {
                                 clientId = parts[0];
                             }
@@ -112,101 +103,81 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
                     }
 
                     if (StringUtils.isBlank(clientId)) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
-                                                                "Missing client_id");
+                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT), "Missing client_id");
                     }
 
                     var registeredClient = registeredClientRepository.findByClientId(clientId);
                     if (registeredClient == null) {
-                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
-                                                                "Client not found");
+                        throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT), "Client not found");
                     }
 
                     if (registeredClient.getClientAuthenticationMethods()
-                                        .contains(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
+                            .contains(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)) {
                         final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
                         if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Basic ")) {
-                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
-                                                                    "Missing Basic auth for client_secret_basic client");
+                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Missing Basic auth for client_secret_basic client");
                         }
                         final var base64Credentials = authHeader.substring("Basic ".length())
-                                                                .trim();
+                                .trim();
                         final var decoded = new String(Base64.getDecoder()
-                                                             .decode(base64Credentials),
-                                                       StandardCharsets.UTF_8);
-                        final var parts = decoded.split(":",
-                                                        2);
+                                .decode(base64Credentials), StandardCharsets.UTF_8);
+                        final var parts = decoded.split(":", 2);
                         if (parts.length != 2) {
-                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST),
-                                                                    "Invalid Basic authorization format");
+                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), "Invalid Basic authorization format");
                         }
                         final var clientSecret = parts[1];
-                        if (!passwordEncoder.matches(clientSecret,
-                                                     registeredClient.getClientSecret())) {
-                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT),
-                                                                    "Invalid client credentials");
+                        if (!passwordEncoder.matches(clientSecret, registeredClient.getClientSecret())) {
+                            throw new OAuth2AuthenticationException(new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT), "Invalid client credentials");
                         }
                     }
                 }
             }
-            filterChain.doFilter(request,
-                                 response);
+            filterChain.doFilter(request, response);
         } catch (OAuth2AuthenticationException ex) {
             SecurityContextHolder.clearContext();
             clearCookies(response);
             noCacheHeaders(response);
-            response.addHeader("WWW-Authenticate",
-                               "Basic realm=\"" + EXPECTED_TENANT + "\"");
+            response.addHeader("WWW-Authenticate", "Basic realm=\"" + EXPECTED_TENANT + "\"");
 
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            Map<String, Object> errorResponse = Map.of("error",
-                                                       ex.getError()
-                                                         .getErrorCode(),
-                                                       "error_description",
-                                                       ex.getMessage());
+            Map<String, Object> errorResponse = Map.of("error", ex.getError()
+                    .getErrorCode(), "error_description", ex.getMessage());
             response.getWriter()
                     .write(toApiJsonSerializer.serialize(errorResponse));
         } catch (Exception ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            Map<String, Object> errorResponse = Map.of("error",
-                                                       "Internal Server Error",
-                                                       "error_description",
-                                                       ex.getMessage());
+            Map<String, Object> errorResponse = Map.of("error", "Internal Server Error", "error_description", ex.getMessage());
             response.getWriter()
                     .write(toApiJsonSerializer.serialize(errorResponse));
         } finally {
             stopWatch.stop();
             var log = RequestLog.builder()
-                                .startTime(stopWatch.getStartInstant()
-                                                    .getEpochSecond())
-                                .stopTime(stopWatch.getStopInstant()
-                                                   .getEpochSecond())
-                                .method(request.getMethod())
-                                .url(request.getRequestURL()
-                                            .toString())
-                                .parameters(parameters(request))
-                                .build();
+                    .startTime(stopWatch.getStartInstant()
+                            .getEpochSecond())
+                    .stopTime(stopWatch.getStopInstant()
+                            .getEpochSecond())
+                    .method(request.getMethod())
+                    .url(request.getRequestURL()
+                            .toString())
+                    .parameters(parameters(request))
+                    .build();
             LOGGER.info(this.toApiJsonSerializer.serialize(log));
         }
     }
 
     private void clearCookies(HttpServletResponse response) {
-        Cookie cookie = new Cookie("JSESSIONID",
-                                   null);
+        Cookie cookie = new Cookie("JSESSIONID", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
     }
 
     private void noCacheHeaders(HttpServletResponse response) {
-        response.setHeader("Cache-Control",
-                           "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma",
-                           "no-cache");
-        response.setHeader("Expires",
-                           "0");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
     }
 
     private Map<String, String[]> parameters(HttpServletRequest request) {

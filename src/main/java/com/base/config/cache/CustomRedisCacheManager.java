@@ -27,16 +27,13 @@ public class CustomRedisCacheManager extends RedisCacheManager {
 
     public CustomRedisCacheManager(RedisCacheWriter cacheWriter,
                                    RedisCacheConfiguration defaultCacheConfiguration) {
-        super(cacheWriter,
-              defaultCacheConfiguration);
+        super(cacheWriter, defaultCacheConfiguration);
     }
 
     @Override
     protected RedisCache createRedisCache(String name,
                                           RedisCacheConfiguration cacheConfig) {
-        return new CustomRedisCache(name,
-                                    getCacheWriter(),
-                                    cacheConfig);
+        return new CustomRedisCache(name, getCacheWriter(), cacheConfig);
     }
 
 }

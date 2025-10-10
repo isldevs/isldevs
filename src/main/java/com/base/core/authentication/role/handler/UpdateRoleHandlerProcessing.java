@@ -42,8 +42,7 @@ public class UpdateRoleHandlerProcessing implements CommandHandlerProcessing {
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateRole(command.getId(),
-                                       command);
+        return this.service.updateRole(command.getId(), command);
     }
 
 }

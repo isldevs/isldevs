@@ -45,17 +45,11 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final MessageSource messageSource;
-
     private final SecurityContext securityContext;
-
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final UserDataValidation validation;
-
     private final FileService fileService;
 
     @Autowired
@@ -83,32 +77,25 @@ public class UserServiceImpl implements UserService {
         final var username = command.extractString(UserConstants.USERNAME);
 
         if (userRepository.existsByUsername(username)) {
-            throw new NotFoundException("msg.username.exist",
-                                        username);
+            throw new NotFoundException("msg.username.exist", username);
         }
 
-        var data = User.from(command,
-                             username,
-                             passwordEncoder,
-                             roleRepository);
+        var data = User.from(command, username, passwordEncoder, roleRepository);
 
         var user = userRepository.save(data);
         return LogData.builder()
-                      .id(user.getId())
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(user.getId())
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     @Cacheable(value = "users", key = "#id")
     public UserDTO getUserById(Long id) {
         var user = userRepository.findById(id)
-                                 .orElseThrow(() -> new NotFoundException("msg.not.found.user",
-                                                                          id));
-        return UserDTO.toDTO(user,
-                             fileService);
+                .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
+        return UserDTO.toDTO(user, fileService);
     }
 
     @Override
@@ -121,8 +108,7 @@ public class UserServiceImpl implements UserService {
                                              sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isBlank()) {
-                predicates.add(sp.like(sp.lower(root.get("username")),
-                                       "%" + search.toLowerCase() + "%"));
+                predicates.add(sp.like(sp.lower(root.get("username")), "%" + search.toLowerCase() + "%"));
             }
             if (!securityContext.isAdmin()) {
                 predicates.add(sp.isTrue(root.get("enabled")));
@@ -131,23 +117,17 @@ public class UserServiceImpl implements UserService {
         };
 
         if (page == null || size == null) {
-            var users = userRepository.findAll(specification,
-                                               Sort.by("username")
-                                                   .ascending());
+            var users = userRepository.findAll(specification, Sort.by("username")
+                    .ascending());
             return new PageImpl<>(users.stream()
-                                       .map(user -> UserDTO.toDTO(user,
-                                                                  null))
-                                       .toList());
+                    .map(user -> UserDTO.toDTO(user, null))
+                    .toList());
         }
 
-        var pageable = PageRequest.of(page,
-                                      size,
-                                      Sort.by("username")
-                                          .ascending());
-        var usersPage = userRepository.findAll(specification,
-                                               pageable);
-        return usersPage.map(user -> UserDTO.toDTO(user,
-                                                   null));
+        var pageable = PageRequest.of(page, size, Sort.by("username")
+                .ascending());
+        var usersPage = userRepository.findAll(specification, pageable);
+        return usersPage.map(user -> UserDTO.toDTO(user, null));
     }
 
     @Override
@@ -155,47 +135,40 @@ public class UserServiceImpl implements UserService {
     public Map<String, Object> updateUser(Long id,
                                           JsonCommand command) {
         var user = userRepository.findById(id)
-                                 .orElseThrow(() -> new NotFoundException("msg.not.found.user",
-                                                                          id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
 
         this.validation.update(command.getJson());
 
         final var username = command.extractString(UserConstants.USERNAME);
         if (!user.getUsername()
-                 .equals(username) && userRepository.existsByUsername(username)) {
-            throw new ErrorException("msg.username.exist",
-                                     username);
+                .equals(username) && userRepository.existsByUsername(username)) {
+            throw new ErrorException("msg.username.exist", username);
         }
-        var changes = user.changed(this.passwordEncoder,
-                                   this.roleRepository,
-                                   command);
+        var changes = user.changed(this.passwordEncoder, this.roleRepository, command);
         if (!changes.isEmpty()) {
             userRepository.save(user);
         }
         return LogData.builder()
-                      .id(id)
-                      .changes(changes)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .changes(changes)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     @CacheEvict(value = "users", key = "#id")
     public Map<String, Object> deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new NotFoundException("msg.not.found.user",
-                                        id);
+            throw new NotFoundException("msg.not.found.user", id);
         }
         userRepository.deleteById(id);
 
         return LogData.builder()
-                      .id(id)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
 }

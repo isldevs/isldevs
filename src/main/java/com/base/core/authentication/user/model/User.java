@@ -104,21 +104,19 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         final var password = command.extractString(UserConstants.PASSWORD);
         final var name = command.extractString(UserConstants.NAME);
         final var email = command.extractString(UserConstants.EMAIL);
-        final var roleNames = command.extractArrayAs(UserConstants.ROLES,
-                                                     String.class);
+        final var roleNames = command.extractArrayAs(UserConstants.ROLES, String.class);
 
         return User.builder()
-                   .username(username)
-                   .password(passwordEncoder.encode(password))
-                   .enabled(true)
-                   .accountNonExpired(true)
-                   .accountNonLocked(true)
-                   .credentialsNonExpired(true)
-                   .name(name)
-                   .email(email)
-                   .roles(resolveRoles(roleNames,
-                                       roleRepository))
-                   .build();
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .enabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .name(name)
+                .email(email)
+                .roles(resolveRoles(roleNames, roleRepository))
+                .build();
     }
 
     public static Set<Role> resolveRoles(Set<String> roleNames,
@@ -130,8 +128,7 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         Set<Role> roles = new HashSet<>();
         for (var roleName : roleNames) {
             var role = roleRepository.findByName("ROLE_" + roleName)
-                                     .orElseThrow(() -> new NotFoundException("msg.not.found.role",
-                                                                              roleName));
+                    .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName));
             roles.add(role);
         }
         return roles;
@@ -229,19 +226,19 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
 
         public Builder authority(Collection<? extends GrantedAuthority> authorities) {
             this.roles = authorities.stream()
-                                    .map(grantedAuthority -> {
-                                        Role role = Role.builder()
-                                                        .name(grantedAuthority.getAuthority())
-                                                        .build();
-                                        Set<Authority> authoritySet = new HashSet<>();
-                                        Authority authority = Authority.builder()
-                                                                       .authority(grantedAuthority.getAuthority())
-                                                                       .build();
-                                        authoritySet.add(authority);
-                                        role.setAuthorities(authoritySet);
-                                        return role;
-                                    })
-                                    .collect(Collectors.toSet());
+                    .map(grantedAuthority -> {
+                        Role role = Role.builder()
+                                .name(grantedAuthority.getAuthority())
+                                .build();
+                        Set<Authority> authoritySet = new HashSet<>();
+                        Authority authority = Authority.builder()
+                                .authority(grantedAuthority.getAuthority())
+                                .build();
+                        authoritySet.add(authority);
+                        role.setAuthorities(authoritySet);
+                        return role;
+                    })
+                    .collect(Collectors.toSet());
             return this;
         }
 
@@ -252,49 +249,35 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
                                        JsonCommand command) {
         Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsString(UserConstants.USERNAME,
-                                     this.username)) {
+        if (command.isChangeAsString(UserConstants.USERNAME, this.username)) {
             final String newUsername = command.extractString(UserConstants.USERNAME);
             this.username = newUsername;
-            changes.put(UserConstants.USERNAME,
-                        newUsername);
+            changes.put(UserConstants.USERNAME, newUsername);
         }
-        if (command.isChangePassword(UserConstants.PASSWORD,
-                                     passwordEncoder,
-                                     this.password)) {
+        if (command.isChangePassword(UserConstants.PASSWORD, passwordEncoder, this.password)) {
             final String newPassword = command.extractString(UserConstants.PASSWORD);
             this.password = passwordEncoder.encode(newPassword);
-            changes.put(UserConstants.PASSWORD,
-                        "CHANGED");
+            changes.put(UserConstants.PASSWORD, "CHANGED");
         }
-        if (command.isChangeAsString(UserConstants.NAME,
-                                     this.name)) {
+        if (command.isChangeAsString(UserConstants.NAME, this.name)) {
             final String newName = command.extractString(UserConstants.NAME);
             this.name = newName;
-            changes.put(UserConstants.NAME,
-                        newName);
+            changes.put(UserConstants.NAME, newName);
         }
-        if (command.isChangeAsString(UserConstants.EMAIL,
-                                     this.email)) {
+        if (command.isChangeAsString(UserConstants.EMAIL, this.email)) {
             final String newEmail = command.extractString(UserConstants.EMAIL);
             this.email = newEmail;
-            changes.put(UserConstants.EMAIL,
-                        newEmail);
+            changes.put(UserConstants.EMAIL, newEmail);
         }
-        if (command.isChangeAsArray(UserConstants.ROLES,
-                                    this.roles.stream()
-                                              .map(Role::getName)
-                                              .collect(Collectors.toSet()),
-                                    String.class)) {
-            final Set<String> newRoles = command.extractArrayAs(UserConstants.ROLES,
-                                                                String.class);
+        if (command.isChangeAsArray(UserConstants.ROLES, this.roles.stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet()), String.class)) {
+            final Set<String> newRoles = command.extractArrayAs(UserConstants.ROLES, String.class);
             this.roles = newRoles.stream()
-                                 .map(roleName -> roleRepository.findByName("ROLE_" + roleName)
-                                                                .orElseThrow(() -> new NotFoundException("msg.not.found.role",
-                                                                                                         roleName)))
-                                 .collect(Collectors.toSet());
-            changes.put(UserConstants.ROLES,
-                        newRoles);
+                    .map(roleName -> roleRepository.findByName("ROLE_" + roleName)
+                            .orElseThrow(() -> new NotFoundException("msg.not.found.role", roleName)))
+                    .collect(Collectors.toSet());
+            changes.put(UserConstants.ROLES, newRoles);
         }
 
         return changes;
@@ -303,36 +286,50 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                    .flatMap(role -> role.getAuthorities()
-                                         .stream())
-                    .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
-                    .collect(Collectors.toSet());
+                .flatMap(role -> role.getAuthorities()
+                        .stream())
+                .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public String getPassword() { return this.password; }
+    public String getPassword() {
+        return this.password;
+    }
 
     @Override
-    public String getUsername() { return this.username; }
+    public String getUsername() {
+        return this.username;
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return this.accountNonExpired; }
+    public boolean isAccountNonExpired() {
+        return this.accountNonExpired;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return this.accountNonLocked; }
+    public boolean isAccountNonLocked() {
+        return this.accountNonLocked;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return this.credentialsNonExpired; }
+    public boolean isCredentialsNonExpired() {
+        return this.credentialsNonExpired;
+    }
 
     @Override
-    public boolean isEnabled() { return this.enabled; }
+    public boolean isEnabled() {
+        return this.enabled;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User user)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof User user))
+            return false;
         return this.getId() != null && this.getId()
-                                           .equals(user.getId());
+                .equals(user.getId());
     }
 
     @Override
@@ -340,19 +337,33 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         return Objects.hash(this.getId());
     }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getEmail() { return email; }
+    public String getEmail() {
+        return email;
+    }
 
-    public Set<Role> getRoles() { return roles; }
+    public Set<Role> getRoles() {
+        return roles;
+    }
 
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public void setPassword(String password) { this.password = password; }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public void enabled(boolean enabled) {
         this.enabled = enabled;
@@ -370,18 +381,32 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
         this.credentialsNonExpired = credentialsNonExpired;
     }
 
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 
-    public String getProviderId() { return providerId; }
+    public String getProviderId() {
+        return providerId;
+    }
 
-    public void setProviderId(String providerId) { this.providerId = providerId; }
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
 
-    public String getProvider() { return provider; }
+    public String getProvider() {
+        return provider;
+    }
 
-    public void setProvider(String provider) { this.provider = provider; }
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
 
-    public String getProviderAvatarUrl() { return providerAvatarUrl; }
+    public String getProviderAvatarUrl() {
+        return providerAvatarUrl;
+    }
 
-    public void setProviderAvatarUrl(String providerAvatarUrl) { this.providerAvatarUrl = providerAvatarUrl; }
+    public void setProviderAvatarUrl(String providerAvatarUrl) {
+        this.providerAvatarUrl = providerAvatarUrl;
+    }
 
 }

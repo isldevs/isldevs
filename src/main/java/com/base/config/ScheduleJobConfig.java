@@ -44,9 +44,7 @@ public class ScheduleJobConfig implements SchedulingConfigurer {
     private final Logger logger = LoggerFactory.getLogger(ScheduleJobConfig.class);
 
     private final ApplicationContext applicationContext;
-
     private final ScheduleJobRepository jobRepository;
-
     private final ScheduledJobHistoryRepository jobHistoryRepository;
 
     public ScheduleJobConfig(final ApplicationContext applicationContext,
@@ -62,7 +60,8 @@ public class ScheduleJobConfig implements SchedulingConfigurer {
         var jobs = jobRepository.findAll();
         if (!jobs.isEmpty()) {
             for (ScheduleJob job : jobs) {
-                if (!job.isEnabled()) continue;
+                if (!job.isEnabled())
+                    continue;
                 var task = getRunnableBean(job.getBeanName());
                 Trigger trigger = triggerContext -> {
                     var cron = job.getCronExpression();
@@ -72,30 +71,25 @@ public class ScheduleJobConfig implements SchedulingConfigurer {
                         }
                         return new CronTrigger(cron).nextExecution(triggerContext);
                     } catch (Exception ex) {
-                        logger.error("Invalid cron expression for job {}: {}. Using fallback.",
-                                     job.getJobName(),
-                                     ex.getMessage());
+                        logger.error("Invalid cron expression for job {}: {}. Using fallback.", job.getJobName(), ex.getMessage());
                         return new CronTrigger("0 0 0 */30 * *").nextExecution(triggerContext);
                     }
                 };
 
                 Runnable wrappedTask = () -> {
                     var executedAt = Timestamp.valueOf(LocalDateTime.now()
-                                                                    .withNano(0));
+                            .withNano(0));
                     Timestamp nextExecuteAt = null;
                     try {
                         var cronTrigger = new CronTrigger(job.getCronExpression());
                         var next = cronTrigger.nextExecution(new SimpleTriggerContext());
                         if (next != null) {
-                            var nextLocalDateTime = LocalDateTime.ofInstant(next,
-                                                                            ZoneId.systemDefault())
-                                                                 .withNano(0);
+                            var nextLocalDateTime = LocalDateTime.ofInstant(next, ZoneId.systemDefault())
+                                    .withNano(0);
                             nextExecuteAt = Timestamp.valueOf(nextLocalDateTime);
                         }
                     } catch (Exception e) {
-                        logger.error("Failed to calculate nextExecuteAt for job '{}'",
-                                     job.getJobName(),
-                                     e);
+                        logger.error("Failed to calculate nextExecuteAt for job '{}'", job.getJobName(), e);
                     }
 
                     var history = new ScheduledJobHistory();
@@ -107,9 +101,7 @@ public class ScheduleJobConfig implements SchedulingConfigurer {
                         task.run();
                         history.setStatus("SUCCESS");
                     } catch (Exception ex) {
-                        logger.error("Job {} failed",
-                                     job.getJobName(),
-                                     ex);
+                        logger.error("Job {} failed", job.getJobName(), ex);
                         history.setStatus("FAILED");
                         history.setErrorMessage(ex.getMessage());
                     }
@@ -117,8 +109,7 @@ public class ScheduleJobConfig implements SchedulingConfigurer {
                     jobHistoryRepository.save(history);
                 };
 
-                taskRegistrar.addTriggerTask(wrappedTask,
-                                             trigger);
+                taskRegistrar.addTriggerTask(wrappedTask, trigger);
             }
         }
     }

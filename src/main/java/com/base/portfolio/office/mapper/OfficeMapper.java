@@ -56,9 +56,7 @@ public abstract class OfficeMapper {
         }
 
         List<OfficeDTO> content = toDTOList(officePage.getContent());
-        return new PageImpl<>(content,
-                              officePage.getPageable(),
-                              officePage.getTotalElements());
+        return new PageImpl<>(content, officePage.getPageable(), officePage.getTotalElements());
     }
 
     @Named("toParentDTO")
@@ -68,21 +66,19 @@ public abstract class OfficeMapper {
         }
         Office parent = office.getParent();
         return OfficeDTO.builder()
-                        .id(parent.getId())
-                        .nameEn(parent.getNameEn())
-                        .nameKm(parent.getNameKm())
-                        .nameZh(parent.getNameZh())
-                        .decorated(OfficeDTO.decorate(parent.getHierarchy(),
-                                                      parent.getNameEn()))
-                        .build();
+                .id(parent.getId())
+                .nameEn(parent.getNameEn())
+                .nameKm(parent.getNameKm())
+                .nameZh(parent.getNameZh())
+                .decorated(OfficeDTO.decorate(parent.getHierarchy(), parent.getNameEn()))
+                .build();
     }
 
     protected String getDecoratedName(Office office) {
         if (office.getParent() != null) {
             return OfficeDTO.decorate(office.getParent()
-                                            .getHierarchy(),
-                                      office.getParent()
-                                            .getNameEn());
+                    .getHierarchy(), office.getParent()
+                            .getNameEn());
         }
         return null;
     }
@@ -98,10 +94,11 @@ public abstract class OfficeMapper {
             return null;
         }
         try {
-            var fileInfo = fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(),
-                                               office.getId());
-            return fileInfo != null && fileInfo.get("file") != null ? fileInfo.get("file")
-                                                                              .toString() : null;
+            var fileInfo = fileService.fileURL(FileUtils.ENTITY.OFFICE.toString(), office.getId());
+            return fileInfo != null && fileInfo.get("file") != null
+                    ? fileInfo.get("file")
+                            .toString()
+                    : null;
         } catch (NotFoundException ignored) {
             return null;
         }

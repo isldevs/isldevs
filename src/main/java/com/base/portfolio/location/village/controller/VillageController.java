@@ -36,11 +36,8 @@ import org.springframework.web.bind.annotation.*;
 public class VillageController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<VillageDTO> serializer;
-
     private final VillageService service;
-
     private final LogService logService;
 
     @Autowired
@@ -55,54 +52,46 @@ public class VillageController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createVillage(@RequestBody
-    String json) {
+    public String createVillage(@RequestBody String json) {
         final var command = new VillageCommandHandler().create()
-                                                       .json(json)
-                                                       .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateVillage(@RequestBody
-    String json,
-                                @PathVariable
-                                Long id) {
+    public String updateVillage(@RequestBody String json,
+                                @PathVariable Long id) {
         final var command = new VillageCommandHandler().update(id)
-                                                       .json(json)
-                                                       .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public String deleteVillage(@PathVariable
-    Long id) {
+    public String deleteVillage(@PathVariable Long id) {
         final var command = new VillageCommandHandler().delete(id)
-                                                       .build();
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getVillage(@PathVariable
-    Long id) {
+    public String getVillage(@PathVariable Long id) {
         var data = this.service.getVillageById(id);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> listVillages(@RequestParam(required = false)
-    Integer page,
-                                          @RequestParam(required = false)
-                                          Integer size,
-                                          @RequestParam(required = false)
-                                          String search) {
-        var communes = this.service.listVillages(page,
-                                                 size,
-                                                 search);
-        var response = (page == null || size == null) ? pageable.unpaged(communes) : pageable.toModel(communes);
+    public ResponseEntity<?> listVillages(@RequestParam(required = false) Integer page,
+                                          @RequestParam(required = false) Integer size,
+                                          @RequestParam(required = false) String search) {
+        var communes = this.service.listVillages(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(communes)
+                : pageable.toModel(communes);
         return ResponseEntity.ok(response);
     }
 

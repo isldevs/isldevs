@@ -81,55 +81,39 @@ public class Province extends CustomAbstractAuditable {
         final var nameKm = command.extractString(ProvinceConstants.NAME_KM);
         final var nameZh = command.extractString(ProvinceConstants.NAME_ZH);
         final var postalCode = command.extractString(ProvinceConstants.POSTAL_CODE);
-        final Set<District> districts = command.extractArrayAs(ProvinceConstants.DISTRICT,
-                                                               District.class);
+        final Set<District> districts = command.extractArrayAs(ProvinceConstants.DISTRICT, District.class);
 
-        return new Province(type,
-                            nameEn,
-                            nameKm,
-                            nameZh,
-                            postalCode,
-                            districts);
+        return new Province(type, nameEn, nameKm, nameZh, postalCode, districts);
     }
 
     public Map<String, Object> changed(JsonCommand command) {
 
         final Map<String, Object> changes = new HashMap<>(7);
 
-        if (command.isChangeAsString(ProvinceConstants.TYPE,
-                                     this.type)) {
+        if (command.isChangeAsString(ProvinceConstants.TYPE, this.type)) {
             final var type = command.extractString(ProvinceConstants.TYPE);
             this.type = type;
-            changes.put(ProvinceConstants.TYPE,
-                        type);
+            changes.put(ProvinceConstants.TYPE, type);
         }
-        if (command.isChangeAsString(ProvinceConstants.NAME_EN,
-                                     this.nameEn)) {
+        if (command.isChangeAsString(ProvinceConstants.NAME_EN, this.nameEn)) {
             final var nameEn = command.extractString(ProvinceConstants.NAME_EN);
             this.nameEn = nameEn;
-            changes.put(ProvinceConstants.NAME_EN,
-                        nameEn);
+            changes.put(ProvinceConstants.NAME_EN, nameEn);
         }
-        if (command.isChangeAsString(ProvinceConstants.NAME_KM,
-                                     this.nameKm)) {
+        if (command.isChangeAsString(ProvinceConstants.NAME_KM, this.nameKm)) {
             final var nameKm = command.extractString(ProvinceConstants.NAME_KM);
             this.nameKm = nameKm;
-            changes.put(ProvinceConstants.NAME_KM,
-                        nameKm);
+            changes.put(ProvinceConstants.NAME_KM, nameKm);
         }
-        if (command.isChangeAsString(ProvinceConstants.NAME_ZH,
-                                     this.nameZh)) {
+        if (command.isChangeAsString(ProvinceConstants.NAME_ZH, this.nameZh)) {
             final var nameZh = command.extractString(ProvinceConstants.NAME_ZH);
             this.nameZh = nameZh;
-            changes.put(ProvinceConstants.NAME_ZH,
-                        nameZh);
+            changes.put(ProvinceConstants.NAME_ZH, nameZh);
         }
-        if (command.isChangeAsString(ProvinceConstants.POSTAL_CODE,
-                                     this.postalCode)) {
+        if (command.isChangeAsString(ProvinceConstants.POSTAL_CODE, this.postalCode)) {
             final var postalCode = command.extractString(ProvinceConstants.POSTAL_CODE);
             this.postalCode = postalCode;
-            changes.put(ProvinceConstants.POSTAL_CODE,
-                        postalCode);
+            changes.put(ProvinceConstants.POSTAL_CODE, postalCode);
         }
 
         return changes;

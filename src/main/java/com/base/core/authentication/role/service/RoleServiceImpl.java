@@ -46,11 +46,8 @@ import org.springframework.stereotype.Service;
 public class RoleServiceImpl implements RoleService {
 
     private final MessageSource messageSource;
-
     private final RoleRepository roleRepository;
-
     private final RoleDataValidator validator;
-
     private final RoleMapper roleMapper;
 
     @Autowired
@@ -71,27 +68,25 @@ public class RoleServiceImpl implements RoleService {
         this.validator.create(command.getJson());
 
         final var name = command.extractString(RoleConstants.NAME);
-        final var authorities = command.extractArrayAs(RoleConstants.AUTHORITIES,
-                                                       String.class);
+        final var authorities = command.extractArrayAs(RoleConstants.AUTHORITIES, String.class);
         var allAuthorities = authorities.stream()
-                                        .map(auth -> {
-                                            Authority authority = new Authority();
-                                            authority.setAuthority(auth);
-                                            return authority;
-                                        })
-                                        .collect(Collectors.toSet());
+                .map(auth -> {
+                    Authority authority = new Authority();
+                    authority.setAuthority(auth);
+                    return authority;
+                })
+                .collect(Collectors.toSet());
         var data = Role.builder()
-                       .name(name)
-                       .authorities(allAuthorities)
-                       .build();
+                .name(name)
+                .authorities(allAuthorities)
+                .build();
         var role = roleRepository.save(data);
 
         return LogData.builder()
-                      .id(role.getId())
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(role.getId())
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -100,8 +95,7 @@ public class RoleServiceImpl implements RoleService {
                                           JsonCommand command) {
 
         var exist = this.roleRepository.findById(id)
-                                       .orElseThrow(() -> new NotFoundException("msg.not.found.role",
-                                                                                id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
 
         this.validator.update(command.getJson());
 
@@ -111,12 +105,11 @@ public class RoleServiceImpl implements RoleService {
         }
 
         return LogData.builder()
-                      .id(id)
-                      .changes(changes)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .changes(changes)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -124,17 +117,15 @@ public class RoleServiceImpl implements RoleService {
     public Map<String, Object> deleteRole(Long id) {
 
         final var role = this.roleRepository.findById(id)
-                                            .orElseThrow(() -> new NotFoundException("msg.not.found.role",
-                                                                                     id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
         this.roleRepository.delete(role);
         this.roleRepository.flush();
 
         return LogData.builder()
-                      .id(id)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .id(id)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
@@ -142,8 +133,7 @@ public class RoleServiceImpl implements RoleService {
     public RoleDTO getRoleById(Long id) {
 
         var role = this.roleRepository.findById(id)
-                                      .orElseThrow(() -> new NotFoundException("msg.not.found.role",
-                                                                               id));
+                .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
 
         return roleMapper.toDTO(role);
     }
@@ -158,37 +148,32 @@ public class RoleServiceImpl implements RoleService {
                                              sp) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (search != null && !search.isEmpty()) {
-                predicates.add(sp.like(root.get("name"),
-                                       "%" + search.toLowerCase() + "%"));
+                predicates.add(sp.like(root.get("name"), "%" + search.toLowerCase() + "%"));
             }
             return sp.and(predicates.toArray(new Predicate[0]));
         };
         if (page == null || size == null) {
-            var allRoles = this.roleRepository.findAll(specification,
-                                                       Sort.by("name")
-                                                           .ascending());
+            var allRoles = this.roleRepository.findAll(specification, Sort.by("name")
+                    .ascending());
             return new PageImpl<>(allRoles.stream()
-                                          .map(this::convertToDTO)
-                                          .toList());
+                    .map(this::convertToDTO)
+                    .toList());
         }
-        var pageable = PageRequest.of(page,
-                                      size,
-                                      Sort.by("name")
-                                          .ascending());
-        var roles = this.roleRepository.findAll(specification,
-                                                pageable);
+        var pageable = PageRequest.of(page, size, Sort.by("name")
+                .ascending());
+        var roles = this.roleRepository.findAll(specification, pageable);
         return roleMapper.toDTOPage(roles);
     }
 
     private RoleDTO convertToDTO(Role role) {
         return RoleDTO.builder()
-                      .id(role.getId())
-                      .name(role.getName())
-                      .authorities(role.getAuthorities()
-                                       .stream()
-                                       .map(Authority::getAuthority)
-                                       .collect(Collectors.toSet()))
-                      .build();
+                .id(role.getId())
+                .name(role.getName())
+                .authorities(role.getAuthorities()
+                        .stream()
+                        .map(Authority::getAuthority)
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
 }

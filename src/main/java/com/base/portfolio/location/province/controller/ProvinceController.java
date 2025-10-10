@@ -36,11 +36,8 @@ import org.springframework.web.bind.annotation.*;
 public class ProvinceController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<ProvinceDTO> serializer;
-
     private final ProvinceService service;
-
     private final LogService logService;
 
     @Autowired
@@ -55,54 +52,46 @@ public class ProvinceController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createProvince(@RequestBody
-    String json) {
+    public String createProvince(@RequestBody String json) {
         final var command = new ProvinceCommandHandler().create()
-                                                        .json(json)
-                                                        .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateProvince(@RequestBody
-    String json,
-                                 @PathVariable
-                                 Long id) {
+    public String updateProvince(@RequestBody String json,
+                                 @PathVariable Long id) {
         final var command = new ProvinceCommandHandler().update(id)
-                                                        .json(json)
-                                                        .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public String deleteProvince(@PathVariable
-    Long id) {
+    public String deleteProvince(@PathVariable Long id) {
         final var command = new ProvinceCommandHandler().delete(id)
-                                                        .build();
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getProvince(@PathVariable
-    Long id) {
+    public String getProvince(@PathVariable Long id) {
         var data = this.service.getProvinceById(id);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> listOffices(@RequestParam(required = false)
-    Integer page,
-                                         @RequestParam(required = false)
-                                         Integer size,
-                                         @RequestParam(required = false)
-                                         String search) {
-        var provinces = this.service.listProvinces(page,
-                                                   size,
-                                                   search);
-        var response = (page == null || size == null) ? pageable.unpaged(provinces) : pageable.toModel(provinces);
+    public ResponseEntity<?> listOffices(@RequestParam(required = false) Integer page,
+                                         @RequestParam(required = false) Integer size,
+                                         @RequestParam(required = false) String search) {
+        var provinces = this.service.listProvinces(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(provinces)
+                : pageable.toModel(provinces);
         return ResponseEntity.ok(response);
     }
 

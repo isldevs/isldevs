@@ -57,7 +57,6 @@ public class WebConfig implements WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(WebConfig.class);
 
     private final GlobalConfig globalConfig;
-
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -72,16 +71,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(getAllowedOrigins())
-                .allowedMethods("GET",
-                                "POST",
-                                "PUT",
-                                "DELETE",
-                                "PATCH",
-                                "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("Authorization",
-                                "Content-Disposition",
-                                "X-CSRF-TOKEN")
+                .exposedHeaders("Authorization", "Content-Disposition", "X-CSRF-TOKEN")
                 .allowCredentials(true)
                 .maxAge(3600); // cache preflight
                                                                                                                                                                                                                                                                                  // response for 1h
@@ -91,7 +83,7 @@ public class WebConfig implements WebMvcConfigurer {
         // Get origins from configuration or use defaults
         String originsConfig = globalConfig.getConfigValue("CORS_ALLOWED_ORIGINS");
         if (originsConfig != null && !originsConfig.trim()
-                                                   .isEmpty()) {
+                .isEmpty()) {
             return originsConfig.split(",");
         }
         return new String[]{"https://127.0.0.1:8443", "http://127.0.0.1:8080", "http://127.0.0.1:3000", "http://localhost:3000", "http://localhost:8080"};
@@ -123,18 +115,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.favorParameter(true)
-                  .parameterName("format")
-                  .ignoreAcceptHeader(false)
-                  .useRegisteredExtensionsOnly(false)
-                  .defaultContentType(MediaType.APPLICATION_JSON)
-                  .mediaType("json",
-                             MediaType.APPLICATION_JSON)
-                  .mediaType("xml",
-                             MediaType.APPLICATION_XML)
-                  .mediaType("html",
-                             MediaType.TEXT_HTML)
-                  .mediaType("text",
-                             MediaType.TEXT_PLAIN);
+                .parameterName("format")
+                .ignoreAcceptHeader(false)
+                .useRegisteredExtensionsOnly(false)
+                .defaultContentType(MediaType.APPLICATION_JSON)
+                .mediaType("json", MediaType.APPLICATION_JSON)
+                .mediaType("xml", MediaType.APPLICATION_XML)
+                .mediaType("html", MediaType.TEXT_HTML)
+                .mediaType("text", MediaType.TEXT_PLAIN);
     }
 
     /** Default servlet handling */
@@ -153,13 +141,10 @@ public class WebConfig implements WebMvcConfigurer {
                                      HttpServletResponse response,
                                      Object handler) {
                 String requestId = UUID.randomUUID()
-                                       .toString();
-                request.setAttribute("requestId",
-                                     requestId);
-                MDC.put("requestId",
-                        requestId);
-                MDC.put("clientIP",
-                        request.getRemoteAddr());
+                        .toString();
+                request.setAttribute("requestId", requestId);
+                MDC.put("requestId", requestId);
+                MDC.put("clientIP", request.getRemoteAddr());
                 return true;
             }
 
@@ -194,10 +179,7 @@ public class WebConfig implements WebMvcConfigurer {
                 if (start != null) {
                     long duration = System.currentTimeMillis() - start;
                     if (duration > 1000) { // Log slow requests
-                        logger.warn("Slow request: {} {} took {}ms",
-                                    request.getMethod(),
-                                    request.getRequestURI(),
-                                    duration);
+                        logger.warn("Slow request: {} {} took {}ms", request.getMethod(), request.getRequestURI(), duration);
                     }
                     startTime.remove();
                 }
@@ -212,14 +194,10 @@ public class WebConfig implements WebMvcConfigurer {
                                    HttpServletResponse response,
                                    Object handler,
                                    ModelAndView modelAndView) {
-                response.setHeader("X-Content-Type-Options",
-                                   "nosniff");
-                response.setHeader("X-Frame-Options",
-                                   "DENY");
-                response.setHeader("X-XSS-Protection",
-                                   "1; mode=block");
-                response.setHeader("Strict-Transport-Security",
-                                   "max-age=31536000; includeSubDomains");
+                response.setHeader("X-Content-Type-Options", "nosniff");
+                response.setHeader("X-Frame-Options", "DENY");
+                response.setHeader("X-XSS-Protection", "1; mode=block");
+                response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
             }
         })
                 .addPathPatterns("/**");
@@ -281,16 +259,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.stream()
-                  .filter(converter -> converter instanceof MappingJackson2HttpMessageConverter)
-                  .map(converter -> (MappingJackson2HttpMessageConverter) converter)
-                  .forEach(converter -> {
-                      ObjectMapper objectMapper = converter.getObjectMapper();
-                      objectMapper.registerModule(new JavaTimeModule());
-                      objectMapper.registerModule(new Jdk8Module());
-                      objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                      objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-                      objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
-                  });
+                .filter(converter -> converter instanceof MappingJackson2HttpMessageConverter)
+                .map(converter -> (MappingJackson2HttpMessageConverter) converter)
+                .forEach(converter -> {
+                    ObjectMapper objectMapper = converter.getObjectMapper();
+                    objectMapper.registerModule(new JavaTimeModule());
+                    objectMapper.registerModule(new Jdk8Module());
+                    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+                    objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
+                });
     }
 
     /** Custom error code resolution */

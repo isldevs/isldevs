@@ -35,9 +35,7 @@ import org.springframework.hateoas.Link;
 public class PageableResponse<T> {
 
     private EmbeddedContent<T> embedded;
-
     private Map<String, Link> links;
-
     private PageMetadata page;
 
     @Data
@@ -54,12 +52,13 @@ public class PageableResponse<T> {
             if (content == null || content.isEmpty()) {
                 return Collections.emptyMap();
             }
-            return Map.of("contents",
-                          content);
+            return Map.of("contents", content);
         }
 
         @JsonAnySetter
-        public void setDynamicProperties(List<T> value) { this.content = value; }
+        public void setDynamicProperties(List<T> value) {
+            this.content = value;
+        }
 
     }
 

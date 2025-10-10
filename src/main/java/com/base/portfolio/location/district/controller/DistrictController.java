@@ -36,11 +36,8 @@ import org.springframework.web.bind.annotation.*;
 public class DistrictController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<DistrictDTO> serializer;
-
     private final DistrictService service;
-
     private final LogService logService;
 
     @Autowired
@@ -55,54 +52,46 @@ public class DistrictController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createDistrict(@RequestBody
-    String json) {
+    public String createDistrict(@RequestBody String json) {
         final var command = new DistrictCommandHandler().create()
-                                                        .json(json)
-                                                        .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String updateDistrict(@RequestBody
-    String json,
-                                 @PathVariable
-                                 Long id) {
+    public String updateDistrict(@RequestBody String json,
+                                 @PathVariable Long id) {
         final var command = new DistrictCommandHandler().update(id)
-                                                        .json(json)
-                                                        .build();
+                .json(json)
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping(value = "{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public String deleteDistrict(@PathVariable
-    Long id) {
+    public String deleteDistrict(@PathVariable Long id) {
         final var command = new DistrictCommandHandler().delete(id)
-                                                        .build();
+                .build();
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getDistrict(@PathVariable
-    Long id) {
+    public String getDistrict(@PathVariable Long id) {
         var data = this.service.getDistrictById(id);
         return this.serializer.serialize(data);
     }
 
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> listDistricts(@RequestParam(required = false)
-    Integer page,
-                                           @RequestParam(required = false)
-                                           Integer size,
-                                           @RequestParam(required = false)
-                                           String search) {
-        var districts = this.service.listDistricts(page,
-                                                   size,
-                                                   search);
-        var response = (page == null || size == null) ? pageable.unpaged(districts) : pageable.toModel(districts);
+    public ResponseEntity<?> listDistricts(@RequestParam(required = false) Integer page,
+                                           @RequestParam(required = false) Integer size,
+                                           @RequestParam(required = false) String search) {
+        var districts = this.service.listDistricts(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(districts)
+                : pageable.toModel(districts);
         return ResponseEntity.ok(response);
     }
 

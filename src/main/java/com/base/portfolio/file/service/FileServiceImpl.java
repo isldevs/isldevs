@@ -41,11 +41,8 @@ import java.util.Map;
 public class FileServiceImpl implements FileService {
 
     private final Storage storage;
-
     private final FileDataValidation validator;
-
     private final MessageSource messageSource;
-
     private final FileRepository repository;
 
     @Autowired
@@ -61,171 +58,132 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Map<String, Object> uploadFile(JsonCommand command) {
-        this.validator.upload(command.getEntityType(),
-                              command.getEntityId());
+        this.validator.upload(command.getEntityType(), command.getEntityId());
         var storage = this.storage.repository();
         try {
             var file = command.getFile();
 
             String oldFileName = null;
-            File entityFile = this.repository.findByEntityAndEntityId(command.getEntityType(),
-                                                                      command.getEntityId());
+            File entityFile = this.repository.findByEntityAndEntityId(command.getEntityType(), command.getEntityId());
             if (entityFile == null) {
                 entityFile = File.builder()
-                                 .entity(command.getEntityType())
-                                 .entityId(command.getEntityId())
-                                 .build();
+                        .entity(command.getEntityType())
+                        .entityId(command.getEntityId())
+                        .build();
             } else {
                 oldFileName = entityFile.getName();
             }
 
-            var directory = storage.writeFile(file.getInputStream(),
-                                              command.getEntityId(),
-                                              command.getEntityType(),
-                                              file.getOriginalFilename(),
-                                              oldFileName,
-                                              storage);
+            var directory = storage.writeFile(file.getInputStream(), command.getEntityId(), command.getEntityType(), file
+                    .getOriginalFilename(), oldFileName, storage);
             entityFile.setName(file.getOriginalFilename());
             entityFile.setSize(file.getSize());
             entityFile.setMimeType(file.getContentType());
             entityFile.setLocation(directory);
             entityFile.setStorageType(storage.getStorageType()
-                                             .getValue());
+                    .getValue());
 
             this.repository.save(entityFile);
 
             return LogData.builder()
-                          .id(entityFile.getId())
-                          .success("msg.success",
-                                   messageSource)
-                          .build()
-                          .claims();
+                    .id(entityFile.getId())
+                    .success("msg.success", messageSource)
+                    .build()
+                    .claims();
 
         } catch (IOException e) {
-            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                     "msg.internal.error",
-                                     "Error while uploading file");
+            throw new ErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "msg.internal.error", "Error while uploading file");
         }
     }
 
     @Override
     public Map<String, Object> delete(final JsonCommand command) {
         var storage = this.storage.repository();
-        var file = this.repository.findByEntityAndEntityId(command.getEntityType(),
-                                                           command.getEntityId());
-        if (file == null) throw new NotFoundException("msg.not.found",
-                                                      command.getEntityType(),
-                                                      command.getEntityId());
+        var file = this.repository.findByEntityAndEntityId(command.getEntityType(), command.getEntityId());
+        if (file == null)
+            throw new NotFoundException("msg.not.found", command.getEntityType(), command.getEntityId());
 
-        var dir = Paths.get(FileConstants.DIR,
-                            command.getEntityType(),
-                            String.valueOf(command.getEntityId()),
-                            file.getName());
+        var dir = Paths.get(FileConstants.DIR, command.getEntityType(), String.valueOf(command.getEntityId()), file.getName());
         storage.deleteFile(dir);
         this.repository.delete(file);
         this.repository.flush();
         return LogData.builder()
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     public Map<String, Object> fileURL(String entity,
                                        Long entityId) {
-        var file = this.repository.findByEntityAndEntityId(entity,
-                                                           entityId);
-        if (file == null) throw new NotFoundException("msg.not.found",
-                                                      entity,
-                                                      entityId);
+        var file = this.repository.findByEntityAndEntityId(entity, entityId);
+        if (file == null)
+            throw new NotFoundException("msg.not.found", entity, entityId);
 
-        var dir = Paths.get(FileConstants.DIR,
-                            entity,
-                            String.valueOf(entityId),
-                            file.getName());
+        var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
         var storageUtils = this.storage.repository(file.getStorageType());
 
         var url = storageUtils.readUrl(dir);
         return LogData.builder()
-                      .file(url)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .file(url)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     public Map<String, Object> fileBase64(String entity,
                                           Long entityId) {
-        var file = this.repository.findByEntityAndEntityId(entity,
-                                                           entityId);
-        if (file == null) throw new NotFoundException("msg.not.found",
-                                                      entity,
-                                                      entityId);
+        var file = this.repository.findByEntityAndEntityId(entity, entityId);
+        if (file == null)
+            throw new NotFoundException("msg.not.found", entity, entityId);
 
-        var dir = Paths.get(FileConstants.DIR,
-                            entity,
-                            String.valueOf(entityId),
-                            file.getName());
+        var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
         var storageUtils = this.storage.repository(file.getStorageType());
 
         var base64 = storageUtils.readBase64(dir);
         base64 = FileUtils.suffix(file.getName()) + base64;
         return LogData.builder()
-                      .file(base64)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .file(base64)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     public Map<String, Object> fileByte(String entity,
                                         Long entityId) {
-        var file = this.repository.findByEntityAndEntityId(entity,
-                                                           entityId);
-        if (file == null) throw new NotFoundException("msg.not.found",
-                                                      entity,
-                                                      entityId);
+        var file = this.repository.findByEntityAndEntityId(entity, entityId);
+        if (file == null)
+            throw new NotFoundException("msg.not.found", entity, entityId);
 
-        var dir = Paths.get(FileConstants.DIR,
-                            entity,
-                            String.valueOf(entityId),
-                            file.getName());
+        var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
         var storageUtils = this.storage.repository(file.getStorageType());
 
         var bytes = storageUtils.readByte(dir);
         return LogData.builder()
-                      .file(bytes)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .file(bytes)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
     @Override
     public Map<String, Object> fileInputStream(String entity,
                                                Long entityId) {
-        var file = this.repository.findByEntityAndEntityId(entity,
-                                                           entityId);
-        if (file == null) throw new NotFoundException("msg.not.found",
-                                                      entity,
-                                                      entityId);
+        var file = this.repository.findByEntityAndEntityId(entity, entityId);
+        if (file == null)
+            throw new NotFoundException("msg.not.found", entity, entityId);
 
-        var dir = Paths.get(FileConstants.DIR,
-                            entity,
-                            String.valueOf(entityId),
-                            file.getName());
+        var dir = Paths.get(FileConstants.DIR, entity, String.valueOf(entityId), file.getName());
         var storageUtils = this.storage.repository(file.getStorageType());
 
         var inputStream = storageUtils.readInputStream(dir);
         return LogData.builder()
-                      .file(inputStream)
-                      .success("msg.success",
-                               messageSource)
-                      .build()
-                      .claims();
+                .file(inputStream)
+                .success("msg.success", messageSource)
+                .build()
+                .claims();
     }
 
 }

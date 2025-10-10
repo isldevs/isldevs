@@ -47,28 +47,52 @@ public class ScheduledJobHistory {
     public ScheduledJobHistory() {
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getJobName() { return jobName; }
+    public String getJobName() {
+        return jobName;
+    }
 
-    public void setJobName(String jobName) { this.jobName = jobName; }
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
+    }
 
-    public Timestamp getExecutedAt() { return executedAt; }
+    public Timestamp getExecutedAt() {
+        return executedAt;
+    }
 
-    public void setExecutedAt(Timestamp executedAt) { this.executedAt = executedAt; }
+    public void setExecutedAt(Timestamp executedAt) {
+        this.executedAt = executedAt;
+    }
 
-    public Timestamp getNextExecutedAt() { return nextExecutedAt; }
+    public Timestamp getNextExecutedAt() {
+        return nextExecutedAt;
+    }
 
-    public void setNextExecutedAt(Timestamp nextExecutedAt) { this.nextExecutedAt = nextExecutedAt; }
+    public void setNextExecutedAt(Timestamp nextExecutedAt) {
+        this.nextExecutedAt = nextExecutedAt;
+    }
 
-    public String getStatus() { return status; }
+    public String getStatus() {
+        return status;
+    }
 
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public String getErrorMessage() { return errorMessage; }
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 
 }

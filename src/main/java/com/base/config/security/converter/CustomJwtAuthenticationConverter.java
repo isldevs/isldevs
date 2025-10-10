@@ -33,15 +33,10 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
     private static final Logger log = LoggerFactory.getLogger(CustomJwtAuthenticationConverter.class);
 
     private static final String ROLES_CLAIM = "roles";
-
     private static final String AUTHORITIES_CLAIM = "authorities";
-
     private static final String SCOPE_CLAIM = "scope";
-
     private static final String SCOPES_CLAIM = "scopes";
-
     private static final String CLIENT_ID = "client_id";
-
     private static final String USER_ID = "user_id";
 
     @Override
@@ -49,32 +44,24 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
         try {
             Collection<GrantedAuthority> authorities = extractAuthorities(jwt);
             String principalName = getPrincipalName(jwt);
-            return new JwtAuthenticationToken(jwt,
-                                              authorities,
-                                              principalName);
+            return new JwtAuthenticationToken(jwt, authorities, principalName);
         } catch (Exception e) {
-            log.error("Failed to convert JWT to Authentication",
-                      e);
-            return new JwtAuthenticationToken(jwt,
-                                              Collections.emptyList(),
-                                              null);
+            log.error("Failed to convert JWT to Authentication", e);
+            return new JwtAuthenticationToken(jwt, Collections.emptyList(), null);
         }
     }
 
     private String getPrincipalName(Jwt jwt) {
         return Optional.ofNullable(jwt.getClaimAsString(USER_ID))
-                       .or(() -> Optional.ofNullable(jwt.getClaimAsString(CLIENT_ID)))
-                       .orElse(jwt.getSubject());
+                .or(() -> Optional.ofNullable(jwt.getClaimAsString(CLIENT_ID)))
+                .orElse(jwt.getSubject());
     }
 
     private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        extractSimpleAuthorities(jwt,
-                                 authorities);
-        extractRoles(jwt,
-                     authorities);
-        extractScopes(jwt,
-                      authorities);
+        extractSimpleAuthorities(jwt, authorities);
+        extractRoles(jwt, authorities);
+        extractScopes(jwt, authorities);
         return authorities;
     }
 
@@ -102,7 +89,9 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
                 ((Collection<?>) rolesClaim).forEach(role -> {
                     if (role != null) {
                         String roleName = role.toString()
-                                              .startsWith("ROLE_") ? role.toString() : "ROLE_" + role;
+                                .startsWith("ROLE_")
+                                        ? role.toString()
+                                        : "ROLE_" + role;
                         authorities.add(new SimpleGrantedAuthority(roleName));
                     }
                 });
@@ -117,11 +106,11 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Abstract
         try {
             String scopeClaim = jwt.getClaimAsString(SCOPE_CLAIM);
             if (scopeClaim != null && !scopeClaim.trim()
-                                                 .isEmpty()) {
+                    .isEmpty()) {
                 Arrays.stream(scopeClaim.split(" "))
-                      .filter(scope -> !scope.trim()
-                                             .isEmpty())
-                      .forEach(scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
+                        .filter(scope -> !scope.trim()
+                                .isEmpty())
+                        .forEach(scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
             }
             Object scopesClaim = jwt.getClaim(SCOPES_CLAIM);
             if (scopesClaim instanceof Collection) {

@@ -37,13 +37,13 @@ public class ClientAssertionJwtDecoderFactory implements JwtDecoderFactory<Clien
     public JwtDecoder createDecoder(ClientAuthenticationToken context) {
 
         var key = rsaKeyPairRepository.findKeyPairs()
-                                      .stream()
-                                      .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                                      .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-                                      .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
+                .stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
 
         return NimbusJwtDecoder.withPublicKey(key)
-                               .build();
+                .build();
     }
 
 }

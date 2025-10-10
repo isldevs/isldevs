@@ -38,7 +38,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationService authenticationService;
-
     private final CustomUserDetailsService userDetailsService;
 
     @Autowired
@@ -60,23 +59,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             if (jwt != null && SecurityContextHolder.getContext()
-                                                    .getAuthentication() == null) {
+                    .getAuthentication() == null) {
                 var username = authenticationService.extractUsername(jwt);
                 if (username != null) {
                     var userDetails = userDetailsService.loadUserByUsername(username);
-                    if (authenticationService.isTokenValid(jwt,
-                                                           userDetails)) {
-                        var authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                                                                                null,
-                                                                                userDetails.getAuthorities());
+                    if (authenticationService.isTokenValid(jwt, userDetails)) {
+                        var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext()
-                                             .setAuthentication(authToken);
+                                .setAuthentication(authToken);
                     }
                 }
             }
-            filterChain.doFilter(request,
-                                 response);
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
             clearCookies(response);
@@ -89,20 +84,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void clearCookies(HttpServletResponse response) {
-        Cookie cookie = new Cookie("JSESSIONID",
-                                   null);
+        Cookie cookie = new Cookie("JSESSIONID", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
     }
 
     private void noCacheHeaders(HttpServletResponse response) {
-        response.setHeader("Cache-Control",
-                           "no-cache, no-store, must-revalidate");
-        response.setHeader("Pragma",
-                           "no-cache");
-        response.setHeader("Expires",
-                           "0");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
     }
 
 }

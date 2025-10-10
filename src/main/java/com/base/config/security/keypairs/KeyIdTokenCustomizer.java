@@ -42,49 +42,47 @@ public class KeyIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingCo
     @Override
     public void customize(JwtEncodingContext context) {
         rsaKeyPairRepository.findKeyPairs()
-                            .stream()
-                            .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                            .ifPresent(keyPair -> context.getJwsHeader()
-                                                         .keyId(keyPair.id()));
+                .stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .ifPresent(keyPair -> context.getJwsHeader()
+                        .keyId(keyPair.id()));
 
         if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
             Authentication principal = context.getPrincipal();
 
             if (principal != null && principal.getAuthorities() != null) {
                 List<String> roles = principal.getAuthorities()
-                                              .stream()
-                                              .map(GrantedAuthority::getAuthority)
-                                              .filter(f -> f.startsWith("ROLE_"))
-                                              .toList();
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(f -> f.startsWith("ROLE_"))
+                        .toList();
 
                 List<String> authorities = principal.getAuthorities()
-                                                    .stream()
-                                                    .map(GrantedAuthority::getAuthority)
-                                                    .filter(f -> !f.startsWith("ROLE_"))
-                                                    .toList();
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(f -> !f.startsWith("ROLE_"))
+                        .toList();
 
                 if ("m2m".equalsIgnoreCase(context.getPrincipal()
-                                                  .getName())) {
+                        .getName())) {
                     roles = new ArrayList<>();
                     roles.add("ROLE_M2M");
 
                     authorities = new ArrayList<>();
                     authorities.add("INTERNAL");
                 } else if ("microservice".equalsIgnoreCase(context.getPrincipal()
-                                                                  .getName())) {
-                                                                      roles = new ArrayList<>();
-                                                                      roles.add("ROLE_S2S");
+                        .getName())) {
+                    roles = new ArrayList<>();
+                    roles.add("ROLE_S2S");
 
-                                                                      authorities = new ArrayList<>();
-                                                                      authorities.add("EXTERNAL");
-                                                                  }
+                    authorities = new ArrayList<>();
+                    authorities.add("EXTERNAL");
+                }
 
                 context.getClaims()
-                       .claim("roles",
-                              roles);
+                        .claim("roles", roles);
                 context.getClaims()
-                       .claim("authorities",
-                              authorities);
+                        .claim("authorities", authorities);
             }
         }
     }

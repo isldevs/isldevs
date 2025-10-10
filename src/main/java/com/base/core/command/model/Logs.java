@@ -67,32 +67,60 @@ public class Logs extends CustomAbstractPersistable {
         this.createdAt = createdAt;
     }
 
-    public Long getEntityId() { return entityId; }
+    public Long getEntityId() {
+        return entityId;
+    }
 
-    public void setEntityId(Long entityId) { this.entityId = entityId; }
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
 
-    public String getAction() { return action; }
+    public String getAction() {
+        return action;
+    }
 
-    public void setAction(String action) { this.action = action; }
+    public void setAction(String action) {
+        this.action = action;
+    }
 
-    public String getEntity() { return entity; }
+    public String getEntity() {
+        return entity;
+    }
 
-    public void setEntity(String entity) { this.entity = entity; }
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
 
-    public String getHref() { return href; }
+    public String getHref() {
+        return href;
+    }
 
-    public void setHref(String href) { this.href = href; }
+    public void setHref(String href) {
+        this.href = href;
+    }
 
-    public String getJson() { return json; }
+    public String getJson() {
+        return json;
+    }
 
-    public void setJson(String json) { this.json = json; }
+    public void setJson(String json) {
+        this.json = json;
+    }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-    public Date getCreatedAt() { return createdAt; }
+    public Date getCreatedAt() {
+        return createdAt;
+    }
 
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 
 }

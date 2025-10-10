@@ -42,7 +42,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
     private final WebClient webClient;
-
     private final ObjectMapper objectMapper;
 
     public AccessTokenResponseClient(WebClient webClient,
@@ -56,45 +55,38 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
         ClientRegistration clientRegistration = authorizationGrantRequest.getClientRegistration();
 
         return webClient.post()
-                        .uri(clientRegistration.getProviderDetails()
-                                               .getTokenUri())
-                        .headers(headers -> {
-                            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                            headers.setBasicAuth(clientRegistration.getClientId(),
-                                                 clientRegistration.getClientSecret());
-                        })
-                        .body(BodyInserters.fromFormData(createTokenRequestParameters(authorizationGrantRequest)))
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .map(responseBody -> extractTokenResponse(responseBody,
-                                                                  clientRegistration))
-                        .block();
+                .uri(clientRegistration.getProviderDetails()
+                        .getTokenUri())
+                .headers(headers -> {
+                    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    headers.setBasicAuth(clientRegistration.getClientId(), clientRegistration.getClientSecret());
+                })
+                .body(BodyInserters.fromFormData(createTokenRequestParameters(authorizationGrantRequest)))
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(responseBody -> extractTokenResponse(responseBody, clientRegistration))
+                .block();
     }
 
     private MultiValueMap<String, String> createTokenRequestParameters(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add(OAuth2ParameterNames.GRANT_TYPE,
-                       authorizationGrantRequest.getGrantType()
-                                                .getValue());
-        parameters.add(OAuth2ParameterNames.CODE,
-                       authorizationGrantRequest.getAuthorizationExchange()
-                                                .getAuthorizationResponse()
-                                                .getCode());
-        parameters.add(OAuth2ParameterNames.REDIRECT_URI,
-                       authorizationGrantRequest.getAuthorizationExchange()
-                                                .getAuthorizationRequest()
-                                                .getRedirectUri());
-        parameters.add(OAuth2ParameterNames.CLIENT_ID,
-                       authorizationGrantRequest.getClientRegistration()
-                                                .getClientId());
+        parameters.add(OAuth2ParameterNames.GRANT_TYPE, authorizationGrantRequest.getGrantType()
+                .getValue());
+        parameters.add(OAuth2ParameterNames.CODE, authorizationGrantRequest.getAuthorizationExchange()
+                .getAuthorizationResponse()
+                .getCode());
+        parameters.add(OAuth2ParameterNames.REDIRECT_URI, authorizationGrantRequest.getAuthorizationExchange()
+                .getAuthorizationRequest()
+                .getRedirectUri());
+        parameters.add(OAuth2ParameterNames.CLIENT_ID, authorizationGrantRequest.getClientRegistration()
+                .getClientId());
 
         // Add PKCE parameters if available
         OAuth2AuthorizationRequest authorizationRequest = authorizationGrantRequest.getAuthorizationExchange()
-                                                                                   .getAuthorizationRequest();
+                .getAuthorizationRequest();
         String codeVerifier = (String) authorizationRequest.getAttribute(PkceParameterNames.CODE_VERIFIER);
         if (codeVerifier != null) {
-            parameters.add(PkceParameterNames.CODE_VERIFIER,
-                           codeVerifier);
+            parameters.add(PkceParameterNames.CODE_VERIFIER, codeVerifier);
         }
 
         return parameters;
@@ -103,9 +95,8 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
     private OAuth2AccessTokenResponse extractTokenResponse(String responseBody,
                                                            ClientRegistration clientRegistration) {
         try {
-            Map<String, Object> tokenResponseMap = objectMapper.readValue(responseBody,
-                                                                          new TypeReference<Map<String, Object>>() {
-                                                                          });
+            Map<String, Object> tokenResponseMap = objectMapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {
+            });
 
             String accessToken = (String) tokenResponseMap.get(OAuth2ParameterNames.ACCESS_TOKEN);
             String tokenType = (String) tokenResponseMap.get(OAuth2ParameterNames.TOKEN_TYPE);
@@ -115,17 +106,15 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
             Map<String, Object> additionalParameters = getAdditionalParameters(tokenResponseMap);
 
             return OAuth2AccessTokenResponse.withToken(accessToken)
-                                            .tokenType(new OAuth2AccessToken.TokenType(tokenType.toUpperCase()))
-                                            .expiresIn(expiresIn)
-                                            .scopes(scopes)
-                                            .refreshToken(refreshToken)
-                                            .additionalParameters(additionalParameters)
-                                            .build();
+                    .tokenType(new OAuth2AccessToken.TokenType(tokenType.toUpperCase()))
+                    .expiresIn(expiresIn)
+                    .scopes(scopes)
+                    .refreshToken(refreshToken)
+                    .additionalParameters(additionalParameters)
+                    .build();
 
         } catch (IOException e) {
-            throw new ErrorException("msg.internal.error",
-                                     "Failed to parse token response",
-                                     e);
+            throw new ErrorException("msg.internal.error", "Failed to parse token response", e);
         }
     }
 
@@ -149,16 +138,12 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
 
     private Map<String, Object> getAdditionalParameters(Map<String, Object> tokenResponseMap) {
         Map<String, Object> additionalParameters = new HashMap<>();
-        Set<String> standardParameters = Set.of(OAuth2ParameterNames.ACCESS_TOKEN,
-                                                OAuth2ParameterNames.TOKEN_TYPE,
-                                                OAuth2ParameterNames.EXPIRES_IN,
-                                                OAuth2ParameterNames.REFRESH_TOKEN,
-                                                OAuth2ParameterNames.SCOPE);
+        Set<String> standardParameters = Set
+                .of(OAuth2ParameterNames.ACCESS_TOKEN, OAuth2ParameterNames.TOKEN_TYPE, OAuth2ParameterNames.EXPIRES_IN, OAuth2ParameterNames.REFRESH_TOKEN, OAuth2ParameterNames.SCOPE);
 
         for (Map.Entry<String, Object> entry : tokenResponseMap.entrySet()) {
             if (!standardParameters.contains(entry.getKey())) {
-                additionalParameters.put(entry.getKey(),
-                                         entry.getValue());
+                additionalParameters.put(entry.getKey(), entry.getValue());
             }
         }
 

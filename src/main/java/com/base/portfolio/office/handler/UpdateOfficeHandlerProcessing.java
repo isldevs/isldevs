@@ -42,8 +42,7 @@ public class UpdateOfficeHandlerProcessing implements CommandHandlerProcessing {
 
     @Override
     public Map<String, Object> process(JsonCommand command) {
-        return this.service.updateOffice(command.getId(),
-                                         command);
+        return this.service.updateOffice(command.getId(), command);
     }
 
 }

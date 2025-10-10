@@ -78,8 +78,7 @@ public class DatasourceConfig {
         config.setDriverClassName(driverClassName);
 
         config.setMaximumPoolSize(Math.min((Runtime.getRuntime()
-                                                   .availableProcessors() * 2) + 1,
-                                           30));
+                .availableProcessors() * 2) + 1, 30));
         config.setMinimumIdle(config.getMaximumPoolSize() / 2);
         config.setConnectionTimeout(connectionTimeout);
         config.setIdleTimeout(idleTimeout);
@@ -87,23 +86,17 @@ public class DatasourceConfig {
         config.setLeakDetectionThreshold(leakDetectionThreshold);
 
         if (config.getDriverClassName()
-                  .contains("postgresql")) {
-            config.addDataSourceProperty("prepStmtCacheSize",
-                                         "250");
-            config.addDataSourceProperty("prepStmtCacheSqlLimit",
-                                         "2048");
-            config.addDataSourceProperty("socketTimeout",
-                                         "30");
+                .contains("postgresql")) {
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.addDataSourceProperty("socketTimeout", "30");
         }
 
         if (config.getDriverClassName()
-                  .contains("mysql")) {
-            config.addDataSourceProperty("cachePrepStmts",
-                                         "true");
-            config.addDataSourceProperty("prepStmtCacheSize",
-                                         "250");
-            config.addDataSourceProperty("useServerPrepStmts",
-                                         "true");
+                .contains("mysql")) {
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("useServerPrepStmts", "true");
         }
 
         return new HikariDataSource(config);
@@ -138,12 +131,9 @@ public class DatasourceConfig {
 
     private Properties hibernateProperties() {
         var properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto",
-                               hibernateDdlAuto);
-        properties.setProperty("hibernate.show_sql",
-                               showSql);
-        properties.setProperty("hibernate.format_sql",
-                               formatSql);
+        properties.setProperty("hibernate.hbm2ddl.auto", hibernateDdlAuto);
+        properties.setProperty("hibernate.show_sql", showSql);
+        properties.setProperty("hibernate.format_sql", formatSql);
         return properties;
     }
 
@@ -151,11 +141,11 @@ public class DatasourceConfig {
     public Flyway flyway(DataSource dataSource) {
 
         var flyway = Flyway.configure()
-                           .dataSource(dataSource)
-                           .locations("classpath:db/migration")
-                           .baselineVersion("1")
-                           .baselineOnMigrate(true)
-                           .load();
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .baselineVersion("1")
+                .baselineOnMigrate(true)
+                .load();
         flyway.migrate();
         return flyway;
     }

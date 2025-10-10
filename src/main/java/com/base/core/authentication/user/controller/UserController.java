@@ -33,11 +33,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<UserDTO> serializer;
-
     private final UserService userService;
-
     private final LogService logService;
 
     @Autowired
@@ -52,55 +49,47 @@ public class UserController {
     }
 
     @PostMapping
-    public String createUser(@RequestBody
-    String json) {
+    public String createUser(@RequestBody String json) {
 
         final var command = new UserCommandBuilder().create()
-                                                    .json(json)
-                                                    .build();
+                .json(json)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable
-    Long id) {
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @GetMapping
-    public ResponseEntity<?> listUsers(@RequestParam(required = false)
-    Integer page,
-                                       @RequestParam(required = false)
-                                       Integer size,
-                                       @RequestParam(required = false)
-                                       String search) {
-        var users = userService.listUsers(page,
-                                          size,
-                                          search);
-        var response = (page == null || size == null) ? pageable.unpaged(users) : pageable.toModel(users);
+    public ResponseEntity<?> listUsers(@RequestParam(required = false) Integer page,
+                                       @RequestParam(required = false) Integer size,
+                                       @RequestParam(required = false) String search) {
+        var users = userService.listUsers(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(users)
+                : pageable.toModel(users);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public String updateUser(@PathVariable
-    Long id,
-                             @RequestBody
-                             String json) {
+    public String updateUser(@PathVariable Long id,
+                             @RequestBody String json) {
         final var command = new UserCommandBuilder().update(id)
-                                                    .json(json)
-                                                    .build();
+                .json(json)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable
-    Long id) {
+    public String deleteUser(@PathVariable Long id) {
         final var command = new UserCommandBuilder().delete(id)
-                                                    .build();
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);

@@ -41,11 +41,8 @@ import org.springframework.stereotype.Component;
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
 
     private final AuthenticationService authenticationService;
-
     private final SessionRegistry sessionRegistry;
-
     private final UserRepository userRepository;
-
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -65,24 +62,21 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
                                         Authentication authentication) throws IOException {
 
         HttpSession session = request.getSession(true);
-        sessionRegistry.registerNewSession(session.getId(),
-                                           authentication.getPrincipal());
+        sessionRegistry.registerNewSession(session.getId(), authentication.getPrincipal());
 
         String username = extractUsernameFromAuthentication(authentication);
 
         var user = userRepository.findByUsername(username)
-                                 .orElseThrow(() -> new NotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new NotFoundException("User not found with username: " + username));
 
         String token = authenticationService.generateToken(user);
 
         boolean isApiClient = isApiRequest(request);
 
         if (isApiClient) {
-            sendJsonResponse(response,
-                             token);
+            sendJsonResponse(response, token);
         } else {
-            setAuthCookie(response,
-                          token);
+            setAuthCookie(response, token);
             response.sendRedirect("/home");
         }
     }
@@ -101,7 +95,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 
     private String extractUsernameFromOAuth2User(OAuth2User oauth2User) {
         String username = (String) Optional.ofNullable(oauth2User.getAttribute("login"))
-                                           .orElse(oauth2User.getAttribute("sub"));
+                .orElse(oauth2User.getAttribute("sub"));
 
         if (username == null) {
             username = oauth2User.getAttribute("id");
@@ -116,12 +110,12 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 
     private boolean isApiRequest(HttpServletRequest request) {
         String acceptHeader = Optional.ofNullable(request.getHeader("Accept"))
-                                      .orElse("");
+                .orElse("");
         String contentTypeHeader = Optional.ofNullable(request.getHeader("Content-Type"))
-                                           .orElse("");
+                .orElse("");
 
         return acceptHeader.contains("application/json") || contentTypeHeader.contains("application/json") || request.getRequestURI()
-                                                                                                                     .startsWith("/api/v1/");
+                .startsWith("/api/v1/");
     }
 
     private void sendJsonResponse(HttpServletResponse response,
@@ -129,27 +123,19 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        Map<String, String> responseBody = Map.of("access_token",
-                                                  token,
-                                                  "token_type",
-                                                  "Bearer",
-                                                  "expires_in",
-                                                  "3600");
+        Map<String, String> responseBody = Map.of("access_token", token, "token_type", "Bearer", "expires_in", "3600");
 
-        objectMapper.writeValue(response.getWriter(),
-                                responseBody);
+        objectMapper.writeValue(response.getWriter(), responseBody);
     }
 
     private void setAuthCookie(HttpServletResponse response,
                                String token) {
-        Cookie cookie = new Cookie("token",
-                                   token);
+        Cookie cookie = new Cookie("token", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(true); // Always use secure cookies in production
         cookie.setPath("/");
         cookie.setMaxAge(3600);
-        cookie.setAttribute("SameSite",
-                            "Lax"); // Prevent CSRF
+        cookie.setAttribute("SameSite", "Lax"); // Prevent CSRF
         response.addCookie(cookie);
     }
 

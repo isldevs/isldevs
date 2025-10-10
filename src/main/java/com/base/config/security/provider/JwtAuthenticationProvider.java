@@ -31,7 +31,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
     private final RegisteredClientRepository clientRepository;
-
     private final JwtDecoderFactory<ClientAuthenticationToken> jwtDecoderFactory;
 
     public JwtAuthenticationProvider(RegisteredClientRepository clientRepository,
@@ -45,15 +44,13 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         var token = (ClientAuthenticationToken) authentication;
 
         var client = clientRepository.findByClientId(token.getClientId());
-        if (client == null) throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
+        if (client == null)
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
 
         var jwtDecoder = jwtDecoderFactory.createDecoder(token);
         var jwt = jwtDecoder.decode(token.getClientAssertion());
 
-        return new OAuth2ClientAuthenticationToken(client.getClientId(),
-                                                   ClientAuthenticationMethod.PRIVATE_KEY_JWT,
-                                                   jwt,
-                                                   null);
+        return new OAuth2ClientAuthenticationToken(client.getClientId(), ClientAuthenticationMethod.PRIVATE_KEY_JWT, jwt, null);
     }
 
     @Override

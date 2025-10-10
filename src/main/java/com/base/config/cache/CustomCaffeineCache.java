@@ -29,23 +29,19 @@ public class CustomCaffeineCache extends CaffeineCache {
     private static final ConcurrentHashMap<String, Boolean> accessedCaches = new ConcurrentHashMap<>();
 
     private final AtomicLong cacheHits = new AtomicLong();
-
     private final AtomicLong databaseHits = new AtomicLong();
 
     public CustomCaffeineCache(String name) {
-        super(name,
-              Caffeine.newBuilder()
-                      .expireAfterWrite(1,
-                                        TimeUnit.HOURS)
-                      .maximumSize(1000)
-                      .recordStats()
-                      .build());
+        super(name, Caffeine.newBuilder()
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .maximumSize(1000)
+                .recordStats()
+                .build());
     }
 
     @Override
     public ValueWrapper get(Object key) {
-        accessedCaches.put(getName(),
-                           true);
+        accessedCaches.put(getName(), true);
         var value = super.get(key);
         if (value != null) {
             cacheHits.incrementAndGet();
@@ -55,9 +51,13 @@ public class CustomCaffeineCache extends CaffeineCache {
         return value;
     }
 
-    public long getCacheHits() { return cacheHits.get(); }
+    public long getCacheHits() {
+        return cacheHits.get();
+    }
 
-    public long getDatabaseHits() { return databaseHits.get(); }
+    public long getDatabaseHits() {
+        return databaseHits.get();
+    }
 
     public static boolean wasAccessed(String name) {
         return accessedCaches.containsKey(name);

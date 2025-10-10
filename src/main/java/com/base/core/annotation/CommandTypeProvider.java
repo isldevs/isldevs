@@ -40,9 +40,7 @@ public class CommandTypeProvider implements ApplicationContextAware {
 
     @Autowired
     private Environment environment;
-
     private ApplicationContext applicationContext;
-
     private HashMap<String, String> registeredCommandTypes;
 
     @Override
@@ -52,19 +50,17 @@ public class CommandTypeProvider implements ApplicationContextAware {
         if (registeredCommandTypes == null) {
             this.registeredCommandTypes = new HashMap<>();
             this.applicationContext.getBeansWithAnnotation(CommandType.class)
-                                   .forEach((_,
-                                             bean) -> {
-                                       CommandType commandType = AopUtils.getTargetClass(bean)
-                                                                         .getAnnotation(CommandType.class);
-                                       this.registeredCommandTypes.put(commandType.action() + "|" + commandType.entity(),
-                                                                       AopUtils.getTargetClass(bean)
-                                                                               .getName());
-                                       commandTypes.add(commandType.action() + "|" + commandType.entity());
-                                   });
+                    .forEach((_,
+                              bean) -> {
+                        CommandType commandType = AopUtils.getTargetClass(bean)
+                                .getAnnotation(CommandType.class);
+                        this.registeredCommandTypes.put(commandType.action() + "|" + commandType.entity(), AopUtils.getTargetClass(bean)
+                                .getName());
+                        commandTypes.add(commandType.action() + "|" + commandType.entity());
+                    });
         }
         if (isDevProfileActive()) {
-            logger.info("Registered @CommandType annotation {}",
-                        commandTypes);
+            logger.info("Registered @CommandType annotation {}", commandTypes);
         }
     }
 
@@ -72,15 +68,13 @@ public class CommandTypeProvider implements ApplicationContextAware {
                                                String entity) {
         final String permission = action + "|" + entity;
         if (!this.registeredCommandTypes.containsKey(permission)) {
-            throw new ErrorException("msg.bad.request.description",
-                                     permission);
+            throw new ErrorException("msg.bad.request.description", permission);
         }
         try {
             Class<?> clazz = Class.forName(this.registeredCommandTypes.get(permission));
             return (CommandHandlerProcessing) this.applicationContext.getBean(clazz);
         } catch (ClassNotFoundException e) {
-            throw new ErrorException("msg.bad.request.description",
-                                     this.registeredCommandTypes.get(permission));
+            throw new ErrorException("msg.bad.request.description", this.registeredCommandTypes.get(permission));
         }
     }
 

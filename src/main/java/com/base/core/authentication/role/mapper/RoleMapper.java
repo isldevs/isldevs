@@ -46,9 +46,7 @@ public abstract class RoleMapper {
             return Page.empty();
         }
         List<RoleDTO> content = toDTOList(rolePage.getContent());
-        return new PageImpl<>(content,
-                              rolePage.getPageable(),
-                              rolePage.getTotalElements());
+        return new PageImpl<>(content, rolePage.getPageable(), rolePage.getTotalElements());
     }
 
     @Named("mapAuthorities")
@@ -57,8 +55,8 @@ public abstract class RoleMapper {
             return Set.of();
         }
         return authorities.stream()
-                          .map(Authority::getAuthority)
-                          .collect(Collectors.toSet());
+                .map(Authority::getAuthority)
+                .collect(Collectors.toSet());
     }
 
 }

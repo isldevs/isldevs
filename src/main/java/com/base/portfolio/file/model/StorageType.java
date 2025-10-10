@@ -26,19 +26,12 @@ import java.util.stream.Collectors;
  */
 public enum StorageType {
 
-    FILE_SYSTEM("File system",
-                1),
-    S3("S3",
-       2),
-    MINIO("MinIO",
-          3);
+    FILE_SYSTEM("File system", 1), S3("S3", 2), MINIO("MinIO", 3);
 
     private static final Map<Integer, StorageType> ENUM_MAP = Collections.unmodifiableMap(Arrays.stream(values())
-                                                                                                .collect(Collectors.toMap(StorageType::getValue,
-                                                                                                                          type -> type)));
+            .collect(Collectors.toMap(StorageType::getValue, type -> type)));
 
     private final String name;
-
     private final int value;
 
     StorageType(String name,
@@ -47,15 +40,18 @@ public enum StorageType {
         this.value = value;
     }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public int getValue() { return value; }
+    public int getValue() {
+        return value;
+    }
 
     public static StorageType fromInt(int i) {
         StorageType type = ENUM_MAP.get(i);
         if (type == null) {
-            throw new ErrorException("msg.storage.type.invalid",
-                                     i);
+            throw new ErrorException("msg.storage.type.invalid", i);
         }
         return type;
     }

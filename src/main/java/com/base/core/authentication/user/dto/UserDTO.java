@@ -29,23 +29,14 @@ import java.util.stream.Collectors;
 public class UserDTO {
 
     private Long id;
-
     private String username;
-
     private String name;
-
     private String email;
-
     private Set<String> roles;
-
     private boolean enabled;
-
     private boolean accountNonExpired;
-
     private boolean accountNonLocked;
-
     private boolean credentialsNonExpired;
-
     private String profile;
 
     protected UserDTO() {
@@ -71,23 +62,22 @@ public class UserDTO {
     public static UserDTO toDTO(User user,
                                 FileService fileService) {
         var roleNames = user.getRoles()
-                            .stream()
-                            .map(Role::getName)
-                            .collect(Collectors.toSet());
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
 
         return UserDTO.builder()
-                      .id(user.getId())
-                      .username(user.getUsername())
-                      .name(user.getName())
-                      .email(user.getEmail())
-                      .roles(roleNames)
-                      .enabled(user.isEnabled())
-                      .accountNonExpired(user.isAccountNonExpired())
-                      .accountNonLocked(user.isAccountNonLocked())
-                      .credentialsNonExpired(user.isCredentialsNonExpired())
-                      .profile(profile(fileService,
-                                       user.getId()))
-                      .build();
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .email(user.getEmail())
+                .roles(roleNames)
+                .enabled(user.isEnabled())
+                .accountNonExpired(user.isAccountNonExpired())
+                .accountNonLocked(user.isAccountNonLocked())
+                .credentialsNonExpired(user.isCredentialsNonExpired())
+                .profile(profile(fileService, user.getId()))
+                .build();
     }
 
     private static String profile(FileService fileService,
@@ -97,11 +87,11 @@ public class UserDTO {
         }
         String profile = null;
         try {
-            profile = fileService.fileURL(FileUtils.ENTITY.USER.toString(),
-                                          id)
-                                 .get("file") != null ? fileService.fileURL(FileUtils.ENTITY.USER.toString(),
-                                                                            id)
-                                                                   .toString() : null;
+            profile = fileService.fileURL(FileUtils.ENTITY.USER.toString(), id)
+                    .get("file") != null
+                            ? fileService.fileURL(FileUtils.ENTITY.USER.toString(), id)
+                                    .toString()
+                            : null;
         } catch (NotFoundException ignored) {
         }
         return profile;
@@ -199,7 +189,7 @@ public class UserDTO {
         } else if (obj != null && this.getClass() == obj.getClass()) {
             UserDTO that = (UserDTO) obj;
             return this.getId()
-                       .equals(that.getId());
+                    .equals(that.getId());
         } else {
             return false;
         }
@@ -207,27 +197,47 @@ public class UserDTO {
 
     public int hashCode() {
         return this.getId()
-                   .hashCode();
+                .hashCode();
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getEmail() { return email; }
+    public String getEmail() {
+        return email;
+    }
 
-    public Set<String> getRoles() { return roles; }
+    public Set<String> getRoles() {
+        return roles;
+    }
 
-    public boolean isEnabled() { return enabled; }
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-    public boolean isAccountNonExpired() { return accountNonExpired; }
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
 
-    public boolean isAccountNonLocked() { return accountNonLocked; }
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
 
-    public boolean isCredentialsNonExpired() { return credentialsNonExpired; }
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
 
-    public String getProfile() { return profile; }
+    public String getProfile() {
+        return profile;
+    }
 
 }

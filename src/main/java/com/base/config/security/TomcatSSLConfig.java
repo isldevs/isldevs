@@ -39,19 +39,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TomcatSSLConfig {
 
-    // Configuration constants
     private static final String KEYSTORE_PATH = "server.p12";
-
     private static final String KEYSTORE_PASSWORD = "isldevs";
-
     private static final String KEY_ALIAS = "server";
-
     private static final String KEYSTORE_TYPE = "PKCS12";
-
     private static final int HTTPS_PORT = 8443;
-
     private static final int HTTP_PORT = 8080;
-
     private static final String CONTEXT_PATH = "/api/v1";
 
     @Bean
@@ -71,16 +64,14 @@ public class TomcatSSLConfig {
                 sslHostConfig.setCiphers("TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256");
                 sslHostConfig.setHonorCipherOrder(true);
 
-                var certificate = new SSLHostConfigCertificate(sslHostConfig,
-                                                               SSLHostConfigCertificate.Type.RSA);
+                var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
                 try (var is = getClass().getClassLoader()
-                                        .getResourceAsStream(KEYSTORE_PATH)) {
+                        .getResourceAsStream(KEYSTORE_PATH)) {
                     if (is == null) {
                         throw new RuntimeException("Keystore not found at classpath path: " + KEYSTORE_PATH);
                     }
                     var ks = KeyStore.getInstance(KEYSTORE_TYPE);
-                    ks.load(is,
-                            KEYSTORE_PASSWORD.toCharArray());
+                    ks.load(is, KEYSTORE_PASSWORD.toCharArray());
 
                     certificate.setCertificateKeystore(ks);
                     certificate.setCertificateKeyAlias(KEY_ALIAS);

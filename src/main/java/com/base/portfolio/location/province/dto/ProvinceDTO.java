@@ -30,17 +30,11 @@ import lombok.*;
 public class ProvinceDTO {
 
     private Long id;
-
     private String type;
-
     private String nameEn;
-
     private String nameKm;
-
     private String nameZh;
-
     private String postalCode;
-
     private List<DistrictDTO> districts;
 
 }

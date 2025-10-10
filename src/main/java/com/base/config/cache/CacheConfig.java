@@ -38,7 +38,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 public class CacheConfig {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
-
     private static final String[] CACHE_NAMES = new String[]{"users", "roles", "offices", "provinces", "districts", "communes", "villages"};
 
     private final Environment env;
@@ -50,8 +49,7 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager(ObjectProvider<RedisConnectionFactory> redisConnectionFactory) {
-        boolean useRedis = Boolean.parseBoolean(env.getProperty("spring.redis.enabled",
-                                                                "false"));
+        boolean useRedis = Boolean.parseBoolean(env.getProperty("spring.redis.enabled", "false"));
         if (useRedis) {
             var connectionFactory = redisConnectionFactory.getIfAvailable();
             if (connectionFactory != null) {
@@ -66,24 +64,19 @@ public class CacheConfig {
     private CacheManager createRedisCacheManager(RedisConnectionFactory connectionFactory) {
         try {
             var config = new RedisStandaloneConfiguration();
-            config.setHostName(env.getProperty("spring.data.redis.host",
-                                               "localhost"));
-            config.setPort(Integer.parseInt(env.getProperty("spring.data.redis.port",
-                                                            "6379")));
-            config.setPassword(env.getProperty("spring.data.redis.password",
-                                               "password"));
+            config.setHostName(env.getProperty("spring.data.redis.host", "localhost"));
+            config.setPort(Integer.parseInt(env.getProperty("spring.data.redis.port", "6379")));
+            config.setPassword(env.getProperty("spring.data.redis.password", "password"));
 
             var cacheDefaults = RedisCacheConfiguration.defaultCacheConfig()
-                                                       .entryTtl(Duration.ofHours(1))
-                                                       .disableCachingNullValues()
-                                                       .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                    .entryTtl(Duration.ofHours(1))
+                    .disableCachingNullValues()
+                    .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-            return new CustomRedisCacheManager(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory),
-                                               cacheDefaults);
+            return new CustomRedisCacheManager(RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory), cacheDefaults);
 
         } catch (Exception e) {
-            logger.warn("Failed to create redis cache manager, falling back to caffeine cache manager",
-                        e);
+            logger.warn("Failed to create redis cache manager, falling back to caffeine cache manager", e);
             return createCaffeineCacheManager();
         }
     }

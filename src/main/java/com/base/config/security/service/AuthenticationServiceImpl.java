@@ -42,7 +42,6 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
     private static final long EXPIRATION = 1000 * 60 * 15;
 
     private final Clock clock;
-
     private final RSAKeyPairRepository rsaKeyPairRepository;
 
     @Autowired
@@ -54,8 +53,7 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String extractUsername(String token) {
-        return extractClaim(token,
-                            Claims::getSubject);
+        return extractClaim(token, Claims::getSubject);
     }
 
     @Override
@@ -67,16 +65,13 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(),
-                             userDetails);
+        return generateToken(new HashMap<>(), userDetails);
     }
 
     @Override
     public String generateToken(Map<String, Object> extraClaims,
                                 UserDetails userDetails) {
-        return buildToken(extraClaims,
-                          userDetails,
-                          EXPIRATION);
+        return buildToken(extraClaims, userDetails, EXPIRATION);
     }
 
     @Override
@@ -84,26 +79,25 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
                              UserDetails userDetails,
                              long expiration) {
         var authorities = userDetails.getAuthorities()
-                                     .stream()
-                                     .map(GrantedAuthority::getAuthority)
-                                     .toList();
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
         RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs()
-                                                       .stream()
-                                                       .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                                                       .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
-                                                       .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+                .stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
         return Jwts.builder()
-                   .claims(extraClaims)
-                   .subject(userDetails.getUsername())
-                   .issuedAt(Date.from(Instant.now(clock)))
-                   .expiration(Date.from(Instant.now(clock)
-                                                .plusSeconds(expiration)))
-                   .claim("authorities",
-                          authorities)
-                   .signWith(privateKey)
-                   .compact();
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(Date.from(Instant.now(clock)))
+                .expiration(Date.from(Instant.now(clock)
+                        .plusSeconds(expiration)))
+                .claim("authorities", authorities)
+                .signWith(privateKey)
+                .compact();
     }
 
     @Override
@@ -120,27 +114,25 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public Date extractExpiration(String token) {
-        return extractClaim(token,
-                            Claims::getExpiration);
+        return extractClaim(token, Claims::getExpiration);
     }
 
     @Override
     public Claims extractAllClaims(String token) {
         try {
             RSAPublicKey publicKey = rsaKeyPairRepository.findKeyPairs()
-                                                         .stream()
-                                                         .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                                                         .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
-                                                         .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+                    .stream()
+                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                    .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                    .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
             return Jwts.parser()
-                       .verifyWith(publicKey)
-                       .build()
-                       .parseSignedClaims(token)
-                       .getPayload();
+                    .verifyWith(publicKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (JwtException e) {
-            throw new RuntimeException("Invalid or expired JWT token",
-                                       e);
+            throw new RuntimeException("Invalid or expired JWT token", e);
         }
     }
 

@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 public class JdbcClientRegistrationRepository implements ClientRegistrationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
     private final RowMapper rowMapper;
 
     public JdbcClientRegistrationRepository(JdbcTemplate jdbcTemplate,
@@ -42,53 +41,58 @@ public class JdbcClientRegistrationRepository implements ClientRegistrationRepos
 
     @Override
     public ClientRegistration findByRegistrationId(String registrationId) {
-        List<ClientRegistration> list = jdbcTemplate.query("SELECT * FROM oauth2_client_registration WHERE registration_id = ?",
-                                                           (rs,
-                                                            rowMapper) -> ClientRegistration.withRegistrationId(rs.getString("registration_id"))
-                                                                                            .clientId(rs.getString("client_id"))
-                                                                                            .clientSecret(rs.getString("client_secret"))
-                                                                                            .clientAuthenticationMethod(ClientAuthenticationMethod.valueOf(rs.getString("client_auth_method")))
-                                                                                            .authorizationGrantType(new AuthorizationGrantType(rs.getString("authorization_grant_type")))
-                                                                                            .redirectUri(rs.getString("redirect_uri"))
-                                                                                            .scope(rs.getString("scope") != null ? rs.getString("scope")
-                                                                                                                                     .split(",") : new String[]{})
-                                                                                            .authorizationUri(rs.getString("authorization_uri"))
-                                                                                            .tokenUri(rs.getString("token_uri"))
-                                                                                            .userInfoUri(rs.getString("user_info_uri"))
-                                                                                            .jwkSetUri(rs.getString("jwk_set_uri"))
-                                                                                            .userNameAttributeName(rs.getString("user_name_attribute"))
-                                                                                            .clientName(rs.getString("client_name"))
-                                                                                            .build(),
-                                                           registrationId);
+        List<ClientRegistration> list = jdbcTemplate.query("SELECT * FROM oauth2_client_registration WHERE registration_id = ?", (rs,
+                                                                                                                                  rowMapper) -> ClientRegistration
+                                                                                                                                          .withRegistrationId(rs
+                                                                                                                                                  .getString("registration_id"))
+                                                                                                                                          .clientId(rs
+                                                                                                                                                  .getString("client_id"))
+                                                                                                                                          .clientSecret(rs
+                                                                                                                                                  .getString("client_secret"))
+                                                                                                                                          .clientAuthenticationMethod(ClientAuthenticationMethod
+                                                                                                                                                  .valueOf(rs
+                                                                                                                                                          .getString("client_auth_method")))
+                                                                                                                                          .authorizationGrantType(new AuthorizationGrantType(rs
+                                                                                                                                                  .getString("authorization_grant_type")))
+                                                                                                                                          .redirectUri(rs
+                                                                                                                                                  .getString("redirect_uri"))
+                                                                                                                                          .scope(rs
+                                                                                                                                                  .getString("scope") != null
+                                                                                                                                                          ? rs.getString("scope")
+                                                                                                                                                                  .split(",")
+                                                                                                                                                          : new String[]{})
+                                                                                                                                          .authorizationUri(rs
+                                                                                                                                                  .getString("authorization_uri"))
+                                                                                                                                          .tokenUri(rs
+                                                                                                                                                  .getString("token_uri"))
+                                                                                                                                          .userInfoUri(rs
+                                                                                                                                                  .getString("user_info_uri"))
+                                                                                                                                          .jwkSetUri(rs
+                                                                                                                                                  .getString("jwk_set_uri"))
+                                                                                                                                          .userNameAttributeName(rs
+                                                                                                                                                  .getString("user_name_attribute"))
+                                                                                                                                          .clientName(rs
+                                                                                                                                                  .getString("client_name"))
+                                                                                                                                          .build(), registrationId);
 
-        return list.isEmpty() ? null : list.get(0);
+        return list.isEmpty()
+                ? null
+                : list.get(0);
     }
 
     public void save(ClientRegistration client) {
-        jdbcTemplate.update("INSERT INTO oauth2_client_registration " + "(registration_id, client_id, client_secret, client_auth_method, authorization_grant_type, " + "redirect_uri, scope, authorization_uri, token_uri, user_info_uri, user_name_attribute, client_name, jwk_set_uri) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            client.getRegistrationId(),
-                            client.getClientId(),
-                            client.getClientSecret(),
-                            client.getClientAuthenticationMethod()
-                                  .getValue(),
-                            client.getAuthorizationGrantType()
-                                  .getValue(),
-                            client.getRedirectUri(),
-                            String.join(",",
-                                        client.getScopes()),
-                            client.getProviderDetails()
-                                  .getAuthorizationUri(),
-                            client.getProviderDetails()
-                                  .getTokenUri(),
-                            client.getProviderDetails()
-                                  .getUserInfoEndpoint()
-                                  .getUri(),
-                            client.getProviderDetails()
-                                  .getUserInfoEndpoint()
-                                  .getUserNameAttributeName(),
-                            client.getClientName(),
-                            client.getProviderDetails()
-                                  .getJwkSetUri());
+        jdbcTemplate
+                .update("INSERT INTO oauth2_client_registration " + "(registration_id, client_id, client_secret, client_auth_method, authorization_grant_type, " + "redirect_uri, scope, authorization_uri, token_uri, user_info_uri, user_name_attribute, client_name, jwk_set_uri) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", client
+                        .getRegistrationId(), client.getClientId(), client.getClientSecret(), client.getClientAuthenticationMethod()
+                                .getValue(), client.getAuthorizationGrantType()
+                                        .getValue(), client.getRedirectUri(), String.join(",", client.getScopes()), client.getProviderDetails()
+                                                .getAuthorizationUri(), client.getProviderDetails()
+                                                        .getTokenUri(), client.getProviderDetails()
+                                                                .getUserInfoEndpoint()
+                                                                .getUri(), client.getProviderDetails()
+                                                                        .getUserInfoEndpoint()
+                                                                        .getUserNameAttributeName(), client.getClientName(), client.getProviderDetails()
+                                                                                .getJwkSetUri());
     }
 
 }

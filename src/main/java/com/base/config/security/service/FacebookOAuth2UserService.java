@@ -40,29 +40,21 @@ public class FacebookOAuth2UserService implements OAuth2UserService<OAuth2UserRe
         var attributes = oauth2User.getAttributes();
         var convertedAttributes = convertFacebookAttributes(attributes);
 
-        return new DefaultOAuth2User(oauth2User.getAuthorities(),
-                                     convertedAttributes,
-                                     "id");
+        return new DefaultOAuth2User(oauth2User.getAuthorities(), convertedAttributes, "id");
     }
 
     private Map<String, Object> convertFacebookAttributes(Map<String, Object> attributes) {
         Map<String, Object> converted = new HashMap<>();
 
-        converted.put("id",
-                      attributes.get("id"));
-        converted.put("name",
-                      attributes.get("name"));
-        converted.put("email",
-                      attributes.get("email"));
-        converted.put("first_name",
-                      attributes.get("first_name"));
-        converted.put("last_name",
-                      attributes.get("last_name"));
+        converted.put("id", attributes.get("id"));
+        converted.put("name", attributes.get("name"));
+        converted.put("email", attributes.get("email"));
+        converted.put("first_name", attributes.get("first_name"));
+        converted.put("last_name", attributes.get("last_name"));
 
         if (attributes.get("picture") instanceof Map<?, ?> picture) {
             if (picture.get("data") instanceof Map<?, ?> data) {
-                converted.put("picture",
-                              data.get("url"));
+                converted.put("picture", data.get("url"));
             }
         }
 

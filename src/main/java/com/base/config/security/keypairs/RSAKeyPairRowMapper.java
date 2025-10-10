@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 public class RSAKeyPairRowMapper implements RowMapper<RSAKeyPairRepository.RSAKeyPair> {
 
     private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
-
     private final RSAPublicKeyConverter rsaPublicKeyConverter;
 
     @Autowired
@@ -53,13 +52,9 @@ public class RSAKeyPairRowMapper implements RowMapper<RSAKeyPairRepository.RSAKe
             var privateKey = (RSAPrivateKey) rsaPrivateKeyConverter.convertFromString(privateKeyStr);
             var publicKey = (RSAPublicKey) rsaPublicKeyConverter.convertFromString(publicKeyStr);
 
-            return new RSAKeyPairRepository.RSAKeyPair(id,
-                                                       created,
-                                                       publicKey,
-                                                       privateKey);
+            return new RSAKeyPairRepository.RSAKeyPair(id, created, publicKey, privateKey);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to map RSA key pair",
-                                       e);
+            throw new RuntimeException("Failed to map RSA key pair", e);
         }
     }
 

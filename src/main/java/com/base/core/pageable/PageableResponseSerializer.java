@@ -38,24 +38,21 @@ public class PageableResponseSerializer extends StdSerializer<PageableResponse> 
 
         jsonGenerator.writeObjectFieldStart("embedded");
         if (pageableResponse.getEmbedded() != null && pageableResponse.getEmbedded()
-                                                                      .getContent() != null) {
+                .getContent() != null) {
             List<?> content = pageableResponse.getEmbedded()
-                                              .getContent();
+                    .getContent();
             if (!content.isEmpty()) {
-                jsonGenerator.writeObjectField("contents",
-                                               content);
+                jsonGenerator.writeObjectField("contents", content);
             }
         }
         jsonGenerator.writeEndObject();
 
         if (pageableResponse.getLinks() != null) {
-            jsonGenerator.writeObjectField("links",
-                                           pageableResponse.getLinks());
+            jsonGenerator.writeObjectField("links", pageableResponse.getLinks());
         }
 
         if (pageableResponse.getPage() != null) {
-            jsonGenerator.writeObjectField("page",
-                                           pageableResponse.getPage());
+            jsonGenerator.writeObjectField("page", pageableResponse.getPage());
         }
 
         jsonGenerator.writeEndObject();

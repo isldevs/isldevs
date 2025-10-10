@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 public class UserDataValidation {
 
     private final JsonHelper jsonHelper;
-
     private final ApiDataValidator validator;
 
     @Autowired
@@ -43,138 +42,95 @@ public class UserDataValidation {
     public void create(String json) {
         final var typeOfMap = new TypeToken<Map<String, Object>>() {
         }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap,
-                                              json,
-                                              UserConstants.SUPPORTED_PARAMETER);
+        this.jsonHelper.unsupportedParameters(typeOfMap, json, UserConstants.SUPPORTED_PARAMETER);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
-        final var username = this.jsonHelper.extractString(UserConstants.USERNAME,
-                                                           jsonElement);
-        validator.parameter(UserConstants.USERNAME,
-                            username)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(255);
+        final var username = this.jsonHelper.extractString(UserConstants.USERNAME, jsonElement);
+        validator.parameter(UserConstants.USERNAME, username)
+                .isString()
+                .notEmpty()
+                .maxLength(255);
 
-        final var name = this.jsonHelper.extractString(UserConstants.NAME,
-                                                       jsonElement);
-        validator.parameter(UserConstants.NAME,
-                            name)
-                 .isString()
-                 .notEmpty()
-                 .maxLength(255);
+        final var name = this.jsonHelper.extractString(UserConstants.NAME, jsonElement);
+        validator.parameter(UserConstants.NAME, name)
+                .isString()
+                .notEmpty()
+                .maxLength(255);
 
-        final var email = this.jsonHelper.extractString(UserConstants.EMAIL,
-                                                        jsonElement);
-        validator.parameter(UserConstants.EMAIL,
-                            email)
-                 .isString()
-                 .notEmpty();
+        final var email = this.jsonHelper.extractString(UserConstants.EMAIL, jsonElement);
+        validator.parameter(UserConstants.EMAIL, email)
+                .isString()
+                .notEmpty();
 
-        if (this.jsonHelper.parameterExists(UserConstants.ENABLED,
-                                            jsonElement)) {
-            final var enabled = this.jsonHelper.extractBoolean(UserConstants.ENABLED,
-                                                               jsonElement);
-            validator.parameter(UserConstants.ENABLED,
-                                enabled)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.ENABLED, jsonElement)) {
+            final var enabled = this.jsonHelper.extractBoolean(UserConstants.ENABLED, jsonElement);
+            validator.parameter(UserConstants.ENABLED, enabled)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                            jsonElement)) {
-            final var isAccountNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                                                           jsonElement);
-            validator.parameter(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                isAccountNonExpired)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_EXPIRED, jsonElement)) {
+            final var isAccountNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_EXPIRED, jsonElement);
+            validator.parameter(UserConstants.IS_ACCOUNT_NON_EXPIRED, isAccountNonExpired)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                            jsonElement)) {
-            final var isAccountNonLocked = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                                                          jsonElement);
-            validator.parameter(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                isAccountNonLocked)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_LOCKED, jsonElement)) {
+            final var isAccountNonLocked = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_LOCKED, jsonElement);
+            validator.parameter(UserConstants.IS_ACCOUNT_NON_LOCKED, isAccountNonLocked)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                            jsonElement)) {
-            final var isCredentialsNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                                                               jsonElement);
-            validator.parameter(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                isCredentialsNonExpired)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_CREDENTIALS_NON_EXPIRED, jsonElement)) {
+            final var isCredentialsNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_CREDENTIALS_NON_EXPIRED, jsonElement);
+            validator.parameter(UserConstants.IS_CREDENTIALS_NON_EXPIRED, isCredentialsNonExpired)
+                    .isBoolean();
         }
     }
 
     public void update(String json) {
         final var typeOfMap = new TypeToken<Map<String, Object>>() {
         }.getType();
-        this.jsonHelper.unsupportedParameters(typeOfMap,
-                                              json,
-                                              UserConstants.SUPPORTED_PARAMETER);
+        this.jsonHelper.unsupportedParameters(typeOfMap, json, UserConstants.SUPPORTED_PARAMETER);
 
         final var jsonElement = this.jsonHelper.parse(json);
 
-        if (this.jsonHelper.parameterExists(UserConstants.USERNAME,
-                                            jsonElement)) {
-            final var username = this.jsonHelper.extractString(UserConstants.USERNAME,
-                                                               jsonElement);
-            validator.parameter(UserConstants.USERNAME,
-                                username)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(255);
+        if (this.jsonHelper.parameterExists(UserConstants.USERNAME, jsonElement)) {
+            final var username = this.jsonHelper.extractString(UserConstants.USERNAME, jsonElement);
+            validator.parameter(UserConstants.USERNAME, username)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(255);
         }
-        if (this.jsonHelper.parameterExists(UserConstants.NAME,
-                                            jsonElement)) {
-            final var name = this.jsonHelper.extractString(UserConstants.NAME,
-                                                           jsonElement);
-            validator.parameter(UserConstants.NAME,
-                                name)
-                     .isString()
-                     .notEmpty()
-                     .maxLength(255);
+        if (this.jsonHelper.parameterExists(UserConstants.NAME, jsonElement)) {
+            final var name = this.jsonHelper.extractString(UserConstants.NAME, jsonElement);
+            validator.parameter(UserConstants.NAME, name)
+                    .isString()
+                    .notEmpty()
+                    .maxLength(255);
         }
-        if (this.jsonHelper.parameterExists(UserConstants.EMAIL,
-                                            jsonElement)) {
-            final var email = this.jsonHelper.extractString(UserConstants.EMAIL,
-                                                            jsonElement);
-            validator.parameter(UserConstants.EMAIL,
-                                email)
-                     .isString()
-                     .notEmpty();
+        if (this.jsonHelper.parameterExists(UserConstants.EMAIL, jsonElement)) {
+            final var email = this.jsonHelper.extractString(UserConstants.EMAIL, jsonElement);
+            validator.parameter(UserConstants.EMAIL, email)
+                    .isString()
+                    .notEmpty();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.ENABLED,
-                                            jsonElement)) {
-            final var enabled = this.jsonHelper.extractBoolean(UserConstants.ENABLED,
-                                                               jsonElement);
-            validator.parameter(UserConstants.ENABLED,
-                                enabled)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.ENABLED, jsonElement)) {
+            final var enabled = this.jsonHelper.extractBoolean(UserConstants.ENABLED, jsonElement);
+            validator.parameter(UserConstants.ENABLED, enabled)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                            jsonElement)) {
-            final var isAccountNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                                                           jsonElement);
-            validator.parameter(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                                isAccountNonExpired)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_EXPIRED, jsonElement)) {
+            final var isAccountNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_EXPIRED, jsonElement);
+            validator.parameter(UserConstants.IS_ACCOUNT_NON_EXPIRED, isAccountNonExpired)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                            jsonElement)) {
-            final var isAccountNonLocked = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                                                          jsonElement);
-            validator.parameter(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                                isAccountNonLocked)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_ACCOUNT_NON_LOCKED, jsonElement)) {
+            final var isAccountNonLocked = this.jsonHelper.extractBoolean(UserConstants.IS_ACCOUNT_NON_LOCKED, jsonElement);
+            validator.parameter(UserConstants.IS_ACCOUNT_NON_LOCKED, isAccountNonLocked)
+                    .isBoolean();
         }
-        if (this.jsonHelper.parameterExists(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                            jsonElement)) {
-            final var isCredentialsNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                                                               jsonElement);
-            validator.parameter(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                                isCredentialsNonExpired)
-                     .isBoolean();
+        if (this.jsonHelper.parameterExists(UserConstants.IS_CREDENTIALS_NON_EXPIRED, jsonElement)) {
+            final var isCredentialsNonExpired = this.jsonHelper.extractBoolean(UserConstants.IS_CREDENTIALS_NON_EXPIRED, jsonElement);
+            validator.parameter(UserConstants.IS_CREDENTIALS_NON_EXPIRED, isCredentialsNonExpired)
+                    .isBoolean();
         }
     }
 

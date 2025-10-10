@@ -34,7 +34,7 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
     public Authentication convert(HttpServletRequest request) {
         var grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
         if (!new AuthorizationGrantType("password").getValue()
-                                                   .equals(grantType)) {
+                .equals(grantType)) {
             return null;
         }
 
@@ -53,21 +53,17 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
 
         Map<String, Object> additionalParameters = new HashMap<>();
         request.getParameterMap()
-               .forEach((key,
-                         values) -> {
-                   if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) && !key.equals(OAuth2ParameterNames.USERNAME) && !key.equals(OAuth2ParameterNames.PASSWORD) && !key.equals(OAuth2ParameterNames.SCOPE)) {
-                       additionalParameters.put(key,
-                                                values[0]);
-                   }
-               });
+                .forEach((key,
+                          values) -> {
+                    if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) && !key.equals(OAuth2ParameterNames.USERNAME) && !key
+                            .equals(OAuth2ParameterNames.PASSWORD) && !key.equals(OAuth2ParameterNames.SCOPE)) {
+                        additionalParameters.put(key, values[0]);
+                    }
+                });
 
         var clientPrincipal = SecurityContextHolder.getContext()
-                                                   .getAuthentication();
-        return new OAuth2PasswordAuthenticationToken(username,
-                                                     password,
-                                                     clientPrincipal,
-                                                     requestedScopes,
-                                                     additionalParameters);
+                .getAuthentication();
+        return new OAuth2PasswordAuthenticationToken(username, password, clientPrincipal, requestedScopes, additionalParameters);
     }
 
 }

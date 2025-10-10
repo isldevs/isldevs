@@ -51,35 +51,34 @@ public class JwtAssertionGeneratorService {
     public String generateClientAssertion() throws JOSEException {
 
         RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs()
-                                                       .stream()
-                                                       .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                                                       .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
-                                                       .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
+                .stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+                .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
         var latestKey = rsaKeyPairRepository.findKeyPairs()
-                                            .stream()
-                                            .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                                            .orElseThrow(() -> {
-                                                logger.error("No RSA key pair found in repository");
-                                                return new IllegalStateException("No RSA key pair available for signing");
-                                            });
+                .stream()
+                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .orElseThrow(() -> {
+                    logger.error("No RSA key pair found in repository");
+                    return new IllegalStateException("No RSA key pair available for signing");
+                });
 
         var now = Instant.now();
         var claimsSet = new JWTClaimsSet.Builder().issuer("https://localhost:8443/api/v1")
-                                                  .subject("microservice")
-                                                  .audience("https://localhost:8443/api/v1/oauth2/token")
-                                                  .jwtID(UUID.randomUUID()
-                                                             .toString())
-                                                  .issueTime(Date.from(now))
-                                                  .expirationTime(Date.from(now.plusSeconds(300)))
-                                                  .build();
+                .subject("microservice")
+                .audience("https://localhost:8443/api/v1/oauth2/token")
+                .jwtID(UUID.randomUUID()
+                        .toString())
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plusSeconds(300)))
+                .build();
 
         var header = new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT)
-                                                              .keyID(latestKey.id())
-                                                              .build();
+                .keyID(latestKey.id())
+                .build();
 
-        var signedJWT = new SignedJWT(header,
-                                      claimsSet);
+        var signedJWT = new SignedJWT(header, claimsSet);
         signedJWT.sign(new RSASSASigner(privateKey));
 
         return signedJWT.serialize();

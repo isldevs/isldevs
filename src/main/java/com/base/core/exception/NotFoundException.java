@@ -28,6 +28,8 @@ public class NotFoundException extends RuntimeException {
         this.args = args;
     }
 
-    public Object[] getArgs() { return args; }
+    public Object[] getArgs() {
+        return args;
+    }
 
 }

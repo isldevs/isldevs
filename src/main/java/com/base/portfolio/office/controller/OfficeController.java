@@ -54,58 +54,50 @@ public class OfficeController {
     }
 
     @PostMapping
-    public String createOffice(@RequestBody
-    String json) {
+    public String createOffice(@RequestBody String json) {
 
         final var command = new OfficeCommandHandler().create()
-                                                      .json(json)
-                                                      .build();
+                .json(json)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @PutMapping("/{id}")
-    public String updateOffice(@PathVariable
-    Long id,
-                               @RequestBody
-                               String json) {
+    public String updateOffice(@PathVariable Long id,
+                               @RequestBody String json) {
 
         final var command = new OfficeCommandHandler().update(id)
-                                                      .json(json)
-                                                      .build();
+                .json(json)
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteOffice(@PathVariable
-    Long id) {
+    public String deleteOffice(@PathVariable Long id) {
         final var command = new OfficeCommandHandler().delete(id)
-                                                      .build();
+                .build();
 
         final var data = this.logService.log(command);
         return this.serializer.serialize(data);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OfficeDTO> getOffice(@PathVariable
-    Long id) {
+    public ResponseEntity<OfficeDTO> getOffice(@PathVariable Long id) {
         return ResponseEntity.ok(this.service.getOfficeById(id));
     }
 
     @GetMapping
-    public ResponseEntity<?> listOffices(@RequestParam(required = false)
-    Integer page,
-                                         @RequestParam(required = false)
-                                         Integer size,
-                                         @RequestParam(required = false)
-                                         String search) {
-        var offices = this.service.listOffices(page,
-                                               size,
-                                               search);
-        var response = (page == null || size == null) ? pageable.unpaged(offices) : pageable.toModel(offices);
+    public ResponseEntity<?> listOffices(@RequestParam(required = false) Integer page,
+                                         @RequestParam(required = false) Integer size,
+                                         @RequestParam(required = false) String search) {
+        var offices = this.service.listOffices(page, size, search);
+        var response = (page == null || size == null)
+                ? pageable.unpaged(offices)
+                : pageable.toModel(offices);
         return ResponseEntity.ok(response);
     }
 

@@ -31,8 +31,7 @@ public class Command implements StandardClaimAccessor, Serializable {
     private final Map<String, Object> claims;
 
     public Command(Map<String, Object> claims) {
-        Assert.notEmpty(claims,
-                        "claims cannot be empty");
+        Assert.notEmpty(claims, "claims cannot be empty");
         this.claims = Collections.unmodifiableMap(new LinkedHashMap<>(claims));
     }
 
@@ -53,59 +52,51 @@ public class Command implements StandardClaimAccessor, Serializable {
 
         public Builder claim(String name,
                              Object value) {
-            this.claims.put(name,
-                            value);
+            this.claims.put(name, value);
             return this;
         }
 
         public Builder id(Long id) {
-            return this.claim("id",
-                              id);
+            return this.claim("id", id);
         }
 
         public Builder action(String action) {
-            return this.claim("action",
-                              action);
+            return this.claim("action", action);
         }
 
         public Builder entity(String entity) {
-            return this.claim("entity",
-                              entity);
+            return this.claim("entity", entity);
         }
 
         public Builder entityType(String entityType) {
-            return this.claim("entityType",
-                              entityType);
+            return this.claim("entityType", entityType);
         }
 
         public Builder entityId(Long entityId) {
-            return this.claim("entityId",
-                              entityId);
+            return this.claim("entityId", entityId);
         }
 
         public Builder permission(String permission) {
-            return this.claim("permission",
-                              permission);
+            return this.claim("permission", permission);
         }
 
         public Builder href(String href) {
-            return this.claim("href",
-                              href);
+            return this.claim("href", href);
         }
 
         public Builder json(String json) {
-            return this.claim("json",
-                              json);
+            return this.claim("json", json);
         }
 
         public Builder file(MultipartFile file) {
-            return this.claim("file",
-                              file);
+            return this.claim("file", file);
         }
 
     }
 
-    public Map<String, Object> getClaims() { return this.claims; }
+    public Map<String, Object> getClaims() {
+        return this.claims;
+    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -113,7 +104,7 @@ public class Command implements StandardClaimAccessor, Serializable {
         } else if (obj != null && this.getClass() == obj.getClass()) {
             Command c = (Command) obj;
             return this.getClaims()
-                       .equals(c.getClaims());
+                    .equals(c.getClaims());
         } else {
             return false;
         }
@@ -121,25 +112,43 @@ public class Command implements StandardClaimAccessor, Serializable {
 
     public int hashCode() {
         return this.getClaims()
-                   .hashCode();
+                .hashCode();
     }
 
-    public Long getId() { return (Long) claims.get("id"); }
+    public Long getId() {
+        return (Long) claims.get("id");
+    }
 
-    public String getAction() { return (String) claims.get("action"); }
+    public String getAction() {
+        return (String) claims.get("action");
+    }
 
-    public String getEntity() { return (String) claims.get("entity"); }
+    public String getEntity() {
+        return (String) claims.get("entity");
+    }
 
-    public String getEntityType() { return (String) claims.get("entityType"); }
+    public String getEntityType() {
+        return (String) claims.get("entityType");
+    }
 
-    public Long getEntityId() { return (Long) claims.get("entityId"); }
+    public Long getEntityId() {
+        return (Long) claims.get("entityId");
+    }
 
-    public String getPermission() { return (String) claims.get("permission"); }
+    public String getPermission() {
+        return (String) claims.get("permission");
+    }
 
-    public String getHref() { return (String) claims.get("href"); }
+    public String getHref() {
+        return (String) claims.get("href");
+    }
 
-    public String getJson() { return (String) claims.get("json"); }
+    public String getJson() {
+        return (String) claims.get("json");
+    }
 
-    public MultipartFile getFile() { return (MultipartFile) claims.get("file"); }
+    public MultipartFile getFile() {
+        return (MultipartFile) claims.get("file");
+    }
 
 }

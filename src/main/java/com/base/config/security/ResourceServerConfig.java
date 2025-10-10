@@ -40,23 +40,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class ResourceServerConfig {
 
     private final JwtDecoder jwtDecoder;
-
     private final SessionRegistry sessionRegistry;
-
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-
     private final ClientRegistrationRepository clientRegistrationRepository;
-
     private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
-
     private final OAuth2UserServiceImpl oauth2UserService;
-
     private final OidcUserServiceImpl oidcUserService;
-
     private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
-
     private final CorsConfigurationSource corsConfigurationSource;
-
     private final AccessTokenResponseClient accessTokenResponseClient;
 
     @Autowired
@@ -85,50 +76,42 @@ public class ResourceServerConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/oauth2/**",
-                                                                "/api/v1/device/**",
-                                                                "/css/**",
-                                                                "/js/**",
-                                                                "/api/v1/login/**",
-                                                                "/api/v1/error/**",
-                                                                "/api/v1/public/**")
-                                               .permitAll()
-                                               .anyRequest()
-                                               .authenticated())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(form -> form.loginPage("/login")
-                                   .defaultSuccessUrl("/home",
-                                                      true)
-                                   .successHandler(authenticationSuccessHandler)
-                                   .permitAll())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)
-                                                                 .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter()))
-                                                  .authenticationEntryPoint(authenticationEntryPoint))
-            .oauth2Login(oauth2 -> oauth2.clientRegistrationRepository(clientRegistrationRepository)
-                                         .authorizedClientService(oauth2AuthorizedClientService)
-                                         .tokenEndpoint(tokenEndpointConfig -> tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient))
-                                         .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService)
-                                                                               .oidcUserService(oidcUserService))
-                                         .successHandler(authenticationSuccessHandler)
-                                         .loginPage("/login")
-                                         .permitAll()
-                                         .defaultSuccessUrl("/home",
-                                                            true)
-                                         .failureUrl("/login?error=true"))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                 .sessionFixation()
-                                                 .migrateSession()
-                                                 .maximumSessions(1)
-                                                 .maxSessionsPreventsLogin(true)
-                                                 .sessionRegistry(sessionRegistry))
-            .logout(logout -> logout.logoutUrl("/logout")
-                                    .deleteCookies("JSESSIONID",
-                                                   "SESSION")
-                                    .clearAuthentication(true)
-                                    .invalidateHttpSession(true))
-            .headers(header -> header.cacheControl(HeadersConfigurer.CacheControlConfig::disable));
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/oauth2/**", "/api/v1/device/**", "/css/**", "/js/**", "/api/v1/login/**", "/api/v1/error/**", "/api/v1/public/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)
+                        .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter()))
+                        .authenticationEntryPoint(authenticationEntryPoint))
+                .oauth2Login(oauth2 -> oauth2.clientRegistrationRepository(clientRegistrationRepository)
+                        .authorizedClientService(oauth2AuthorizedClientService)
+                        .tokenEndpoint(tokenEndpointConfig -> tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService)
+                                .oidcUserService(oidcUserService))
+                        .successHandler(authenticationSuccessHandler)
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/login?error=true"))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation()
+                        .migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true)
+                        .sessionRegistry(sessionRegistry))
+                .logout(logout -> logout.logoutUrl("/logout")
+                        .deleteCookies("JSESSIONID", "SESSION")
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true))
+                .headers(header -> header.cacheControl(HeadersConfigurer.CacheControlConfig::disable));
 
         return http.build();
     }

@@ -37,8 +37,7 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
     private final Map<String, Object> claims;
 
     public UserInfoData(Map<String, Object> claims) {
-        Assert.notEmpty(claims,
-                        "claims cannot be empty");
+        Assert.notEmpty(claims, "claims cannot be empty");
         this.claims = Collections.unmodifiableMap(new LinkedHashMap<>(claims));
     }
 
@@ -54,64 +53,52 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
         }
 
         public Builder id(Long id) {
-            return this.claim(UserConstants.ID,
-                              id);
+            return this.claim(UserConstants.ID, id);
         }
 
         public Builder username(String username) {
-            return this.claim(UserConstants.USERNAME,
-                              username);
+            return this.claim(UserConstants.USERNAME, username);
         }
 
         public Builder name(String name) {
-            return this.claim(UserConstants.NAME,
-                              name);
+            return this.claim(UserConstants.NAME, name);
         }
 
         public Builder email(String email) {
-            return this.claim(UserConstants.EMAIL,
-                              email);
+            return this.claim(UserConstants.EMAIL, email);
         }
 
         public Builder roles(Set<String> roles) {
-            return this.claim(UserConstants.ROLES,
-                              roles);
+            return this.claim(UserConstants.ROLES, roles);
         }
 
         public Builder authorities(Set<String> authorities) {
-            return this.claim(UserConstants.AUTHORITIES,
-                              authorities);
+            return this.claim(UserConstants.AUTHORITIES, authorities);
         }
 
         public Builder enabled(boolean enabled) {
-            return this.claim(UserConstants.ENABLED,
-                              enabled);
+            return this.claim(UserConstants.ENABLED, enabled);
         }
 
         public Builder authenticated(boolean authenticated) {
-            return this.claim(UserConstants.AUTHENTICATED,
-                              authenticated);
+            return this.claim(UserConstants.AUTHENTICATED, authenticated);
         }
 
         public Builder isAccountNonExpired(boolean isAccountNonExpired) {
-            return this.claim(UserConstants.IS_ACCOUNT_NON_EXPIRED,
-                              isAccountNonExpired);
+            return this.claim(UserConstants.IS_ACCOUNT_NON_EXPIRED, isAccountNonExpired);
         }
 
         public Builder isAccountNonLocked(boolean isAccountNonLocked) {
-            return this.claim(UserConstants.IS_ACCOUNT_NON_LOCKED,
-                              isAccountNonLocked);
+            return this.claim(UserConstants.IS_ACCOUNT_NON_LOCKED, isAccountNonLocked);
         }
 
         public Builder isCredentialsNonExpired(boolean isCredentialsNonExpired) {
-            return this.claim(UserConstants.IS_CREDENTIALS_NON_EXPIRED,
-                              isCredentialsNonExpired);
+            return this.claim(UserConstants.IS_CREDENTIALS_NON_EXPIRED, isCredentialsNonExpired);
         }
 
         public Builder claim(String name,
                              Object value) {
-            this.claims.put(name,
-                            value);
+            this.claims.put(name, value);
             return this;
         }
 
@@ -126,7 +113,9 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
 
     }
 
-    public Map<String, Object> getClaims() { return this.claims; }
+    public Map<String, Object> getClaims() {
+        return this.claims;
+    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -134,7 +123,7 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
         } else if (obj != null && this.getClass() == obj.getClass()) {
             UserInfoData that = (UserInfoData) obj;
             return this.getClaims()
-                       .equals(that.getClaims());
+                    .equals(that.getClaims());
         } else {
             return false;
         }
@@ -142,7 +131,7 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
 
     public int hashCode() {
         return this.getClaims()
-                   .hashCode();
+                .hashCode();
     }
 
 }
