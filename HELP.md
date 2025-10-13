@@ -462,3 +462,151 @@ redis-cli -h 127.0.0.1 -p 6379 -a yourpassword
 ping
 # PONG
 ```
+
+## SSH Key Setup Instructions
+
+### 1. Generate SSH Keys
+Generate separate SSH keys for GitHub and GitLab using the `ed25519` algorithm.
+
+```bash
+ssh-keygen -t ed25519 -C "username@example.com" -f ~/.ssh/id_ed25519_github
+ssh-keygen -t ed25519 -C "username@example.com" -f ~/.ssh/id_ed25519_gitlab
+```
+
+- **Options**:
+   - `-t ed25519`: Specifies the key type (Ed25519 for modern security).
+   - `-C "username@example.com"`: Adds a comment with your email for identification.
+   - `-f ~/.ssh/id_ed25519_github`: Specifies the file path for the GitHub key.
+   - `-f ~/.ssh/id_ed25519_gitlab`: Specifies the file path for the GitLab key.
+- When prompted, press Enter to use no passphrase, or set one for added security.
+
+### 2. Add SSH Keys to SSH Agent
+Start the SSH agent and add the private keys to it.
+
+```bash
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519_github
+ssh-add ~/.ssh/id_ed25519_gitlab
+```
+
+- **Explanation**:
+   - `eval "$(ssh-agent -s)"`: Starts the SSH agent in the background.
+   - `ssh-add`: Adds the private keys to the agent for authentication.
+
+### 3. Copy Public Keys to Clipboard
+Copy the public keys to your clipboard to add them to GitHub and GitLab.
+
+**Using `xclip` (Linux)**:
+```bash
+cat ~/.ssh/id_ed25519_github.pub | xclip -selection clipboard
+cat ~/.ssh/id_ed25519_gitlab.pub | xclip -selection clipboard
+```
+
+**Alternative (manual display)**:
+```bash
+cat ~/.ssh/id_ed25519_github.pub
+cat ~/.ssh/id_ed25519_gitlab.pub
+```
+
+- Copy the output and add it to:
+   - **GitHub**: Settings > SSH and GPG keys > New SSH key.
+   - **GitLab**: Settings > SSH Keys > Add SSH Key.
+
+### 4. Configure SSH for GitHub and GitLab
+Create or edit the SSH configuration file to specify which key to use for each service.
+
+```bash
+nano ~/.ssh/config
+```
+
+Add the following content to `~/.ssh/config`:
+
+```
+# GitHub
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_github
+
+# GitLab
+Host gitlab.com
+  HostName gitlab.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_gitlab
+```
+
+Set the correct permissions for the config file:
+
+```bash
+chmod 600 ~/.ssh/config
+```
+
+- **Explanation**:
+   - `Host`: Defines a shorthand name for the service.
+   - `HostName`: Specifies the actual hostname.
+   - `User git`: Uses the `git` user for SSH connections.
+   - `IdentityFile`: Points to the specific private key for each service.
+   - `chmod 600`: Ensures the config file is only readable/writable by the owner.
+
+### 5. Test SSH Connections
+Verify that the SSH keys work for GitHub and GitLab.
+
+```bash
+ssh -T git@github.com
+ssh -T git@gitlab.com
+```
+
+- **Expected Output**:
+   - GitHub: `Hi username! You've successfully authenticated...`
+   - GitLab: `Welcome to GitLab, @username!`
+
+### 6. Configure Git Remotes
+Set up the repository to push to both GitHub and GitLab.
+
+Check current remotes:
+```bash
+git remote -v
+```
+
+Add GitHub and GitLab as push URLs for the `origin` remote:
+```bash
+git remote set-url --add --push origin git@github.com:username/projectname.git
+git remote set-url --add --push origin git@gitlab.com:username/projectname.git
+```
+
+- **Explanation**:
+   - `git remote set-url --add --push`: Adds multiple push URLs to the `origin` remote.
+   - This allows pushing to both GitHub and GitLab with a single `git push`.
+
+### 7. Push to Both Repositories
+Push changes to both GitHub and GitLab.
+
+```bash
+git push origin master
+```
+
+Alternatively, push to GitLab explicitly:
+```bash
+git push gitlab master
+```
+
+- **Note**: Ensure the `master` branch exists. If your default branch is `main`, replace `main` with `master`.
+
+## Troubleshooting
+- **SSH Connection Issues**:
+   - Verify key permissions: `ls -l ~/.ssh/` (should be `600` for private keys, `644` for public keys).
+   - Check SSH agent: `ssh-add -l` to list loaded keys.
+   - Debug SSH: `ssh -vT git@github.com` or `ssh -vT git@gitlab.com`.
+
+- **Clipboard Issues**:
+   - If `xclip` is unavailable, manually copy the output of `cat ~/.ssh/id_ed25519_*.pub`.
+   - On macOS, use `pbcopy`: `cat ~/.ssh/id_ed25519_github.pub | pbcopy`.
+
+- **Git Push Errors**:
+   - Ensure the repository exists on both GitHub (`git@github.com:username/projectname.git`) and GitLab (`git@gitlab.com:username/projectname.git`).
+   - Verify branch name: `git branch` to confirm `main` or `master`.
+
+## Notes
+- Replace `yourgmail@gmail.com` with your actual email if different.
+- Ensure `username/projectname` repositories exist on both GitHub and GitLab.
+- For added security, consider using a passphrase for SSH keys and manage with `ssh-agent`.

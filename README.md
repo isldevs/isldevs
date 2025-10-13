@@ -22,6 +22,7 @@ Simplifies secure backend development with:
 1. Clone the repo:
    ```bash
    git clone https://github.com/isldevs/isldevs
+   git clone https://gitlab.com/isldevs/isldevs
    cd isldevs
    ```
 2. Install dependencies:
