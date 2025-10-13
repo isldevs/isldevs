@@ -527,17 +527,20 @@ Host github.com
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_ed25519_github
+  IdentitiesOnly yes
 
 # GitLab
 Host gitlab.com
   HostName gitlab.com
   User git
   IdentityFile ~/.ssh/id_ed25519_gitlab
+  IdentitiesOnly yes
 ```
 
 Set the correct permissions for the config file:
 
 ```bash
+sudo chown username:username ~/.ssh/config
 chmod 600 ~/.ssh/config
 ```
 
