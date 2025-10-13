@@ -392,6 +392,73 @@ WITH SCHEMA MAPPING
    >psql -h {IP} -u {DB_USERNAME} -d isldevs_db
 
 4. **Run migration**
-   ```
+
+```bash
    pgloader mysql_to_pg.load
-   ```
+ ```
+
+## Redis Setup Guide
+
+### Ubuntu
+
+```bash
+sudo apt update
+sudo apt install redis-server -y
+sudo systemctl enable redis
+sudo systemctl start redis
+sudo systemctl status redis
+
+```
+
+* Test Connection
+
+```bash
+redis-cli
+ping
+# PONG
+```
+
+* Set Password
+
+```bash
+sudo nano /etc/redis/redis.conf
+# Find and set:
+# requirepass yourpassword
+sudo systemctl restart redis
+```
+
+* Authenticate
+
+```bash
+redis-cli -a yourpassword
+```
+
+### Windows
+
+Redis doesn’t have an official Windows build.
+Use Docker or WSL2.
+
+* Option A: Docker
+
+```bash
+docker run --name redis-local -p 6379:6379 -d redis:7-alpine
+docker volume create redis-data
+docker run --name redis-local \
+  -p 6379:6379 \
+  -v redis-data:/data \
+  -d redis:7-alpine \
+  redis-server --appendonly yes
+```
+
+* Option B: WSL (Ubuntu)
+
+1. Install WSL2
+2. Open Ubuntu terminal
+3. Follow the Ubuntu steps above.
+4. Test Redis
+
+```bash
+redis-cli -h 127.0.0.1 -p 6379 -a yourpassword
+ping
+# PONG
+```
