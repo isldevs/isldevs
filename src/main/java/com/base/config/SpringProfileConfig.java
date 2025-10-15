@@ -15,10 +15,6 @@
  */
 package com.base.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -35,24 +31,13 @@ public class SpringProfileConfig implements EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         this.env = (ConfigurableEnvironment) environment;
-        loadEnvFile();
+        springProfile();
     }
 
-    private void loadEnvFile() {
-        var envFile = env.getProperty("spring.env.file");
+    private void springProfile() {
         var profile = env.getProperty("spring.profiles.active");
-        if (envFile != null) {
-            try {
-                var file = new File(envFile);
-                if (file.exists()) {
-                    var props = new Properties();
-                    props.load(new FileInputStream(file));
-                    props.forEach((key,
-                                   value) -> System.setProperty(key.toString(), value.toString()));
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load ." + profile + " file", e);
-            }
+        if (profile == null) {
+            throw new RuntimeException("No active profile found.");
         }
     }
 
