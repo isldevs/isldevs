@@ -613,3 +613,73 @@ git push gitlab master
 - Replace `yourgmail@gmail.com` with your actual email if different.
 - Ensure `username/projectname` repositories exist on both GitHub and GitLab.
 - For added security, consider using a passphrase for SSH keys and manage with `ssh-agent`.
+
+## Jenkins Setup Guide
+
+This guide provides comprehensive instructions to install and configure the **latest version** of **Jenkins**, the leading open-source automation server for CI/CD pipelines.
+
+## 🛠️ Installation Methods
+Method 1: Using Official Package Manager (Recommended)
+* **Linux**
+```bash
+sudo apt update
+sudo apt install fontconfig openjdk-21-jre
+java -version
+
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+sudo apt install jenkins
+```
+1. Go to edit Jenkins config file and append this
+```bash
+sudo systemctl edit jenkins
+
+### Editing /etc/systemd/system/jenkins.service.d/override.conf
+### Anything between here and the comment below will become the contents of the drop-in file
+[Service]
+Environment="JAVA_OPTS=-Djava.awt.headless=true \
+-Djava.net.preferIPv4Stack=true \
+-Djava.io.tmpdir=/var/cache/jenkins/tmp \
+-Dorg.apache.commons.jelly.tags.fmt.timeZone=Asia/Phnom_Penh \
+-Duser.timezone=Asia/Phnom_Penh"
+Environment="JENKINS_OPTS=--httpPort=9090 --httpListenAddress=0.0.0.0 --pluginroot=/var/cache/jenkins/plugins"
+
+```
+
+2. This command creates a temporary directory structure for Jenkins and sets proper file ownership
+```bash
+sudo mkdir /var/cache/jenkins/tmp
+sudo chown -R jenkins:jenkins /var/cache/jenkins/tmp
+sudo chmod -R 755 /var/cache/jenkins
+```
+
+3. Reload Daemon and verify service running properly
+```bash
+sudo systemctl daemon-reload
+systemd-analyze verify jenkins.service
+```
+4. Start service: change start -> stop or restart as you prefer
+```bash
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+```
+
+5. Log service and copy password from there
+```bash
+sudo journalctl -u jenkins
+
+#Oct 15 09:57:08 DESKTOP-QAHQPF3 jenkins[956]: [LF]> Jenkins initial setup is required. An admin user has been created and a password generated.
+#Oct 15 09:57:08 DESKTOP-QAHQPF3 jenkins[956]: [LF]> Please use the following password to proceed to installation:
+#Oct 15 09:57:08 DESKTOP-QAHQPF3 jenkins[956]: [LF]>
+#Oct 15 09:57:08 DESKTOP-QAHQPF3 jenkins[956]: [LF]> 74511ae8cf3c49df8977c554d082a4a5
+```
+
+6. Open browser hit: http://127.0.0.1/9090 and past Password to Unlock Jenkins and hit continue
+7. Install all plugins from suggestion default selected or customize as you want (Recommended as default)
+8. Create First Admin User and Hit continue
+9. Keep Instance Configuration Jenkins URL as default, and hit Save and Finish
+10. Boom! Congratulation you've successful config Jenkins!
