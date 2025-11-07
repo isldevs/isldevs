@@ -15,9 +15,12 @@
  */
 package com.base.core.data;
 
+import lombok.Getter;
+
 /**
  * @author YISivlay
  */
+@Getter
 public final class ErrorData {
 
     private final Integer status;
@@ -79,26 +82,6 @@ public final class ErrorData {
             return this;
         }
 
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Object[] getArgs() {
-        return args;
     }
 
 }

@@ -25,6 +25,9 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,6 +36,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 /**
  * @author YISivlay
  */
+@Setter
+@Getter
 @Entity
 @Table(name = "users")
 public class User extends CustomAbstractPersistable implements UserDetails, Serializable {
@@ -336,77 +341,4 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
     public int hashCode() {
         return Objects.hash(this.getId());
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void enabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void accountNonExpired(boolean accountNonExpired) {
-        this.accountNonExpired = accountNonExpired;
-    }
-
-    public void accountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
-    public void credentialsNonExpired(boolean credentialsNonExpired) {
-        this.credentialsNonExpired = credentialsNonExpired;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getProviderAvatarUrl() {
-        return providerAvatarUrl;
-    }
-
-    public void setProviderAvatarUrl(String providerAvatarUrl) {
-        this.providerAvatarUrl = providerAvatarUrl;
-    }
-
 }

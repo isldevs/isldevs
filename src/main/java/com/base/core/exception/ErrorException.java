@@ -15,11 +15,13 @@
  */
 package com.base.core.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
  * @author YISivlay
  */
+@Getter
 public class ErrorException extends RuntimeException {
 
     private final Object[] args;
@@ -51,18 +53,6 @@ public class ErrorException extends RuntimeException {
         this.status = status;
         this.args = args;
         this.description = description;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
 }

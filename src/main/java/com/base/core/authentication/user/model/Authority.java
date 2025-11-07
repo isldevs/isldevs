@@ -17,10 +17,14 @@ package com.base.core.authentication.user.model;
 
 import com.base.core.auditable.CustomAbstractPersistable;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author YISivlay
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "authorities")
 public class Authority extends CustomAbstractPersistable {
@@ -52,14 +56,6 @@ public class Authority extends CustomAbstractPersistable {
             return this;
         }
 
-    }
-
-    public String getAuthority() {
-        return authority;
-    }
-
-    public void setAuthority(String authority) {
-        this.authority = authority;
     }
 
 }

@@ -20,11 +20,16 @@ import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.user.model.Authority;
 import com.base.core.command.data.JsonCommand;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
 /**
  * @author YISivlay
  */
+@Setter
+@Getter
 @Entity
 @Table(name = "roles")
 public class Role extends CustomAbstractPersistable {
@@ -85,22 +90,6 @@ public class Role extends CustomAbstractPersistable {
         }
 
         return changes;
-    }
-
-    public Set<Authority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
 }
