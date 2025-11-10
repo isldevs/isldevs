@@ -43,6 +43,9 @@ public class TomcatSSLConfig {
     private static final String KEYSTORE_PASSWORD = "isldevs";
     private static final String KEY_ALIAS = "server";
     private static final String KEYSTORE_TYPE = "PKCS12";
+    private static final String TRUSTSTORE_PATH = "truststore.jks";
+    private static final String TRUSTSTORE_PASSWORD = "password";
+    private static final String TRUSTSTORE_TYPE = "JKS";
     private static final int HTTPS_PORT = 8443;
     private static final int HTTP_PORT = 8080;
     private static final String CONTEXT_PATH = "/api/v1";
@@ -65,13 +68,20 @@ public class TomcatSSLConfig {
                 sslHostConfig.setHonorCipherOrder(true);
 
                 var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
-                try (var is = getClass().getClassLoader()
-                        .getResourceAsStream(KEYSTORE_PATH)) {
-                    if (is == null) {
+                try (var ksis = getClass().getClassLoader()
+                        .getResourceAsStream(KEYSTORE_PATH); var tsIs = getClass().getClassLoader()
+                                .getResourceAsStream(TRUSTSTORE_PATH)) {
+                    if (ksis == null) {
                         throw new RuntimeException("Keystore not found at classpath path: " + KEYSTORE_PATH);
                     }
+                    if (tsIs == null) {
+                        throw new RuntimeException("Truststore not found at classpath path: " + TRUSTSTORE_PATH);
+                    }
                     var ks = KeyStore.getInstance(KEYSTORE_TYPE);
-                    ks.load(is, KEYSTORE_PASSWORD.toCharArray());
+                    ks.load(ksis, KEYSTORE_PASSWORD.toCharArray());
+
+                    KeyStore ts = KeyStore.getInstance(TRUSTSTORE_TYPE);
+                    ts.load(tsIs, TRUSTSTORE_PASSWORD.toCharArray());
 
                     certificate.setCertificateKeystore(ks);
                     certificate.setCertificateKeyAlias(KEY_ALIAS);
@@ -99,7 +109,7 @@ public class TomcatSSLConfig {
     public TomcatContextCustomizer tomcatContextCustomizer() {
         return context -> {
             StandardManager manager = new StandardManager();
-            manager.setPathname(null); // disables session persistence
+            manager.setPathname(null);
             context.setManager(manager);
         };
     }
