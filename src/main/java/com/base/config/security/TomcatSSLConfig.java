@@ -15,11 +15,6 @@
  */
 package com.base.config.security;
 
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.StandardManager;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -30,6 +25,12 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 /**
  * Configuration class for customizing Tomcat with SSL and HTTP connectors.
@@ -67,6 +68,15 @@ public class TomcatSSLConfig {
                 sslHostConfig.setCiphers("TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256");
                 sslHostConfig.setHonorCipherOrder(true);
 
+                var truststoreUrl = getClass().getClassLoader()
+                        .getResource(TRUSTSTORE_PATH);
+                if (truststoreUrl == null) {
+                    throw new RuntimeException("Truststore not found at classpath path: " + TRUSTSTORE_PATH);
+                }
+                sslHostConfig.setTruststoreFile(truststoreUrl.getPath());
+                sslHostConfig.setTruststorePassword(TRUSTSTORE_PASSWORD);
+                sslHostConfig.setTruststoreType(TRUSTSTORE_TYPE);
+
                 var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
                 try (var ksis = getClass().getClassLoader()
                         .getResourceAsStream(KEYSTORE_PATH); var tsIs = getClass().getClassLoader()
@@ -80,9 +90,6 @@ public class TomcatSSLConfig {
                     var ks = KeyStore.getInstance(KEYSTORE_TYPE);
                     ks.load(ksis, KEYSTORE_PASSWORD.toCharArray());
 
-                    KeyStore ts = KeyStore.getInstance(TRUSTSTORE_TYPE);
-                    ts.load(tsIs, TRUSTSTORE_PASSWORD.toCharArray());
-
                     certificate.setCertificateKeystore(ks);
                     certificate.setCertificateKeyAlias(KEY_ALIAS);
                     certificate.setCertificateKeystorePassword(KEYSTORE_PASSWORD);
@@ -94,6 +101,7 @@ public class TomcatSSLConfig {
                 sslHostConfig.addCertificate(certificate);
                 protocol.setSSLEnabled(true);
                 protocol.addSslHostConfig(sslHostConfig);
+
             });
             var httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
             httpConnector.setScheme("http");
