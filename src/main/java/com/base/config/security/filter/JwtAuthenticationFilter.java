@@ -22,7 +22,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,12 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationService authenticationService;
     private final CustomUserDetailsService userDetailsService;
+    private final MessageSource messageSource;
 
     @Autowired
     public JwtAuthenticationFilter(final AuthenticationService authenticationService,
-                                   final CustomUserDetailsService userDetailsService) {
+                                   final CustomUserDetailsService userDetailsService,
+                                   final MessageSource messageSource) {
         this.authenticationService = authenticationService;
         this.userDetailsService = userDetailsService;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -76,10 +83,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             clearCookies(response);
             noCacheHeaders(response);
+
+            Locale locale = LocaleContextHolder.getLocale();
+            String message = messageSource.getMessage("msg.unauthorized.description", null, e.getMessage(), locale);
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
             response.getWriter()
-                    .write("{\"error\":\"Unauthorized\",\"error_description\":\"" + e.getMessage() + "\"}");
+                    .write("{\"status\":\"" + HttpServletResponse.SC_UNAUTHORIZED + "\",\"description\":\"" + message + "\"}");
         }
     }
 
