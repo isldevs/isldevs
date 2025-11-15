@@ -16,12 +16,10 @@
 package com.base.config.security;
 
 import com.base.config.security.converter.CustomAuthenticationConverter;
-import com.base.config.security.converter.OAuth2PasswordAuthenticationConverter;
 import com.base.config.security.filter.HttpAuthenticationFilter;
 import com.base.config.security.filter.JwtAuthenticationFilter;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
-import com.base.config.security.provider.OAuth2PasswordAuthenticationProvider;
-import com.base.config.security.service.AuthenticationSuccessHandlerImpl;
+import com.base.config.security.service.FederatedIdentityAuthenticationSuccessHandler;
 import com.base.config.security.service.CustomTokenErrorResponseHandler;
 import com.base.config.security.service.UserInfoService;
 import java.util.Arrays;
@@ -30,16 +28,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientCredentialsAuthenticationProvider;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.authentication.*;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
@@ -62,8 +60,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class AuthorizationServerConfig {
 
     private final MessageSource messageSource;
-    private final AuthenticationProvider authenticationProvider;
     private final OAuth2AuthorizationService authorizationService;
+    private final OAuth2AuthorizationConsentService oAuth2AuthorizationConsentService;
     private final OAuth2TokenGenerator<?> tokenGenerator;
     private final RegisteredClientRepository registeredClientRepository;
     private final HttpAuthenticationFilter httpAuthenticationFilter;
@@ -71,12 +69,12 @@ public class AuthorizationServerConfig {
     private final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider;
     private final CorsConfigurationSource corsConfigurationSource;
     private final UserInfoService userInfoService;
-    private final AuthenticationSuccessHandlerImpl authenticationSuccessHandler;
+    private final FederatedIdentityAuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Autowired
     public AuthorizationServerConfig(final MessageSource messageSource,
-                                     final AuthenticationProvider authenticationProvider,
                                      final OAuth2AuthorizationService authorizationService,
+                                     final OAuth2AuthorizationConsentService oAuth2AuthorizationConsentService,
                                      final OAuth2TokenGenerator<?> tokenGenerator,
                                      final RegisteredClientRepository registeredClientRepository,
                                      final HttpAuthenticationFilter httpAuthenticationFilter,
@@ -84,10 +82,10 @@ public class AuthorizationServerConfig {
                                      final JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
                                      final CorsConfigurationSource corsConfigurationSource,
                                      final UserInfoService userInfoService,
-                                     final AuthenticationSuccessHandlerImpl authenticationSuccessHandler) {
+                                     final FederatedIdentityAuthenticationSuccessHandler authenticationSuccessHandler) {
         this.messageSource = messageSource;
-        this.authenticationProvider = authenticationProvider;
         this.authorizationService = authorizationService;
+        this.oAuth2AuthorizationConsentService = oAuth2AuthorizationConsentService;
         this.tokenGenerator = tokenGenerator;
         this.registeredClientRepository = registeredClientRepository;
         this.httpAuthenticationFilter = httpAuthenticationFilter;
@@ -99,7 +97,7 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    @Order(1)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = this.userInfoService::loadUser;
@@ -108,20 +106,23 @@ public class AuthorizationServerConfig {
                 .userInfoMapper(userInfoMapper)))
                 .clientAuthentication(Customizer.withDefaults())
                 .tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(new DelegatingAuthenticationConverter(Arrays
-                        .asList(new CustomAuthenticationConverter(), new OAuth2PasswordAuthenticationConverter(), new OAuth2RefreshTokenAuthenticationConverter(), new OAuth2AuthorizationCodeAuthenticationConverter(), new OAuth2ClientCredentialsAuthenticationConverter())))
+                        .asList(new CustomAuthenticationConverter(), new OAuth2RefreshTokenAuthenticationConverter(), new OAuth2AuthorizationCodeAuthenticationConverter(), new OAuth2ClientCredentialsAuthenticationConverter())))
                         .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
                         .authenticationProviders(providers -> {
                             providers.add(jwtBearerAuthenticationProvider);
-                            providers
-                                    .add(new OAuth2PasswordAuthenticationProvider(authenticationProvider, authorizationService, tokenGenerator, registeredClientRepository));
                             providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService, tokenGenerator));
                             providers.add(new OAuth2ClientCredentialsAuthenticationProvider(authorizationService, tokenGenerator));
+                            providers.add(new OAuth2AuthorizationCodeAuthenticationProvider(authorizationService, tokenGenerator));
+                            providers
+                                    .add(new OAuth2AuthorizationCodeRequestAuthenticationProvider(registeredClientRepository, authorizationService, oAuth2AuthorizationConsentService));
+                            providers
+                                    .add(new OAuth2AuthorizationConsentAuthenticationProvider(registeredClientRepository, authorizationService, oAuth2AuthorizationConsentService));
                         })));
 
         http.securityMatcher(configurer.getEndpointsMatcher())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/v1/oauth2/token", "/api/v1/oauth2/device_authorization", "/api/v1/oauth2/token/introspect", "/api/v1/oauth2/token/revoke"))
+                        .ignoringRequestMatchers("/api/v1/oauth2/token/**", "/api/v1/oauth2/device_authorization", "/api/v1/oauth2/device_verification", "/api/v1/oauth2/token/introspect", "/api/v1/oauth2/token/revoke"))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/oauth2/token", "/api/v1/oauth2/device_authorization", "/api/v1/oauth2/token/introspect", "/api/v1/oauth2/token/revoke", "/.well-known/oauth-authorization-server", "/.well-known/openid-configuration", "/jwks", "/api/v1/device/**", "/css/**", "/js/**", "/api/v1/login/**", "/api/v1/error/**", "/api/v1/public/**")
                         .permitAll()

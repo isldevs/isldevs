@@ -103,12 +103,14 @@ public class TomcatSSLConfig {
                 protocol.addSslHostConfig(sslHostConfig);
 
             });
+
+            factory.setContextPath(CONTEXT_PATH);
+
             var httpConnector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
             httpConnector.setScheme("http");
             httpConnector.setPort(HTTP_PORT);
             httpConnector.setSecure(false);
             httpConnector.setRedirectPort(HTTPS_PORT);
-            factory.setContextPath(CONTEXT_PATH);
             factory.addAdditionalTomcatConnectors(httpConnector);
         };
     }
@@ -121,5 +123,4 @@ public class TomcatSSLConfig {
             context.setManager(manager);
         };
     }
-
 }

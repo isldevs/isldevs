@@ -91,7 +91,7 @@ import org.springframework.web.servlet.view.JstlView;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.issuer-uri:http://localhost:8080}")
+    @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api/v1}")
     private String issuerUri;
 
     private final GlobalConfig config;
@@ -116,7 +116,6 @@ public class SecurityConfig {
                 .clientSecret(passwordEncoder().encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(new AuthorizationGrantType("password"))
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
@@ -132,12 +131,18 @@ public class SecurityConfig {
                 })
                 .clientSettings(ClientSettings.builder()
                         .requireProofKey(true)
-                        .requireAuthorizationConsent(false)
+                        .requireAuthorizationConsent(true)
                         .build())
                 .tokenSettings(TokenSettings.builder()
+                        // This format SELF_CONTAINED not work revoke token with access_token,
+                        // only work with refresh_token
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofMinutes(30))
                         .refreshTokenTimeToLive(Duration.ofDays(7))
+                        // Rotate refresh tokens on each use for better security:
+                        // - Old refresh tokens are invalidated after use
+                        // - Prevents replay attacks if a token is stolen
+                        // - Aligns with OAuth2 security best practices
                         .reuseRefreshTokens(false)
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
                         .build())

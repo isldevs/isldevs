@@ -19,7 +19,11 @@ import com.base.core.exception.ErrorException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
@@ -95,8 +99,17 @@ public class AccessTokenResponseClient implements OAuth2AccessTokenResponseClien
     private OAuth2AccessTokenResponse extractTokenResponse(String responseBody,
                                                            ClientRegistration clientRegistration) {
         try {
-            Map<String, Object> tokenResponseMap = objectMapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {
-            });
+            Map<String, Object> tokenResponseMap;
+            if (clientRegistration.getRegistrationId()
+                    .equals("github")) {
+                tokenResponseMap = Arrays.stream(responseBody.split("&"))
+                        .map(param -> param.split("=", 2))
+                        .filter(arr -> arr.length == 2)
+                        .collect(Collectors.toMap(arr -> arr[0], arr -> URLDecoder.decode(arr[1], StandardCharsets.UTF_8)));
+            } else {
+                tokenResponseMap = objectMapper.readValue(responseBody, new TypeReference<>() {
+                });
+            }
 
             String accessToken = (String) tokenResponseMap.get(OAuth2ParameterNames.ACCESS_TOKEN);
             String tokenType = (String) tokenResponseMap.get(OAuth2ParameterNames.TOKEN_TYPE);

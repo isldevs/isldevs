@@ -21,10 +21,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Locale;
+
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
@@ -47,18 +49,33 @@ public class CustomTokenErrorResponseHandler implements AuthenticationFailureHan
                                         AuthenticationException exception) throws IOException {
 
         Locale locale = request.getLocale();
+
+        String errorCode = "invalid_request";
         String message = messageSource.getMessage("msg.unauthorized.description", null, "Please login again.", locale);
 
+        if (exception instanceof OAuth2AuthenticationException ex) {
+            errorCode = ex.getError()
+                    .getErrorCode();
+            message = ex.getError()
+                    .getDescription() != null
+                            ? ex.getError()
+                                    .getDescription()
+                            : message;
+        } else if (exception instanceof BadCredentialsException) {
+            errorCode = "invalid_grant";
+            message = messageSource.getMessage("msg.invalid.credentials", null, "Invalid username or password.", locale);
+        }
+
         ErrorData errorData = ErrorData.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .status(HttpServletResponse.SC_BAD_REQUEST)
+                .error(errorCode)
                 .message(message)
+                .description(exception.getMessage())
                 .build();
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
         objectMapper.writeValue(response.getOutputStream(), errorData);
     }
-
 }
