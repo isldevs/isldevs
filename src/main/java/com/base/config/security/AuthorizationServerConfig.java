@@ -117,6 +117,7 @@ public class AuthorizationServerConfig {
                                     .add(new OAuth2AuthorizationCodeRequestAuthenticationProvider(registeredClientRepository, authorizationService, oAuth2AuthorizationConsentService));
                             providers
                                     .add(new OAuth2AuthorizationConsentAuthenticationProvider(registeredClientRepository, authorizationService, oAuth2AuthorizationConsentService));
+                            providers.add(tokenExchangeAuthenticationProvider());
                         })));
 
         http.securityMatcher(configurer.getEndpointsMatcher())
@@ -153,4 +154,8 @@ public class AuthorizationServerConfig {
         return http.build();
     }
 
+    @Bean
+    public OAuth2TokenExchangeAuthenticationProvider tokenExchangeAuthenticationProvider() {
+        return new OAuth2TokenExchangeAuthenticationProvider(authorizationService, tokenGenerator);
+    }
 }

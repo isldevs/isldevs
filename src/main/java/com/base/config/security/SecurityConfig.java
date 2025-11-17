@@ -150,6 +150,31 @@ public class SecurityConfig {
     }
 
     @Bean
+    public RegisteredClient tokenExchangeClient() {
+        return RegisteredClient.withId(UUID.randomUUID()
+                .toString())
+                .clientId("token-exchange")
+                .clientSecret(passwordEncoder().encode("secret"))
+                .clientName("Token Exchange")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.TOKEN_EXCHANGE)
+                .scopes(scopes -> {
+                    scopes.add("user.read");
+                    scopes.add("user.write");
+                    scopes.add("role.manage");
+                })
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                        .accessTokenTimeToLive(Duration.ofMinutes(30))
+                        .refreshTokenTimeToLive(Duration.ofHours(12))
+                        .build())
+                .clientSettings(ClientSettings.builder()
+                        .requireAuthorizationConsent(false)
+                        .build())
+                .build();
+    }
+
+    @Bean
     public RegisteredClient serviceM2MClient() {
         return RegisteredClient.withId(UUID.randomUUID()
                 .toString())
@@ -345,7 +370,7 @@ public class SecurityConfig {
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
         try {
-            Stream.of(webAppClient(), serviceM2MClient(), microserviceClient(), deviceClient())
+            Stream.of(webAppClient(), tokenExchangeClient(), serviceM2MClient(), microserviceClient(), deviceClient())
                     .forEach(client -> {
                         if (repository.findByClientId(client.getClientId()) == null) {
                             repository.save(client);

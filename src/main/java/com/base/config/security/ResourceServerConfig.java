@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -72,20 +71,6 @@ public class ResourceServerConfig {
     }
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain deviceCodeSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/v1/oauth2/device_verification")
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest()
-                        .permitAll())
-                .csrf(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder))
-                        .authenticationEntryPoint(authenticationEntryPoint));
-        return http.build();
-    }
-
-    @Bean
-    @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/oauth2/**", "/css/**", "/js/**", "/api/v1/login/**", "/login/oauth2/**", "/api/v1/error/**", "/api/v1/public/**")
