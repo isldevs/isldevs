@@ -24,7 +24,6 @@ import com.nimbusds.jose.proc.SecurityContext;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,19 +32,18 @@ import org.springframework.stereotype.Component;
 @Component(value = "customJWKSource")
 public class RSAKeyPairRepositoryJWKSource implements JWKSource<SecurityContext> {
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairService rsaKeyPairService;
 
-    @Autowired
-    public RSAKeyPairRepositoryJWKSource(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    public RSAKeyPairRepositoryJWKSource(RSAKeyPairService rsaKeyPairService) {
+        this.rsaKeyPairService = rsaKeyPairService;
     }
 
     @Override
     public List<JWK> get(JWKSelector jwkSelector,
                          SecurityContext securityContext) throws KeySourceException {
-        return rsaKeyPairRepository.findKeyPairs()
+        return rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
                 .map(keyPair -> {
                     var rsaKey = new RSAKey.Builder(keyPair.publicKey()).privateKey(keyPair.privateKey())
                             .keyID(keyPair.id())

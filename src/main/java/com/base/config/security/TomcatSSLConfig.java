@@ -31,6 +31,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.time.Clock;
 
 /**
  * Configuration class for customizing Tomcat with SSL and HTTP connectors.
@@ -122,5 +123,10 @@ public class TomcatSSLConfig {
             manager.setPathname(null);
             context.setManager(manager);
         };
+    }
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
     }
 }

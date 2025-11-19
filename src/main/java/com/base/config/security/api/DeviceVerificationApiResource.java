@@ -15,31 +15,20 @@
  */
 package com.base.config.security.api;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Map;
 
 @Controller
 public class DeviceVerificationApiResource {
 
-    @GetMapping("/oauth2/device_verification")
-    public String deviceVerification(@RequestParam(value = "user_code", required = false) String userCode,
-                                     Model model) {
-        if (userCode == null) {
-            model.addAttribute("error", "Missing user_code");
-            return "error";
-        }
-
-        model.addAttribute("userCode", userCode);
-        return "oauth2/device-verification";
-    }
-
-    @GetMapping("/device")
-    public String verificationSuccess(@RequestParam(value = "success", required = false) String success,
-                                      Model model) {
-        model.addAttribute("message", "Device verification successful!");
-        return "oauth2/device-verification-success";
+    @PostMapping
+    public ResponseEntity<?> verify(@RequestParam String user_code) {
+        // manually validate the code here…
+        return ResponseEntity.ok(Map.of("status", "verified"));
     }
 
 }

@@ -15,21 +15,22 @@
  */
 package com.base.config.security;
 
-import com.base.config.GlobalConfig;
+import com.base.config.security.converter.CustomAuthenticationConverter;
+import com.base.config.security.converter.CustomJwtAuthenticationConverter;
 import com.base.config.security.data.ClientAssertionJwtDecoderFactory;
-import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.base.config.security.filter.HttpAuthenticationFilter;
+import com.base.config.security.filter.JwtAuthenticationFilter;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import com.base.config.security.provider.JwtAuthenticationProvider;
 import com.base.config.security.provider.JwtBearerAuthenticationProvider;
-import com.base.config.security.service.JdbcClientRegistrationRepository;
+import com.base.config.security.service.*;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.Module;
-import java.time.Clock;
-import java.time.Duration;
 import java.util.*;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
+import java.util.function.Function;
+
 import org.hibernate.collection.spi.PersistentSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,44 +38,52 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.authentication.*;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2TokenExchangeAuthenticationConverter;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.cors.CorsConfiguration;
@@ -94,264 +103,255 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api/v1}")
     private String issuerUri;
 
-    private final GlobalConfig config;
     private final MessageSource messageSource;
     private final CustomUserDetailsService userDetailsService;
+    private final UserInfoService userInfoService;
+    private final JwtDecoder jwtDecoder;
+    private final JdbcTemplate jdbcTemplate;
+    private final AuthenticationService authenticationService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final OAuth2TokenGenerator<?> tokenGenerator;
+    private final RegisteredClientRepository registeredClientRepository;
+    private final CorsConfigurationSource corsConfigurationSource;
+    private final FederatedIdentityAuthenticationSuccessHandler authenticationSuccessHandler;
+    private final HttpAuthenticationFilter httpAuthenticationFilter;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    private final OAuth2UserServiceImpl oauth2UserService;
+    private final OidcUserServiceImpl oidcUserService;
 
     @Autowired
-    public SecurityConfig(final GlobalConfig config,
-                          final MessageSource messageSource,
-                          final CustomUserDetailsService userDetailsService) {
-        this.config = config;
+    public SecurityConfig(final MessageSource messageSource,
+                          final CustomUserDetailsService userDetailsService,
+                          final UserInfoService userInfoService,
+                          final JwtDecoder jwtDecoder,
+                          final JdbcTemplate jdbcTemplate,
+                          final AuthenticationService authenticationService,
+                          final CustomAuthenticationEntryPoint authenticationEntryPoint,
+                          final OAuth2TokenGenerator<?> tokenGenerator,
+                          final RegisteredClientRepository registeredClientRepository,
+                          final CorsConfigurationSource corsConfigurationSource,
+                          final FederatedIdentityAuthenticationSuccessHandler authenticationSuccessHandler,
+                          final HttpAuthenticationFilter httpAuthenticationFilter,
+                          final ClientRegistrationRepository clientRegistrationRepository,
+                          final OAuth2UserServiceImpl oauth2UserService,
+                          final OidcUserServiceImpl oidcUserService) {
         this.messageSource = messageSource;
         this.userDetailsService = userDetailsService;
+        this.userInfoService = userInfoService;
+        this.jwtDecoder = jwtDecoder;
+        this.jdbcTemplate = jdbcTemplate;
+        this.authenticationService = authenticationService;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.tokenGenerator = tokenGenerator;
+        this.registeredClientRepository = registeredClientRepository;
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.httpAuthenticationFilter = httpAuthenticationFilter;
+        this.clientRegistrationRepository = clientRegistrationRepository;
+        this.oauth2UserService = oauth2UserService;
+        this.oidcUserService = oidcUserService;
     }
 
+    /**
+     * Authorization Server filter chain.
+     * - Registers endpoints for token, authorize, jwks, device, PAR, revocation, introspection.
+     * - Adds custom token converters and authentication providers (refresh, code, client-credentials, jwt-bearer, token-exchange).
+     * - Adds your custom filters: HttpAuthenticationFilter (pre-token sanity checks) and JwtAuthenticationFilter.
+     *
+     * NOTE: Keep endpointsMatcher() usage — this chain should only match authorization server endpoints.
+     */
     @Bean
-    public RegisteredClient webAppClient() {
-        return RegisteredClient.withId(UUID.randomUUID()
-                .toString())
-                .clientName("Web && Mobile")
-                .clientId("web-app")
-                .clientSecret(passwordEncoder().encode("secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
-                .postLogoutRedirectUri("http://127.0.0.1:8080/")
-                .scopes(scopes -> {
-                    scopes.add(OidcScopes.OPENID);
-                    scopes.add(OidcScopes.EMAIL);
-                    scopes.add(OidcScopes.PROFILE);
-                    scopes.add(OidcScopes.PHONE);
-                    scopes.add(OidcScopes.ADDRESS);
-                    scopes.add("read");
-                    scopes.add("write");
-                })
-                .clientSettings(ClientSettings.builder()
-                        .requireProofKey(true)
-                        .requireAuthorizationConsent(true)
-                        .build())
-                .tokenSettings(TokenSettings.builder()
-                        // This format SELF_CONTAINED not work revoke token with access_token,
-                        // only work with refresh_token
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofMinutes(30))
-                        .refreshTokenTimeToLive(Duration.ofDays(7))
-                        // Rotate refresh tokens on each use for better security:
-                        // - Old refresh tokens are invalidated after use
-                        // - Prevents replay attacks if a token is stolen
-                        // - Aligns with OAuth2 security best practices
-                        .reuseRefreshTokens(false)
-                        .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
-                        .build())
-                .build();
+    @Order(1)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+
+        // map OIDC userinfo using your service
+        Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = this.userInfoService::loadUser;
+
+        var configurer = OAuth2AuthorizationServerConfigurer.authorizationServer();
+        http.with(configurer, (authorizationServer) -> authorizationServer.oidc((oidc) -> oidc.userInfoEndpoint((userInfo) -> userInfo
+                .userInfoMapper(userInfoMapper)))
+                .clientAuthentication(Customizer.withDefaults())
+                .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                        // Delegating converter: accept refresh, code, client_credentials, etc.
+                        .accessTokenRequestConverter(                                                   //
+                                new DelegatingAuthenticationConverter(                                  //
+                                        Arrays.asList(                                                  //
+                                                new CustomAuthenticationConverter(),                    //
+                                                new OAuth2RefreshTokenAuthenticationConverter(),        //
+                                                new OAuth2AuthorizationCodeAuthenticationConverter(),   //
+                                                new OAuth2ClientCredentialsAuthenticationConverter(),   //
+                                                new OAuth2TokenExchangeAuthenticationConverter()        //
+                                        )))
+                        .errorResponseHandler(new CustomTokenErrorResponseHandler(messageSource))
+                        .authenticationProviders(providers -> {
+                            providers.add(jwtBearerAuthenticationProvider());
+                            providers.add(new OAuth2RefreshTokenAuthenticationProvider(authorizationService(), tokenGenerator));
+                            providers.add(new OAuth2ClientCredentialsAuthenticationProvider(authorizationService(), tokenGenerator));
+                            providers.add(new OAuth2AuthorizationCodeAuthenticationProvider(authorizationService(), tokenGenerator));
+                            providers.add(//
+                                    new OAuth2AuthorizationCodeRequestAuthenticationProvider(   //
+                                            registeredClientRepository,                         //
+                                            authorizationService(),                             //
+                                            authorizationConsentService()                       //
+                            ));
+                            providers.add(                                                      //
+                                    new OAuth2AuthorizationConsentAuthenticationProvider(       //
+                                            registeredClientRepository,                         //
+                                            authorizationService(),                             //
+                                            authorizationConsentService()                       //
+                            ));
+                            // custom token exchange provider (implements RFC 8693) - see bean below
+                            providers.add(tokenExchangeAuthenticationProvider());
+                        })));
+
+        http.securityMatcher(configurer.getEndpointsMatcher())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(csrf -> csrf
+                        // token endpoints and device endpoints are excluded from CSRF protection.
+                        .ignoringRequestMatchers(                       //
+                                "/api/v1/oauth2/token",         // token endpoint
+                                "/api/v1/oauth2/device_authorization",  // device code request
+                                "/api/v1/oauth2/device_verification",   // device verification page
+                                "/api/v1/oauth2/token/introspect",      //
+                                "/api/v1/oauth2/token/revoke"           //
+                        ))
+                .authorizeHttpRequests(authorize -> authorize               //
+                        .requestMatchers(                                   //
+                                "/api/v1/oauth2/token",                   //
+                                "/api/v1/oauth2/device_authorization",    //
+                                "/api/v1/oauth2/token/introspect",        //
+                                "/api/v1/oauth2/token/revoke",            //
+                                "/.well-known/oauth-authorization-server",//
+                                "/.well-known/openid-configuration",      //
+                                "/jwks",                                  //
+                                "/api/v1/device/**",                      //
+                                "/css/**",                                //
+                                "/js/**",                                 //
+                                "/api/v1/login/**",                       //
+                                "/api/v1/error/**",                       //
+                                "/api/v1/public/**"                       //
+                        )
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                // We keep formLogin so browser-based flows still work for interactive OIDC/OAuth2 login
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll())
+                // Your custom pre-token request validations (tenant header, client_secret checks when present)
+                .addFilterBefore(httpAuthenticationFilter, BasicAuthenticationFilter.class)
+                // JWT authentication filter sets SecurityContext from Authorization header for resource endpoints
+                .addFilterAfter(jwtAuthenticationFilter(), HttpAuthenticationFilter.class)
+                .exceptionHandling((exception) -> exception.defaultAuthenticationEntryPointFor(//
+                        new LoginUrlAuthenticationEntryPoint("/login"),              //
+                        new MediaTypeRequestMatcher(MediaType.TEXT_HTML)                       //
+                ))
+                .headers(headers -> headers.xssProtection(Customizer.withDefaults())
+                        .cacheControl(Customizer.withDefaults())
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'; " + "script-src 'self'; " + "style-src 'self'; " + "img-src 'self' data:; " + "font-src 'self'; " + "connect-src 'self'; " + "form-action 'self'; " + "frame-ancestors 'none'; " + "block-all-mixed-content"))
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'"))
+                        .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
+                // If behind a proxy that sets X-Forwarded-Proto, redirectToHttps enforces https.
+                .redirectToHttps(redirectToHttp -> redirectToHttp.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null));
+
+        return http.build();
     }
 
+    /**
+     * Default resource server filter chain (web + API)
+     * - Permits auth endpoints and static resources
+     * - Enables form login and oauth2Login for interactive users
+     * - Enables jwt resource server for API endpoints
+     *
+     * IMPORTANT:
+     * - This chain is stateful for browser users (IF_REQUIRED).
+     * - Device verification uses above state-less chain so it won't redirect to /login.
+     */
     @Bean
-    public RegisteredClient tokenExchangeClient() {
-        return RegisteredClient.withId(UUID.randomUUID()
-                .toString())
-                .clientId("token-exchange")
-                .clientSecret(passwordEncoder().encode("secret"))
-                .clientName("Token Exchange")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.TOKEN_EXCHANGE)
-                .scopes(scopes -> {
-                    scopes.add("user.read");
-                    scopes.add("user.write");
-                    scopes.add("role.manage");
-                })
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofMinutes(30))
-                        .refreshTokenTimeToLive(Duration.ofHours(12))
-                        .build())
-                .clientSettings(ClientSettings.builder()
-                        .requireAuthorizationConsent(false)
-                        .build())
-                .build();
-    }
+    @Order(2)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth //
+                .requestMatchers( //
+                        "/api/v1/oauth2/**", //
+                        "/css/**",           //
+                        "/js/**",            //
+                        "/api/v1/login/**",  //
+                        "/login/oauth2/**",  //
+                        "/api/v1/error/**",  //
+                        "/api/v1/public/**") //
+                .permitAll()
+                .anyRequest()
+                .authenticated())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                // CSRF tokens stored in cookie for browser clients. Token endpoints that are not browser-based are excluded.
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers( //
+                                "/api/v1/oauth2/token",        //
+                                "/api/v1/oauth2/device_authorization", //
+                                "/api/v1/oauth2/device_verification",  //
+                                "/api/v1/oauth2/token/introspect",     //
+                                "/api/v1/oauth2/token/revoke"))        //
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(form -> form.loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .successHandler(authenticationSuccessHandler)
+                        .permitAll())
+                .oauth2Login(oauth2 -> oauth2.clientRegistrationRepository(clientRegistrationRepository)
+                        .authorizedClientService(authorizedClientService())
+                        .tokenEndpoint(tokenEndpointConfig -> tokenEndpointConfig.accessTokenResponseClient(accessTokenResponseClient()))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService)
+                                .oidcUserService(oidcUserService))
+                        .successHandler(authenticationSuccessHandler)
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/login?error=true"))
+                // JWT resource server for API calls
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)
+                        .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter()))
+                        .authenticationEntryPoint(authenticationEntryPoint))
+                // Session management: browser interactive users keep session. Device flows are handled by stateless chain above.
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation()
+                        .migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true))
+                .logout(logout -> logout.logoutUrl("/logout")
+                        .deleteCookies("JSESSIONID", "SESSION")
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true))
+                .headers(header -> header.cacheControl(HeadersConfigurer.CacheControlConfig::disable));
 
-    @Bean
-    public RegisteredClient serviceM2MClient() {
-        return RegisteredClient.withId(UUID.randomUUID()
-                .toString())
-                .clientName("Machine to Machine")
-                .clientId("m2m")
-                .clientSecret(passwordEncoder().encode("secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .scopes(scopes -> {
-                    scopes.add("api.internal");
-                    scopes.add("monitoring.read");
-                })
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofHours(1))
-                        .build())
-                .build();
-    }
-
-    @Bean
-    public RegisteredClient microserviceClient() {
-        return RegisteredClient.withId(UUID.randomUUID()
-                .toString())
-                .clientName("Microservice")
-                .clientId("microservice")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT)
-                .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-                .scope("api.write")
-                .clientSettings(ClientSettings.builder()
-                        .jwkSetUrl(issuerUri + "/oauth2/jwks")
-                        .build())
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofMinutes(15))
-                        .build())
-                .build();
-    }
-
-    @Bean
-    public RegisteredClient deviceClient() {
-        return RegisteredClient.withId(UUID.randomUUID()
-                .toString())
-                .clientName("IOT Device")
-                .clientId("iot-device")
-                .clientSecret(passwordEncoder().encode("secret"))
-                .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .scopes(scopes -> {
-                    scopes.add(OidcScopes.OPENID);
-                    scopes.add(OidcScopes.EMAIL);
-                    scopes.add(OidcScopes.PROFILE);
-                    scopes.add(OidcScopes.PHONE);
-                    scopes.add(OidcScopes.ADDRESS);
-                    scopes.add("device.manage");
-                })
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofDays(1))
-                        .refreshTokenTimeToLive(Duration.ofDays(30))
-                        .build())
-                .build();
-    }
-
-    @Bean
-    public ClientRegistration githubClientRegistration() {
-        if (config.getConfigValue("GITHUB_CLIENT_ID") != null && config.getConfigValue("GITHUB_CLIENT_SECRET") != null) {
-            return ClientRegistration.withRegistrationId("github")
-                    .clientId(config.getConfigValue("GITHUB_CLIENT_ID"))
-                    .clientSecret(config.getConfigValue("GITHUB_CLIENT_SECRET"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                    .scope("read:user", "user:email")
-                    .authorizationUri("https://github.com/login/oauth/authorize")
-                    .tokenUri("https://github.com/login/oauth/access_token")
-                    .userInfoUri("https://api.github.com/user")
-                    .userNameAttributeName("id")
-                    .clientName("GitHub")
-                    .build();
-        }
-        return null;
-    }
-
-    @Bean
-    public ClientRegistration googleClientRegistration() {
-        if (config.getConfigValue("GOOGLE_CLIENT_ID") != null && config.getConfigValue("GOOGLE_CLIENT_SECRET") != null) {
-            return ClientRegistration.withRegistrationId("google")
-                    .clientId(config.getConfigValue("GOOGLE_CLIENT_ID"))
-                    .clientSecret(config.getConfigValue("GOOGLE_CLIENT_SECRET"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                    .scope("openid", "profile", "email")
-                    .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-                    .tokenUri("https://oauth2.googleapis.com/token")
-                    .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-                    .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
-                    .userNameAttributeName(IdTokenClaimNames.SUB)
-                    .clientName("Google")
-                    .build();
-        }
-        return null;
-    }
-
-    @Bean
-    public ClientRegistration facebookClientRegistration() {
-        if (config.getConfigValue("FACEBOOK_CLIENT_ID") != null && config.getConfigValue("FACEBOOK_CLIENT_SECRET") != null) {
-            return ClientRegistration.withRegistrationId("facebook")
-                    .clientId(config.getConfigValue("FACEBOOK_CLIENT_ID"))
-                    .clientSecret(config.getConfigValue("FACEBOOK_CLIENT_SECRET"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-                    .scope("public_profile", "email")
-                    .authorizationUri("https://www.facebook.com/v23.0/dialog/oauth")
-                    .tokenUri("https://graph.facebook.com/v23.0/oauth/access_token")
-                    .userInfoUri("https://graph.facebook.com/me?fields=id,name,email,picture")
-                    .userNameAttributeName("id")
-                    .clientName("Facebook")
-                    .build();
-        }
-        return null;
-    }
-
-    @Bean
-    @Primary
-    public ClientRegistrationRepository clientRegistrationRepository(JdbcClientRegistrationRepository clientRegistrationRepository) {
-        if (clientRegistrationRepository.findByRegistrationId("github") == null) {
-            if (githubClientRegistration() != null) {
-                clientRegistrationRepository.save(githubClientRegistration());
-            }
-        }
-        if (clientRegistrationRepository.findByRegistrationId("google") == null) {
-            if (googleClientRegistration() != null) {
-                clientRegistrationRepository.save(googleClientRegistration());
-            }
-        }
-        if (clientRegistrationRepository.findByRegistrationId("facebook") == null) {
-            if (facebookClientRegistration() != null) {
-                clientRegistrationRepository.save(facebookClientRegistration());
-            }
-        }
-        return clientRegistrationRepository;
+        return http.build();
     }
 
     @Bean
     @Primary
-    public OAuth2AuthorizedClientService authorizedClientService(JdbcTemplate jdbcTemplate,
-                                                                 ClientRegistrationRepository clientRegistrationRepository) {
+    public OAuth2AuthorizedClientService authorizedClientService() {
         return new JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository);
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                .issuer(issuerUri)
-                .build();
+    public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider() {
+        return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService(), tokenGenerator);
     }
 
     @Bean
-    public JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider(JwtDecoder jwtDecoder,
-                                                                           RegisteredClientRepository registeredClientRepository,
-                                                                           OAuth2AuthorizationService authorizationService,
-                                                                           OAuth2TokenGenerator<?> tokenGenerator) {
-        return new JwtBearerAuthenticationProvider(jwtDecoder, registeredClientRepository, authorizationService, tokenGenerator);
+    public JwtAuthenticationProvider jwtAuthenticationProvider(RSAKeyPairService rsaKeyPairService) {
+        return new JwtAuthenticationProvider(registeredClientRepository, new ClientAssertionJwtDecoderFactory(rsaKeyPairService));
     }
 
     @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(RegisteredClientRepository registeredClientRepository,
-                                                               RSAKeyPairRepository rsaKeyPairRepository) {
-        return new JwtAuthenticationProvider(registeredClientRepository, new ClientAssertionJwtDecoderFactory(rsaKeyPairRepository));
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(JwtBearerAuthenticationProvider jwtBearerAuthenticationProvider,
-                                                       AuthenticationProvider authenticationProvider) {
-        return new ProviderManager(List.of(jwtBearerAuthenticationProvider, authenticationProvider));
+    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
+        return new ProviderManager(List.of(jwtBearerAuthenticationProvider(), authenticationProvider(passwordEncoder)));
     }
 
     @Bean
@@ -367,47 +367,38 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-        var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        try {
-            Stream.of(webAppClient(), tokenExchangeClient(), serviceM2MClient(), microserviceClient(), deviceClient())
-                    .forEach(client -> {
-                        if (repository.findByClientId(client.getClientId()) == null) {
-                            repository.save(client);
-                        }
-                    });
-        } catch (BadSqlGrammarException ignored) {
-        }
-
-        return repository;
-    }
-
-    @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations,
-                                                           RegisteredClientRepository registeredClientRepository) throws ClassNotFoundException {
+    public OAuth2AuthorizationService authorizationService() {
         ObjectMapper objectMapper = new ObjectMapper();
         ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
         List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
         objectMapper.registerModules(securityModules);
         objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-        objectMapper.addMixIn(Class.forName("com.base.core.authentication.user.model.User"), User.class);
-        objectMapper.addMixIn(Class.forName("org.hibernate.collection.spi.PersistentSet"), PersistentSet.class);
-        objectMapper.addMixIn(Class.forName("java.util.HashSet"), HashSet.class);
-        objectMapper.addMixIn(Class.forName("java.util.Collections$UnmodifiableSet"), Collections.class);
-        objectMapper.addMixIn(Class.forName("java.util.ImmutableCollections$ListN"), ImmutableCollections.class);
+        try {
+            objectMapper.addMixIn(Class.forName("com.base.core.authentication.user.model.User"), User.class);
+            objectMapper.addMixIn(Class.forName("org.hibernate.collection.spi.PersistentSet"), PersistentSet.class);
+            objectMapper.addMixIn(Class.forName("java.util.HashSet"), HashSet.class);
+            objectMapper.addMixIn(Class.forName("java.util.Collections$UnmodifiableSet"), Collections.class);
+            objectMapper.addMixIn(Class.forName("java.util.ImmutableCollections$ListN"), ImmutableCollections.class);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper = new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
         rowMapper.setObjectMapper(objectMapper);
-        JdbcOAuth2AuthorizationService authorizationService = new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
+        JdbcOAuth2AuthorizationService authorizationService = new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
         authorizationService.setAuthorizationRowMapper(rowMapper);
 
         return authorizationService;
     }
 
     @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcOperations jdbcOperations,
-                                                                         RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationConsentService(jdbcOperations, registeredClientRepository);
+    public OAuth2AuthorizedClientRepository authorizedClientRepository() {
+        return new AuthenticatedPrincipalOAuth2AuthorizedClientRepository(authorizedClientService());
+    }
+
+    @Bean
+    public OAuth2AuthorizationConsentService authorizationConsentService() {
+        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
     }
 
     @Bean
@@ -418,18 +409,45 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(authenticationService, userDetailsService, messageSource);
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+    public WebClient webClient() {
+        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServletOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationRepository, authorizedClientRepository());
+        return WebClient.builder()
+                .filter(oauth2)
+                .build();
     }
 
     @Bean
-    public Clock clock() {
-        return Clock.systemUTC();
+    public AccessTokenResponseClient accessTokenResponseClient() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return new AccessTokenResponseClient(webClient(), objectMapper);
+    }
+
+    /**
+     * Token exchange provider bean.
+     * - Implements RFC 8693 (Token Exchange).
+     * - Accepts subject_token + subject_token_type and issues a new token per token exchange rules.
+     *
+     * TODO: implement policy checks (what scopes can be granted, audience mapping, impersonation rules).
+     */
+    @Bean
+    public OAuth2TokenExchangeAuthenticationProvider tokenExchangeAuthenticationProvider() {
+        return new OAuth2TokenExchangeAuthenticationProvider(authorizationService(), tokenGenerator);
+    }
+
+    /**
+     * Authorization server settings (issuer)
+     * Keep issuer consistent with SecurityConfig.
+     */
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder()
+                .issuer(issuerUri)
+                .build();
     }
 
     @Bean
@@ -440,15 +458,6 @@ public class SecurityConfig {
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
-    }
-
-    @Bean
-    public WebClient rest(ClientRegistrationRepository clients,
-                          OAuth2AuthorizedClientRepository auth) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServletOAuth2AuthorizedClientExchangeFilterFunction(clients, auth);
-        return WebClient.builder()
-                .filter(oauth2)
-                .build();
     }
 
     @Bean

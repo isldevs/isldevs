@@ -30,20 +30,20 @@ import org.springframework.stereotype.Component;
  * @author YISivlay
  */
 @Component
-public class KeyIdTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
+public class TokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairService rsaKeyPairService;
 
     @Autowired
-    public KeyIdTokenCustomizer(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    public TokenCustomizer(RSAKeyPairService rsaKeyPairService) {
+        this.rsaKeyPairService = rsaKeyPairService;
     }
 
     @Override
     public void customize(JwtEncodingContext context) {
-        rsaKeyPairRepository.findKeyPairs()
+        rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
                 .ifPresent(keyPair -> context.getJwsHeader()
                         .keyId(keyPair.id()));
 

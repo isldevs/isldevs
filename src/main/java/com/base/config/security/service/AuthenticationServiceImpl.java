@@ -15,7 +15,7 @@
  */
 package com.base.config.security.service;
 
-import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -42,13 +42,13 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
     private static final long EXPIRATION = 1000 * 60 * 15;
 
     private final Clock clock;
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairService rsaKeyPairService;
 
     @Autowired
     public AuthenticationServiceImpl(final Clock clock,
-                                     final RSAKeyPairRepository rsaKeyPairRepository) {
+                                     final RSAKeyPairService rsaKeyPairService) {
         this.clock = clock;
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+        this.rsaKeyPairService = rsaKeyPairService;
     }
 
     @Override
@@ -83,10 +83,10 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs()
+        RSAPrivateKey privateKey = rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
+                .map(RSAKeyPairService.RSAKeyPair::privateKey)
                 .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
         return Jwts.builder()
@@ -120,10 +120,10 @@ public final class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public Claims extractAllClaims(String token) {
         try {
-            RSAPublicKey publicKey = rsaKeyPairRepository.findKeyPairs()
+            RSAPublicKey publicKey = rsaKeyPairService.findKeyPairs()
                     .stream()
-                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                    .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                    .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
+                    .map(RSAKeyPairService.RSAKeyPair::publicKey)
                     .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
             return Jwts.parser()

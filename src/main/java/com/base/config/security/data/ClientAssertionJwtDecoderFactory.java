@@ -15,7 +15,7 @@
  */
 package com.base.config.security.data;
 
-import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import java.util.Comparator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -27,19 +27,19 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
  */
 public class ClientAssertionJwtDecoderFactory implements JwtDecoderFactory<ClientAuthenticationToken> {
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairService rsaKeyPairService;
 
-    public ClientAssertionJwtDecoderFactory(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    public ClientAssertionJwtDecoderFactory(RSAKeyPairService rsaKeyPairService) {
+        this.rsaKeyPairService = rsaKeyPairService;
     }
 
     @Override
     public JwtDecoder createDecoder(ClientAuthenticationToken context) {
 
-        var key = rsaKeyPairRepository.findKeyPairs()
+        var key = rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::publicKey)
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
+                .map(RSAKeyPairService.RSAKeyPair::publicKey)
                 .orElseThrow(() -> new OAuth2AuthenticationException("No key found"));
 
         return NimbusJwtDecoder.withPublicKey(key)

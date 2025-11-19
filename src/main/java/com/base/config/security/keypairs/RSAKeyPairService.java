@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author YISivlay
  */
-public interface RSAKeyPairRepository {
+public interface RSAKeyPairService {
 
     List<RSAKeyPair> findKeyPairs();
 

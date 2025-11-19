@@ -15,7 +15,7 @@
  */
 package com.base.config.security.service;
 
-import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -41,24 +41,24 @@ public class JwtAssertionGeneratorService {
 
     private final Logger logger = LoggerFactory.getLogger(JwtAssertionGeneratorService.class);
 
-    private final RSAKeyPairRepository rsaKeyPairRepository;
+    private final RSAKeyPairService rsaKeyPairService;
 
     @Autowired
-    public JwtAssertionGeneratorService(RSAKeyPairRepository rsaKeyPairRepository) {
-        this.rsaKeyPairRepository = rsaKeyPairRepository;
+    public JwtAssertionGeneratorService(RSAKeyPairService rsaKeyPairService) {
+        this.rsaKeyPairService = rsaKeyPairService;
     }
 
     public String generateClientAssertion() throws JOSEException {
 
-        RSAPrivateKey privateKey = rsaKeyPairRepository.findKeyPairs()
+        RSAPrivateKey privateKey = rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
-                .map(RSAKeyPairRepository.RSAKeyPair::privateKey)
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
+                .map(RSAKeyPairService.RSAKeyPair::privateKey)
                 .orElseThrow(() -> new IllegalStateException("No RSA key pair found in the repository"));
 
-        var latestKey = rsaKeyPairRepository.findKeyPairs()
+        var latestKey = rsaKeyPairService.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created))
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created))
                 .orElseThrow(() -> {
                     logger.error("No RSA key pair found in repository");
                     return new IllegalStateException("No RSA key pair available for signing");

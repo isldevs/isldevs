@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Device Verification</title>
+</head>
+<body>
+<h2>Enter your device code</h2>
+
+<form method="post" action="/api/v1/oauth2/device_verification">
+    <label>Device Code:</label>
+    <input name="user_code" type="text" value="${user_code}">
+    <button type="submit">Verify</button>
+</form>
+
+</body>
+</html>

@@ -39,14 +39,14 @@ public class CustomTokenErrorResponseHandler implements AuthenticationFailureHan
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final MessageSource messageSource;
 
-    public CustomTokenErrorResponseHandler(MessageSource messageSource) {
+    public CustomTokenErrorResponseHandler(final MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException {
+    public void onAuthenticationFailure(final HttpServletRequest request,
+                                        final HttpServletResponse response,
+                                        final AuthenticationException exception) throws IOException {
 
         Locale locale = request.getLocale();
 

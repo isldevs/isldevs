@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.base.config.security.keypairs;
+package com.base.config.security;
 
 import com.base.config.GlobalConfig;
+import com.base.config.security.keypairs.Keys;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import java.sql.Timestamp;
@@ -30,6 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
@@ -39,41 +43,45 @@ import org.springframework.security.oauth2.server.authorization.token.*;
  * @author YISivlay
  */
 @Configuration
-public class KeyConfiguration {
+public class KeyConfig {
 
-    private final Logger logger = LoggerFactory.getLogger(KeyConfiguration.class);
-
+    private final Logger logger = LoggerFactory.getLogger(KeyConfig.class);
     private final GlobalConfig config;
 
     @Autowired
-    public KeyConfiguration(final GlobalConfig config) {
+    public KeyConfig(final GlobalConfig config) {
         this.config = config;
     }
 
     @Bean
-    TextEncryptor textEncryptor() {
+    public TextEncryptor textEncryptor() {
         return Encryptors.text(config.getJwtPassword(), config.getJwtSalt());
     }
 
     @Bean
-    NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> customJWKSource) {
+    public NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> customJWKSource) {
         return new NimbusJwtEncoder(customJWKSource);
     }
 
     @Bean
-    OAuth2TokenGenerator<OAuth2Token> tokenGenerator(JwtEncoder encoder,
-                                                     OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public OAuth2TokenGenerator<OAuth2Token> tokenGenerator(JwtEncoder encoder,
+                                                            OAuth2TokenCustomizer<JwtEncodingContext> customTokenCustomizer) {
         var generator = new JwtGenerator(encoder);
         generator.setJwtCustomizer(customTokenCustomizer);
         return new DelegatingOAuth2TokenGenerator(generator, new OAuth2AccessTokenGenerator(), new OAuth2RefreshTokenGenerator());
     }
 
     @Bean
-    ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairRepository repository) {
+    public ApplicationListener<ApplicationReadyEvent> rsaKeyRotationAutomatic(RSAKeyPairService repository) {
         return _ -> {
             var existingKey = repository.findKeyPairs()
                     .stream()
-                    .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+                    .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created));
 
             if (existingKey.isEmpty()) {
                 var keys = new Keys();

@@ -30,19 +30,19 @@ import org.springframework.util.Assert;
  * @author YISivlay
  */
 @Component
-public class JdbcRSAKeyPairRepository implements RSAKeyPairRepository {
+public class JdbcRSAKeyPairService implements RSAKeyPairService {
 
-    private final JdbcTemplate jdbc;
+    private final JdbcTemplate jdbcTemplate;
     private final RSAPublicKeyConverter rsaPublicKeyConverter;
     private final RSAPrivateKeyConverter rsaPrivateKeyConverter;
     private final RowMapper<RSAKeyPair> keyPairRowMapper;
 
     @Autowired
-    public JdbcRSAKeyPairRepository(final JdbcTemplate jdbc,
-                                    final RSAPublicKeyConverter rsaPublicKeyConverter,
-                                    final RSAPrivateKeyConverter rsaPrivateKeyConverter,
-                                    final RowMapper<RSAKeyPair> keyPairRowMapper) {
-        this.jdbc = jdbc;
+    public JdbcRSAKeyPairService(final JdbcTemplate jdbcTemplate,
+                                 final RSAPublicKeyConverter rsaPublicKeyConverter,
+                                 final RSAPrivateKeyConverter rsaPrivateKeyConverter,
+                                 final RowMapper<RSAKeyPair> keyPairRowMapper) {
+        this.jdbcTemplate = jdbcTemplate;
         this.rsaPublicKeyConverter = rsaPublicKeyConverter;
         this.rsaPrivateKeyConverter = rsaPrivateKeyConverter;
         this.keyPairRowMapper = keyPairRowMapper;
@@ -50,7 +50,7 @@ public class JdbcRSAKeyPairRepository implements RSAKeyPairRepository {
 
     @Override
     public List<RSAKeyPair> findKeyPairs() {
-        return this.jdbc.query("SELECT * FROM rsa_key_pairs ORDER BY created DESC", this.keyPairRowMapper);
+        return this.jdbcTemplate.query("SELECT * FROM rsa_key_pairs ORDER BY created DESC", this.keyPairRowMapper);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class JdbcRSAKeyPairRepository implements RSAKeyPairRepository {
         try (var privateBAOS = new ByteArrayOutputStream(); var publicBAOS = new ByteArrayOutputStream()) {
             this.rsaPrivateKeyConverter.serialize(keyPair.privateKey(), privateBAOS);
             this.rsaPublicKeyConverter.serialize(keyPair.publicKey(), publicBAOS);
-            var updated = this.jdbc.update(sql, keyPair.id(), privateBAOS.toString(StandardCharsets.UTF_8), publicBAOS
+            var updated = this.jdbcTemplate.update(sql, keyPair.id(), privateBAOS.toString(StandardCharsets.UTF_8), publicBAOS
                     .toString(StandardCharsets.UTF_8), new Date(keyPair.created()
                             .getTime()));
             Assert.state(updated == 0 || updated == 1, "no more than one record should have been updated");

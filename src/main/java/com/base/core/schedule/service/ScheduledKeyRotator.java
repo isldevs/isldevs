@@ -16,12 +16,13 @@
 package com.base.core.schedule.service;
 
 import com.base.config.security.keypairs.Keys;
-import com.base.config.security.keypairs.RSAKeyPairRepository;
+import com.base.config.security.keypairs.RSAKeyPairService;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,11 @@ public class ScheduledKeyRotator implements Runnable {
 
     private final Logger logger = LoggerFactory.getLogger(ScheduledKeyRotator.class);
 
-    private final RSAKeyPairRepository repository;
+    private final RSAKeyPairService repository;
     private final Keys keys;
 
     @Autowired
-    public ScheduledKeyRotator(RSAKeyPairRepository repository,
+    public ScheduledKeyRotator(RSAKeyPairService repository,
                                Keys keys) {
         this.repository = repository;
         this.keys = keys;
@@ -65,7 +66,7 @@ public class ScheduledKeyRotator implements Runnable {
     private void performScheduledRotation() {
         var existingKey = repository.findKeyPairs()
                 .stream()
-                .max(Comparator.comparing(RSAKeyPairRepository.RSAKeyPair::created));
+                .max(Comparator.comparing(RSAKeyPairService.RSAKeyPair::created));
         var shouldRotate = existingKey.isEmpty() || existingKey.get()
                 .created()
                 .toInstant()

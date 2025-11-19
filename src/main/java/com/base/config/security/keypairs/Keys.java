@@ -28,12 +28,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class Keys {
 
-    public RSAKeyPairRepository.RSAKeyPair generateKeyPair(String keyId,
-                                                           Timestamp created) {
+    public RSAKeyPairService.RSAKeyPair generateKeyPair(String keyId,
+                                                        Timestamp created) {
         var keyPair = generateRsaKey();
         var publicKey = (RSAPublicKey) keyPair.getPublic();
         var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        return new RSAKeyPairRepository.RSAKeyPair(keyId, created, publicKey, privateKey);
+        return new RSAKeyPairService.RSAKeyPair(keyId, created, publicKey, privateKey);
     }
 
     private KeyPair generateRsaKey() {
