@@ -13,7 +13,7 @@ Simplifies secure backend development with:
 ## Requirements
 
 - Java 25 (Gradle toolchain)
-- Spring Boot 3.5.6, Spring Authorization Server 1.5.2
+- Spring Boot 3.5.8, Spring Authorization Server 1.5.2
 - PostgreSQL (dev) or MySQL
 - Gradle (Wrapper included)
 - Optional: GraalVM for native builds

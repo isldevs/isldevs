@@ -19,7 +19,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import javax.sql.DataSource;
-import org.flywaydb.core.Flyway;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
@@ -136,19 +136,6 @@ public class DatasourceConfig {
         properties.setProperty("hibernate.show_sql", showSql);
         properties.setProperty("hibernate.format_sql", formatSql);
         return properties;
-    }
-
-    @Bean
-    public Flyway flyway(DataSource dataSource) {
-
-        var flyway = Flyway.configure()
-                .dataSource(dataSource)
-                .locations("classpath:db/migration")
-                .baselineVersion("1")
-                .baselineOnMigrate(true)
-                .load();
-        flyway.migrate();
-        return flyway;
     }
 
     @Bean

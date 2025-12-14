@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.spring.webflux)
     implementation(libs.spring.integration.core)
     implementation(libs.flyway.core)
+    implementation(libs.flyway.database.postgresql)
     implementation(libs.bundles.mapping)
     implementation(libs.dotenv.java)
     implementation(libs.commons.lang3)

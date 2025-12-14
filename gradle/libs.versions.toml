@@ -1,22 +1,21 @@
 [versions]
-spring-boot = "3.5.6"
-spring-security = "6.5.5"
+spring-boot = "3.5.8"
+spring-security = "6.5.7"
 oauth2-authorization-server = "1.5.2"
-spring-integration-core = "6.5.2"
+spring-integration-core = "6.5.4"
 webflux = "6.2.11"
 dependency-management = "1.1.7"
 graalvm-native = "0.11.1"
-flyway = "9.22.3"
+flyway-core = "11.19.0"
 versions = "0.53.0"
 spotless = "8.0.0"
 postgresql = "42.7.5"
-flyway-core = "9.22.3"
 jackson-databind = "2.20.0"
 dotenv-java = "3.2.0"
 commons-lang3 = "3.19.0"
 gson = "2.13.2"
 mapstruct = "1.6.3"
-caffeine = "3.2.2"
+caffeine = "3.2.3"
 nimbus-jose-jwt = "10.5"
 jjwt = "0.13.0"
 lombok = "1.18.42"
@@ -43,6 +42,7 @@ spring-security-oauth2-authorization-server = { module = "org.springframework.se
 spring-integration-core = { module = "org.springframework.integration:spring-integration-core", version.ref = "spring-integration-core" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-core" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway-core"}
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql"}
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 dotenv-java = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv-java" }
@@ -73,7 +73,7 @@ netty-transport-native-unix-common = { module = "io.netty:netty-transport-native
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dependency-management = { id = "io.spring.dependency-management", version.ref = "dependency-management" }
 graalvm-native = { id = "org.graalvm.buildtools.native", version.ref = "graalvm-native" }
-flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
+flyway = { id = "org.flywaydb.flyway", version.ref = "flyway-core" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
