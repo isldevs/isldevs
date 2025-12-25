@@ -41,7 +41,7 @@ public class JsonConfig {
             module.addSerializer(new PageableJsonSerializer());
             builder.modules(module);
 
-            builder.propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
+            builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
             builder.serializationInclusion(JsonInclude.Include.NON_NULL);
             builder.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
             builder.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
