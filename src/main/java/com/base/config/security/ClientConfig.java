@@ -32,7 +32,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -80,14 +79,12 @@ public class ClientConfig {
                 .toString())
                 .clientName("Web && Mobile")
                 .clientId("web-app")
-                // Keep secret for server-based flows.
-                // If you want a pure PKCE public client,
-                // remove clientSecret and set ClientAuthenticationMethod.NONE.
-                .clientSecret(passwordEncoder.encode("secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // PUBLIC CLIENT
+                // Browser/Mobile apps never store secrets
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                // USER-BASED FLOW ONLY
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
                 .postLogoutRedirectUri("http://127.0.0.1:8080/")
                 .scopes(scopes -> {
@@ -97,7 +94,7 @@ public class ClientConfig {
                     scopes.add(OidcScopes.PHONE);
                     scopes.add(OidcScopes.ADDRESS);
                     scopes.add("read");
-                    scopes.add("write");
+                    scopes.add("offline_access");
                 })
                 .clientSettings(ClientSettings.builder()
                         // requireProofKey(true) is recommended for public/browser clients using PKCE.
@@ -108,11 +105,47 @@ public class ClientConfig {
                         // This format SELF_CONTAINED not work revoke token with access_token,
                         // only work with refresh_token
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofMinutes(30))
-                        .refreshTokenTimeToLive(Duration.ofDays(7))
+                        .accessTokenTimeToLive(Duration.ofMinutes(15))
+                        .refreshTokenTimeToLive(Duration.ofDays(30))
                         // reuseRefreshTokens(false) -> rotate refresh tokens. Recommended for security.
                         .reuseRefreshTokens(false)
-                        .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                        .build())
+                .build();
+    }
+
+    /**
+     * API Development / Internal Testing Client
+     * Purpose:
+     * - Used by developers to test protected APIs directly from tools like Postman or curl
+     * without going through a browser login or OAuth2 authorization UI.
+     *
+     * Security Model:
+     * - Permissions are granted via scopes/authorities assigned to the client
+     * (e.g. api.development, FULL_ACCESS)
+     * - Authorities must be mapped from scopes for method-level security
+     *
+     * What this client MUST NOT be used for:
+     * - End-user authentication
+     * - Web or mobile applications
+     * - Acting on behalf of a specific user
+     */
+    @Bean
+    public RegisteredClient apiDevelopmentClient() {
+        return RegisteredClient.withId(UUID.randomUUID()
+                .toString())
+                .clientId("api-development")
+                .clientName("API Development")
+                .clientSecret(passwordEncoder.encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                // MACHINE-ONLY FLOW
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scopes(scopes -> {
+                    scopes.add("api.development");
+                    scopes.add("FULL_ACCESS");
+                })
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                        .accessTokenTimeToLive(Duration.ofMinutes(10))
                         .build())
                 .build();
     }
@@ -285,7 +318,7 @@ public class ClientConfig {
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         var repository = new JdbcRegisteredClientRepository(jdbcTemplate);
         try {
-            Stream.of(webAppClient(), tokenExchangeClient(), serviceM2MClient(), microserviceClient(), deviceClient())
+            Stream.of(webAppClient(), apiDevelopmentClient(), tokenExchangeClient(), serviceM2MClient(), microserviceClient(), deviceClient())
                     .forEach(client -> {
                         if (repository.findByClientId(client.getClientId()) == null) {
                             repository.save(client);

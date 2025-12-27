@@ -32,7 +32,7 @@ apply from: 'gradle/dependencies.gradle'
 
 configurations.configureEach {
     resolutionStrategy {
-        force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
+        //force 'org.apache.tomcat.embed:tomcat-embed-core:10.1.39'
         cacheChangingModulesFor 10, 'minutes'
         cacheDynamicVersionsFor 10, 'minutes'
 
@@ -186,12 +186,11 @@ tasks.named("bootJar") {
     archiveBaseName = "isldevs"
     archiveClassifier = "standalone"
 }
-tasks.named("war") {
+tasks.named("bootWar") {
     archiveBaseName = "isldevs"
     archiveClassifier = "deploy"
 }
-tasks.named("bootWar") { enabled = false }
-tasks.named("jar") { enabled = false }
+tasks.named('assemble') { dependsOn war }
 
 abstract class GenerateTestClasses extends DefaultTask {
     @InputDirectory
@@ -312,4 +311,3 @@ tasks.named('test', Test) {
 }
 
 tasks.named('build') { dependsOn 'test', 'spotlessCheck', 'generateTestClasses' }
-tasks.named('assemble') { dependsOn war, bootJar }

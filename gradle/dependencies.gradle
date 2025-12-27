@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.bundles.netty)
 
     developmentOnly(libs.spring.boot.devtools)
+    providedRuntime(libs.spring.boot.starter.tomcat)
     runtimeOnly(libs.postgresql)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
