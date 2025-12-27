@@ -72,6 +72,7 @@ public class JwtAssertionGeneratorService {
                         .toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plusSeconds(300)))
+                .claim("scope", "write")
                 .build();
 
         var header = new JWSHeader.Builder(JWSAlgorithm.RS256).type(JOSEObjectType.JWT)

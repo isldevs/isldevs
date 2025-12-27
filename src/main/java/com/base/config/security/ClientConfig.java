@@ -80,9 +80,11 @@ public class ClientConfig {
                 .clientName("Web && Mobile")
                 .clientId("web-app")
                 // PUBLIC CLIENT
-                // Browser/Mobile apps never store secrets
-                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                // USER-BASED FLOW ONLY
+                // Browser / Mobile apps never store secrets
+                // If you want a pure PKCE public client,
+                // remove clientSecret and set ClientAuthenticationMethod.NONE.
+                .clientSecret(passwordEncoder.encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
@@ -94,7 +96,6 @@ public class ClientConfig {
                     scopes.add(OidcScopes.PHONE);
                     scopes.add(OidcScopes.ADDRESS);
                     scopes.add("read");
-                    scopes.add("offline_access");
                 })
                 .clientSettings(ClientSettings.builder()
                         // requireProofKey(true) is recommended for public/browser clients using PKCE.
@@ -141,7 +142,7 @@ public class ClientConfig {
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scopes(scopes -> {
                     scopes.add("api.development");
-                    scopes.add("FULL_ACCESS");
+                    scopes.add("full_access");
                 })
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -166,9 +167,9 @@ public class ClientConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.TOKEN_EXCHANGE)
                 .scopes(scopes -> {
-                    scopes.add("user.read");
-                    scopes.add("user.write");
-                    scopes.add("role.manage");
+                    scopes.add("read");
+                    scopes.add("write");
+                    scopes.add("manage");
                 })
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -181,6 +182,16 @@ public class ClientConfig {
                 .build();
     }
 
+    /**
+     * Machine-to-machine (M2M) client using the client_credentials grant.
+     *
+     * This client is used for app-to-app communication where no user context
+     * is involved. It authenticates with a shared client secret and is limited
+     * to the scopes explicitly assigned to it.
+     *
+     * In this configuration, the client is granted READ access only and can
+     * consume shared APIs from other services that allow the "read" scope.
+     */
     @Bean
     public RegisteredClient serviceM2MClient() {
         return RegisteredClient.withId(UUID.randomUUID()
@@ -191,8 +202,7 @@ public class ClientConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scopes(scopes -> {
-                    scopes.add("api.internal");
-                    scopes.add("monitoring.read");
+                    scopes.add("read");
                 })
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -202,8 +212,14 @@ public class ClientConfig {
     }
 
     /**
-     * Microservice uses private_key_jwt + jwt-bearer client auth for inter-service authentication.
-     * - jwkSetUrl points to your issuer's JWKS or remote key set for the client
+     * Privileged microservice client for inter-service communication.
+     *
+     * This client uses private_key_jwt with the JWT Bearer grant to authenticate
+     * a trusted backend service using a key pair (no shared secrets).
+     *
+     * It is intentionally scoped to WRITE access only and is used for
+     * state-changing operations (commands, events, updates). Read access
+     * is handled by separate, lower-privilege M2M clients.
      */
     @Bean
     public RegisteredClient microserviceClient() {
@@ -213,7 +229,7 @@ public class ClientConfig {
                 .clientId("microservice")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT)
                 .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
-                .scope("api.write")
+                .scope("write")
                 .clientSettings(ClientSettings.builder()
                         .jwkSetUrl(issuerUri + "/oauth2/jwks")
                         .build())
