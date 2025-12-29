@@ -58,7 +58,7 @@ The `docker-compose.yml` defines two services:
    ```bash
    docker-compose up --build
    ```
-2. Access API at base url `https://localhost:8443/api/v1`.
+2. Access API at base url `https://localhost:8443/api`.
    ### Stopping the Containers
    To stop the services:
    ```bash

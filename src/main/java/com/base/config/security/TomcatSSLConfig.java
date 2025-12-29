@@ -50,7 +50,7 @@ public class TomcatSSLConfig {
     private static final String TRUSTSTORE_TYPE = "JKS";
     private static final int HTTPS_PORT = 8443;
     private static final int HTTP_PORT = 8080;
-    private static final String CONTEXT_PATH = "/api/v1";
+    private static final String CONTEXT_PATH = "/api";
 
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> webServerFactoryCustomizer() {

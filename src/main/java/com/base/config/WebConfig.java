@@ -185,7 +185,7 @@ public class WebConfig implements WebMvcConfigurer {
                 }
             }
         })
-                .addPathPatterns("/api/v1/**");
+                .addPathPatterns("/api/**");
 
         // Security headers interceptor
         registry.addInterceptor(new HandlerInterceptor() {

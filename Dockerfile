@@ -21,7 +21,7 @@ COPY --from=builder /app/build/libs/isldevs-standalone.jar app.jar
 EXPOSE 8443
 
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV ISSUER_URI=https://localhost:8443/api/v1
+ENV ISSUER_URI=https://localhost:8443/api
 ENV DB_HOST=db
 ENV DB_PORT=5432
 ENV DB_NAME=isldevs_db

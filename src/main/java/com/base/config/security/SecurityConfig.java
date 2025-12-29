@@ -97,7 +97,7 @@ import org.springframework.web.servlet.view.JstlView;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api/v1}")
+    @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api}")
     private String issuerUri;
 
     private final MessageSource messageSource;
@@ -206,27 +206,27 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         // token endpoints and device endpoints are excluded from CSRF protection.
                         .ignoringRequestMatchers(                       //
-                                "/api/v1/oauth2/token",         // token endpoint
-                                "/api/v1/oauth2/device_authorization",  // device code request
-                                "/api/v1/oauth2/device_verification",   // device verification page
-                                "/api/v1/oauth2/token/introspect",      //
-                                "/api/v1/oauth2/token/revoke"           //
+                                "/oauth2/token",         // token endpoint
+                                "/oauth2/device_authorization",  // device code request
+                                "/oauth2/device_verification",   // device verification page
+                                "/oauth2/token/introspect",      //
+                                "/oauth2/token/revoke"           //
                         ))
                 .authorizeHttpRequests(authorize -> authorize               //
                         .requestMatchers(                                   //
-                                "/api/v1/oauth2/token",                   //
-                                "/api/v1/oauth2/device_authorization",    //
-                                "/api/v1/oauth2/token/introspect",        //
-                                "/api/v1/oauth2/token/revoke",            //
+                                "/oauth2/token",                   //
+                                "/oauth2/device_authorization",    //
+                                "/oauth2/token/introspect",        //
+                                "/oauth2/token/revoke",            //
                                 "/.well-known/oauth-authorization-server",//
                                 "/.well-known/openid-configuration",      //
                                 "/jwks",                                  //
-                                "/api/v1/device/**",                      //
+                                "/device/**",                      //
                                 "/css/**",                                //
                                 "/js/**",                                 //
-                                "/api/v1/login/**",                       //
-                                "/api/v1/error/**",                       //
-                                "/api/v1/public/**"                       //
+                                "/login/**",                       //
+                                "/error/**",                       //
+                                "/public/**"                       //
                         )
                         .permitAll()
                         .anyRequest()
@@ -278,13 +278,13 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth //
                 .requestMatchers( //
-                        "/api/v1/oauth2/**", //
+                        "/oauth2/**", //
                         "/css/**",           //
                         "/js/**",            //
-                        "/api/v1/login/**",  //
+                        "/login/**",  //
                         "/login/oauth2/**",  //
-                        "/api/v1/error/**",  //
-                        "/api/v1/public/**") //
+                        "/error/**",  //
+                        "/public/**") //
                 .permitAll()
                 .anyRequest()
                 .authenticated())
@@ -292,11 +292,11 @@ public class SecurityConfig {
                 // CSRF tokens stored in cookie for browser clients. Token endpoints that are not browser-based are excluded.
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers( //
-                                "/api/v1/oauth2/token",        //
-                                "/api/v1/oauth2/device_authorization", //
-                                "/api/v1/oauth2/device_verification",  //
-                                "/api/v1/oauth2/token/introspect",     //
-                                "/api/v1/oauth2/token/revoke"))        //
+                                "/oauth2/token",        //
+                                "/oauth2/device_authorization", //
+                                "/oauth2/device_verification",  //
+                                "/oauth2/token/introspect",     //
+                                "/oauth2/token/revoke"))        //
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form.loginPage("/login")
                         .defaultSuccessUrl("/home", true)

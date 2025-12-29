@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 @Configuration
 public class ClientConfig {
 
-    @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api/v1}")
+    @Value("${spring.security.oauth2.issuer-uri:https://localhost:8443/api}")
     private String issuerUri;
 
     private final GlobalConfig config;
@@ -201,9 +201,7 @@ public class ClientConfig {
                 .clientSecret(passwordEncoder.encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .scopes(scopes -> {
-                    scopes.add("read");
-                })
+                .scopes(scopes -> scopes.add("read"))
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .accessTokenTimeToLive(Duration.ofHours(1))
@@ -250,14 +248,12 @@ public class ClientConfig {
                 .clientName("IOT Device")
                 .clientId("iot-device")
                 .clientSecret(passwordEncoder.encode("secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.DEVICE_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .scopes(scopes -> {
                     scopes.add(OidcScopes.OPENID);
-                    scopes.add(OidcScopes.EMAIL);
                     scopes.add(OidcScopes.PROFILE);
-                    scopes.add(OidcScopes.PHONE);
-                    scopes.add(OidcScopes.ADDRESS);
                     scopes.add("device.manage");
                 })
                 .tokenSettings(TokenSettings.builder()

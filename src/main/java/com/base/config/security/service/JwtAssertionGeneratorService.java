@@ -65,9 +65,9 @@ public class JwtAssertionGeneratorService {
                 });
 
         var now = Instant.now();
-        var claimsSet = new JWTClaimsSet.Builder().issuer("https://localhost:8443/api/v1")
+        var claimsSet = new JWTClaimsSet.Builder().issuer("https://localhost:8443/api")
                 .subject("microservice")
-                .audience("https://localhost:8443/api/v1/oauth2/token")
+                .audience("https://localhost:8443/api/oauth2/token")
                 .jwtID(UUID.randomUUID()
                         .toString())
                 .issueTime(Date.from(now))

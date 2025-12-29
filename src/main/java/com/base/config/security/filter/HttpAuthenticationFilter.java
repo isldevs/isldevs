@@ -53,7 +53,7 @@ public class HttpAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String TENANT_HEADER = "Tenant-Type";
     private static final String EXPECTED_TENANT = "iSLDevs";
-    private static final String TOKEN_ENDPOINT = "/api/v1/oauth2/token";
+    private static final String TOKEN_ENDPOINT = "/api/oauth2/token";
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final PasswordEncoder passwordEncoder;
     private final RegisteredClientRepository registeredClientRepository;
