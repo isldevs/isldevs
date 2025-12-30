@@ -69,6 +69,7 @@ netty-handler = { module = "io.netty:netty-handler", version.ref = "netty" }
 netty-resolver = { module = "io.netty:netty-resolver", version.ref = "netty" }
 netty-transport = { module = "io.netty:netty-transport", version.ref = "netty" }
 netty-transport-native-unix-common = { module = "io.netty:netty-transport-native-unix-common", version.ref = "netty" }
+spring-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "spring-boot" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.bundles.jwt)
     implementation(libs.bundles.netty)
+    implementation(libs.spring.mail)
 
     developmentOnly(libs.spring.boot.devtools)
     providedRuntime(libs.spring.boot.starter.tomcat)

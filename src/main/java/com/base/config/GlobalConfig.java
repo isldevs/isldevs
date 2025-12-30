@@ -50,4 +50,9 @@ public class GlobalConfig {
         return configMap.getOrDefault(key, null);
     }
 
+    public String getConfigValue(String key,
+                                 String defaultValue) {
+        return configMap.getOrDefault(key, defaultValue);
+    }
+
 }
