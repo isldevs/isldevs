@@ -15,6 +15,7 @@
  */
 package com.base.core.authentication.role.service;
 
+import com.base.config.security.service.SecurityContext;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.role.mapper.RoleMapper;
@@ -22,6 +23,7 @@ import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.role.validation.RoleDataValidator;
 import com.base.core.authentication.user.model.Authority;
+import com.base.core.authentication.user.repository.AuthorityRepository;
 import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.NotFoundException;
@@ -47,18 +49,24 @@ public class RoleServiceImpl implements RoleService {
 
     private final MessageSource messageSource;
     private final RoleRepository roleRepository;
+    private final AuthorityRepository authorityRepository;
     private final RoleDataValidator validator;
     private final RoleMapper roleMapper;
+    private final SecurityContext securityContext;
 
     @Autowired
     public RoleServiceImpl(final MessageSource messageSource,
                            final RoleRepository roleRepository,
+                           final AuthorityRepository authorityRepository,
                            final RoleDataValidator validator,
-                           final RoleMapper roleMapper) {
+                           final RoleMapper roleMapper,
+                           final SecurityContext securityContext) {
         this.messageSource = messageSource;
         this.roleRepository = roleRepository;
+        this.authorityRepository = authorityRepository;
         this.validator = validator;
         this.roleMapper = roleMapper;
+        this.securityContext = securityContext;
     }
 
     @Override
@@ -90,7 +98,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @CacheEvict(value = "roles", key = "T(java.util.Objects).hash(#id, #command)")
+    @CacheEvict(value = "roles", allEntries = true)
     public Map<String, Object> updateRole(Long id,
                                           JsonCommand command) {
 
@@ -99,8 +107,11 @@ public class RoleServiceImpl implements RoleService {
 
         this.validator.update(command.getJson());
 
-        var changes = exist.changed(command);
+        var changes = exist.changed(command, authorityRepository);
         if (!changes.isEmpty()) {
+            if (changes.containsKey(RoleConstants.AUTHORITIES)) {
+                this.securityContext.forceLogout(exist.getId());
+            }
             this.roleRepository.save(exist);
         }
 
@@ -113,13 +124,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @CacheEvict(value = "roles", key = "#id")
+    @CacheEvict(value = "roles", allEntries = true)
     public Map<String, Object> deleteRole(Long id) {
 
         final var role = this.roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found.role", id));
         this.roleRepository.delete(role);
         this.roleRepository.flush();
+        this.securityContext.forceLogout(id);
 
         return LogData.builder()
                 .id(id)

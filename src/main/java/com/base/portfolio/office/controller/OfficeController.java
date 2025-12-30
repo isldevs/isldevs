@@ -35,11 +35,8 @@ import org.springframework.web.bind.annotation.*;
 public class OfficeController {
 
     private final PageableHateoasAssembler pageable;
-
     private final JsonSerializerImpl<OfficeDTO> serializer;
-
     private final OfficeService service;
-
     private final LogService logService;
 
     @Autowired

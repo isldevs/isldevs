@@ -89,7 +89,7 @@ public class VillageServiceImpl implements VillageService {
     }
 
     @Override
-    @CacheEvict(value = "villages", key = "#id")
+    @CacheEvict(value = "villages", allEntries = true)
     public Map<String, Object> updateVillage(Long id,
                                              JsonCommand command) {
         var data = this.repository.findById(id)
@@ -110,7 +110,7 @@ public class VillageServiceImpl implements VillageService {
     }
 
     @Override
-    @CacheEvict(value = "villages", key = "#id")
+    @CacheEvict(value = "villages", allEntries = true)
     public Map<String, Object> deleteVillage(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

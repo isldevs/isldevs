@@ -16,6 +16,7 @@
 package com.base.core.authentication.user.model;
 
 import com.base.core.auditable.CustomAbstractPersistable;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.role.model.Role;
 import com.base.core.authentication.role.repository.RoleRepository;
 import com.base.core.authentication.user.controller.UserConstants;
@@ -137,6 +138,25 @@ public class User extends CustomAbstractPersistable implements UserDetails, Seri
             roles.add(role);
         }
         return roles;
+    }
+
+    public Set<RoleDTO> toRoleDTO(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return roles.stream()
+                .map(role -> RoleDTO.builder()
+                        .id(role.getId())
+                        .name(role.getName())
+                        .authorities(role.getAuthorities() != null
+                                ? role.getAuthorities()
+                                        .stream()
+                                        .map(Authority::getAuthority)
+                                        .collect(Collectors.toSet())
+                                : Collections.emptySet())
+                        .build())
+                .collect(Collectors.toSet());
     }
 
     public static class Builder {

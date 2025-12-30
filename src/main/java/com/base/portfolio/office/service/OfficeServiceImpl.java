@@ -93,7 +93,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    @CacheEvict(value = "offices", key = "#id")
+    @CacheEvict(value = "offices", allEntries = true)
     public Map<String, Object> updateOffice(Long id,
                                             JsonCommand command) {
         var exist = this.repository.findById(id)
@@ -121,7 +121,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    @CacheEvict(value = "offices", key = "#id")
+    @CacheEvict(value = "offices", allEntries = true)
     public Map<String, Object> deleteOffice(Long id) {
 
         var exist = this.repository.findById(id)

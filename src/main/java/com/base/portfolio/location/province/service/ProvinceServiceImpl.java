@@ -79,7 +79,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
-    @CacheEvict(value = "provinces", key = "#id")
+    @CacheEvict(value = "provinces", allEntries = true)
     public Map<String, Object> updateProvince(Long id,
                                               JsonCommand command) {
         var data = this.repository.findById(id)
@@ -100,7 +100,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
-    @CacheEvict(value = "provinces", key = "#id")
+    @CacheEvict(value = "provinces", allEntries = true)
     public Map<String, Object> deleteProvince(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

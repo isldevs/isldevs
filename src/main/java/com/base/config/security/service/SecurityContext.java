@@ -17,6 +17,7 @@ package com.base.config.security.service;
 
 import com.base.core.authentication.user.model.User;
 
+
 /**
  * @author YISivlay
  */
@@ -28,4 +29,7 @@ public interface SecurityContext {
 
     boolean hasAuthority(String authority);
 
+    void forceLogout(String username);
+
+    void forceLogout(Long roleId);
 }

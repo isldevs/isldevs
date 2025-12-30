@@ -15,11 +15,13 @@
  */
 package com.base.config.security.service;
 
-import com.base.core.authentication.role.model.Role;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.user.dto.UserInfoData;
-import com.base.core.authentication.user.model.Authority;
 import com.base.core.authentication.user.repository.UserRepository;
+
+import java.util.*;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -46,16 +48,7 @@ public class UserInfoService {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        var roles = user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-        var authorities = user.getRoles()
-                .stream()
-                .flatMap(role -> role.getAuthorities()
-                        .stream())
-                .map(Authority::getAuthority)
-                .collect(Collectors.toSet());
+        Set<RoleDTO> roles = user.toRoleDTO(user.getRoles());
 
         var userInfo = UserInfoData.builder()
                 .id(user.getId())
@@ -68,11 +61,53 @@ public class UserInfoService {
                 .isAccountNonLocked(user.isAccountNonLocked())
                 .isCredentialsNonExpired(user.isCredentialsNonExpired())
                 .roles(roles)
-                .authorities(authorities)
                 .build()
                 .getClaims();
+        Map<String, Object> snakeCaseClaims = toSnakeCaseMap(userInfo);
+        return new OidcUserInfo(snakeCaseClaims);
+    }
 
-        return new OidcUserInfo(userInfo);
+    /**
+     * Recursively converts map keys to snake_case
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> toSnakeCaseMap(Map<String, Object> map) {
+        return map.entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> toSnakeCase(entry.getKey()), entry -> {
+                    Object value = entry.getValue();
+                    if (value instanceof Map<?, ?> nestedMap) {
+                        return toSnakeCaseMap((Map<String, Object>) nestedMap);
+                    } else if (value instanceof Collection<?> collection) {
+                        return collection.stream()
+                                .map(item -> item instanceof Map<?, ?> m
+                                        ? toSnakeCaseMap((Map<String, Object>) m)
+                                        : item)
+                                .collect(Collectors.toList());
+                    } else {
+                        return value;
+                    }
+                }, (_,
+                    b) -> b, LinkedHashMap::new));
+    }
+
+    /**
+     * Converts a camelCase string to snake_case
+     */
+    public static String toSnakeCase(String str) {
+        if (str == null || str.isEmpty())
+            return str;
+
+        var sb = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                sb.append('_')
+                        .append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
 }

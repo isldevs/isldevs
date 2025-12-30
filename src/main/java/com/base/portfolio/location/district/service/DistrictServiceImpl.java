@@ -89,7 +89,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    @CacheEvict(value = "districts", key = "#id")
+    @CacheEvict(value = "districts", allEntries = true)
     public Map<String, Object> updateDistrict(Long id,
                                               JsonCommand command) {
         var data = this.repository.findById(id)
@@ -110,7 +110,7 @@ public class DistrictServiceImpl implements DistrictService {
     }
 
     @Override
-    @CacheEvict(value = "districts", key = "#id")
+    @CacheEvict(value = "districts", allEntries = true)
     public Map<String, Object> deleteDistrict(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

@@ -18,6 +18,7 @@ package com.base.config.security.service;
 import com.base.core.authentication.user.model.User;
 import com.base.core.authentication.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -25,6 +26,9 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -34,6 +38,9 @@ public class SecurityContextImpl implements SecurityContext {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public User authenticatedUser() {
@@ -90,4 +97,21 @@ public class SecurityContextImpl implements SecurityContext {
                         .equals(authority));
     }
 
+    @Override
+    public void forceLogout(String username) {
+        this.jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name = ?", username);
+    }
+
+    @Override
+    public void forceLogout(Long roleId) {
+        if (roleId == null) {
+            return;
+        }
+        Collection<String> usernames = this.userRepository.findUsernamesByRoleId(roleId);
+        if (!usernames.isEmpty()) {
+            this.jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name IN (%s)".formatted(usernames.stream()
+                    .map(_ -> "?")
+                    .collect(Collectors.joining(","))), usernames.toArray());
+        }
+    }
 }

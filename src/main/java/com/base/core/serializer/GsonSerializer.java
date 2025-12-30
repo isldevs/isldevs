@@ -18,7 +18,11 @@ package com.base.core.serializer;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author YISivlay
@@ -41,6 +45,13 @@ public final class GsonSerializer {
             serialized = json;
         }
         return serialized;
+    }
+
+    public Map<String, Object> deserializeToMap(String json) {
+        if (json == null)
+            return Collections.emptyMap();
+        return gson.fromJson(json, new TypeToken<Map<String, Object>>() {
+        }.getType());
     }
 
 }

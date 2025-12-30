@@ -15,13 +15,13 @@
  */
 package com.base.core.authentication.user.dto;
 
-import com.base.core.authentication.role.model.Role;
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.user.model.User;
 import com.base.core.exception.NotFoundException;
 import com.base.portfolio.file.repository.FileUtils;
-import com.base.portfolio.file.service.FileService;
+import com.base.portfolio.file.service.FileServiceImpl;
+
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -32,7 +32,7 @@ public class UserDTO {
     private String username;
     private String name;
     private String email;
-    private Set<String> roles;
+    private Set<RoleDTO> roles;
     private boolean enabled;
     private boolean accountNonExpired;
     private boolean accountNonLocked;
@@ -60,18 +60,13 @@ public class UserDTO {
     }
 
     public static UserDTO toDTO(User user,
-                                FileService fileService) {
-        var roleNames = user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-
+                                FileServiceImpl fileService) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
-                .roles(roleNames)
+                .roles(user.toRoleDTO(user.getRoles()))
                 .enabled(user.isEnabled())
                 .accountNonExpired(user.isAccountNonExpired())
                 .accountNonLocked(user.isAccountNonLocked())
@@ -80,7 +75,7 @@ public class UserDTO {
                 .build();
     }
 
-    private static String profile(FileService fileService,
+    private static String profile(FileServiceImpl fileService,
                                   Long id) {
         if (fileService == null) {
             return null;
@@ -100,23 +95,14 @@ public class UserDTO {
     public static class Builder {
 
         private Long id;
-
         private String username;
-
         private String name;
-
         private String email;
-
-        private Set<String> roles;
-
+        private Set<RoleDTO> roles;
         private boolean enabled;
-
         private boolean accountNonExpired;
-
         private boolean accountNonLocked;
-
         private boolean credentialsNonExpired;
-
         private String profile;
 
         public Builder() {
@@ -146,13 +132,8 @@ public class UserDTO {
             return this;
         }
 
-        public Builder roles(Set<String> roles) {
+        public Builder roles(Set<RoleDTO> roles) {
             this.roles = roles;
-            return this;
-        }
-
-        public Builder authorities(Set<String> authorities) {
-            this.roles = authorities;
             return this;
         }
 
@@ -216,7 +197,7 @@ public class UserDTO {
         return email;
     }
 
-    public Set<String> getRoles() {
+    public Set<RoleDTO> getRoles() {
         return roles;
     }
 

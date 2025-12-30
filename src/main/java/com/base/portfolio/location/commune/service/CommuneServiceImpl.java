@@ -92,7 +92,7 @@ public class CommuneServiceImpl implements CommuneService {
     }
 
     @Override
-    @CacheEvict(value = "communes", key = "#id")
+    @CacheEvict(value = "communes", allEntries = true)
     public Map<String, Object> updateCommune(Long id,
                                              JsonCommand command) {
         var data = this.repository.findById(id)
@@ -113,7 +113,7 @@ public class CommuneServiceImpl implements CommuneService {
     }
 
     @Override
-    @CacheEvict(value = "communes", key = "#id")
+    @CacheEvict(value = "communes", allEntries = true)
     public Map<String, Object> deleteCommune(Long id) {
         final var data = this.repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("msg.not.found", id));

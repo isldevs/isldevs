@@ -18,12 +18,18 @@ package com.base.core.authentication.role.model;
 import com.base.core.auditable.CustomAbstractPersistable;
 import com.base.core.authentication.role.controller.RoleConstants;
 import com.base.core.authentication.user.model.Authority;
+import com.base.core.authentication.user.repository.AuthorityRepository;
 import com.base.core.command.data.JsonCommand;
+import com.base.core.exception.NotFoundException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author YISivlay
@@ -75,7 +81,8 @@ public class Role extends CustomAbstractPersistable {
 
     }
 
-    public Map<String, Object> changed(final JsonCommand command) {
+    public Map<String, Object> changed(final JsonCommand command,
+                                       AuthorityRepository authorityRepository) {
         final Map<String, Object> changes = new HashMap<>(7);
 
         if (command.isChangeAsString(RoleConstants.NAME, this.name)) {
@@ -83,9 +90,15 @@ public class Role extends CustomAbstractPersistable {
             this.name = value;
             changes.put(RoleConstants.NAME, value);
         }
-        if (command.isChangeAsArray(RoleConstants.AUTHORITIES, this.authorities, Authority.class)) {
-            final var value = command.extractArrayAs(RoleConstants.AUTHORITIES, Authority.class);
-            this.authorities = value;
+        if (command.isChangeAsArray(RoleConstants.AUTHORITIES, this.authorities.stream()
+                .map(Authority::getAuthority)
+                .collect(Collectors.toSet()), String.class)) {
+            final var value = command.extractArrayAs(RoleConstants.AUTHORITIES, String.class);
+            this.authorities = value.stream()
+                    .map(authority -> authorityRepository.findByAuthority(authority)
+                            .orElseThrow(() -> new NotFoundException("msg.not.found", authority)))
+                    .collect(Collectors.toSet());
+            ;
             changes.put(RoleConstants.AUTHORITIES, value);
         }
 

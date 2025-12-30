@@ -26,9 +26,10 @@ import com.base.core.command.data.JsonCommand;
 import com.base.core.command.data.LogData;
 import com.base.core.exception.ErrorException;
 import com.base.core.exception.NotFoundException;
-import com.base.portfolio.file.service.FileService;
+import com.base.portfolio.file.service.FileServiceImpl;
 import jakarta.persistence.criteria.Predicate;
 import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDataValidation validation;
-    private final FileService fileService;
+    private final FileServiceImpl fileService;
 
     @Autowired
     public UserServiceImpl(final MessageSource messageSource,
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
                            final RoleRepository roleRepository,
                            final PasswordEncoder passwordEncoder,
                            final UserDataValidation validation,
-                           final FileService fileService) {
+                           final FileServiceImpl fileService) {
         this.messageSource = messageSource;
         this.securityContext = securityContext;
         this.userRepository = userRepository;
@@ -131,7 +132,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#id")
+    @CacheEvict(value = "users", allEntries = true)
     public Map<String, Object> updateUser(Long id,
                                           JsonCommand command) {
         var user = userRepository.findById(id)
@@ -146,6 +147,9 @@ public class UserServiceImpl implements UserService {
         }
         var changes = user.changed(this.passwordEncoder, this.roleRepository, command);
         if (!changes.isEmpty()) {
+            if (changes.containsKey(UserConstants.PASSWORD) || changes.containsKey(UserConstants.ROLES) || changes.containsKey(UserConstants.AUTHORITIES)) {
+                securityContext.forceLogout(user.getUsername());
+            }
             userRepository.save(user);
         }
         return LogData.builder()
@@ -157,12 +161,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#id")
+    @CacheEvict(value = "users", allEntries = true)
     public Map<String, Object> deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new NotFoundException("msg.not.found.user", id);
-        }
-        userRepository.deleteById(id);
+
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("msg.not.found.user", id));
+        userRepository.delete(user);
+        securityContext.forceLogout(user.getUsername());
 
         return LogData.builder()
                 .id(id)

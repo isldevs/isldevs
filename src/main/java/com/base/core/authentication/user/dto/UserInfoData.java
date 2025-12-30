@@ -15,6 +15,7 @@
  */
 package com.base.core.authentication.user.dto;
 
+import com.base.core.authentication.role.dto.RoleDTO;
 import com.base.core.authentication.user.controller.UserConstants;
 import java.io.Serial;
 import java.io.Serializable;
@@ -68,7 +69,7 @@ public class UserInfoData implements StandardClaimAccessor, Serializable {
             return this.claim(UserConstants.EMAIL, email);
         }
 
-        public Builder roles(Set<String> roles) {
+        public Builder roles(Set<RoleDTO> roles) {
             return this.claim(UserConstants.ROLES, roles);
         }
 
