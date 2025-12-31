@@ -257,6 +257,15 @@ public class SecurityConfig {
                         .permissionsPolicyHeader(permissions -> permissions.policy("geolocation 'none'; midi 'none'; camera 'none'"))
                         .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig
                                 .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation()
+                        .migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false))
+                .logout(logout -> logout.logoutUrl("/logout")
+                        .deleteCookies("JSESSIONID", "SESSION")
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true))
                 // If behind a proxy that sets X-Forwarded-Proto, redirectToHttps enforces https.
                 .redirectToHttps(redirectToHttp -> redirectToHttp.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null));
 
@@ -321,7 +330,7 @@ public class SecurityConfig {
                         .sessionFixation()
                         .migrateSession()
                         .maximumSessions(1)
-                        .maxSessionsPreventsLogin(true))
+                        .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout.logoutUrl("/logout")
                         .deleteCookies("JSESSIONID", "SESSION")
                         .clearAuthentication(true)

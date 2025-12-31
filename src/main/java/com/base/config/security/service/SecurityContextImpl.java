@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -41,6 +43,9 @@ public class SecurityContextImpl implements SecurityContext {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     @Override
     public User authenticatedUser() {
@@ -100,6 +105,14 @@ public class SecurityContextImpl implements SecurityContext {
     @Override
     public void forceLogout(String username) {
         this.jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name = ?", username);
+        for (Object principal : sessionRegistry.getAllPrincipals()) {
+            if (principal instanceof User user && user.getUsername()
+                    .equals(username)) {
+                for (SessionInformation sessionInfo : sessionRegistry.getAllSessions(principal, false)) {
+                    sessionInfo.expireNow();
+                }
+            }
+        }
     }
 
     @Override
@@ -109,9 +122,21 @@ public class SecurityContextImpl implements SecurityContext {
         }
         Collection<String> usernames = this.userRepository.findUsernamesByRoleId(roleId);
         if (!usernames.isEmpty()) {
+
             this.jdbcTemplate.update("DELETE FROM oauth2_authorization WHERE principal_name IN (%s)".formatted(usernames.stream()
                     .map(_ -> "?")
                     .collect(Collectors.joining(","))), usernames.toArray());
+
+            usernames.forEach(username -> {
+                for (Object principal : sessionRegistry.getAllPrincipals()) {
+                    if (principal instanceof User user && user.getUsername()
+                            .equals(username)) {
+                        for (SessionInformation sessionInfo : sessionRegistry.getAllSessions(principal, false)) {
+                            sessionInfo.expireNow();
+                        }
+                    }
+                }
+            });
         }
     }
 }

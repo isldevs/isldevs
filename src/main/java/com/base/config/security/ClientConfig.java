@@ -81,10 +81,7 @@ public class ClientConfig {
                 .clientId("web-app")
                 // PUBLIC CLIENT
                 // Browser / Mobile apps never store secrets
-                // If you want a pure PKCE public client,
-                // remove clientSecret and set ClientAuthenticationMethod.NONE.
-                .clientSecret(passwordEncoder.encode("secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/web-app")
@@ -106,8 +103,8 @@ public class ClientConfig {
                         // This format SELF_CONTAINED not work revoke token with access_token,
                         // only work with refresh_token
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        .accessTokenTimeToLive(Duration.ofMinutes(15))
-                        .refreshTokenTimeToLive(Duration.ofDays(30))
+                        .accessTokenTimeToLive(Duration.ofMinutes(10))
+                        .refreshTokenTimeToLive(Duration.ofMinutes(30))
                         // reuseRefreshTokens(false) -> rotate refresh tokens. Recommended for security.
                         .reuseRefreshTokens(false)
                         .build())
@@ -134,7 +131,7 @@ public class ClientConfig {
     public RegisteredClient apiDevelopmentClient() {
         return RegisteredClient.withId(UUID.randomUUID()
                 .toString())
-                .clientId("api-development")
+                .clientId("system")
                 .clientName("API Development")
                 .clientSecret(passwordEncoder.encode("secret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
