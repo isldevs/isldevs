@@ -80,7 +80,12 @@ public class ClientConfig {
                 .clientName("Web && Mobile")
                 .clientId("web-app")
                 // PUBLIC CLIENT
-                // Browser / Mobile apps never store secrets
+                // Browser / Mobile apps never store secrets and use refresh_token
+                // PUBLIC CLIENT No need refresh_token, If you want to use refresh_token.
+                // Enable these two line belows and remove ClientAuthenticationMethod.NONE
+
+                //.clientSecret(passwordEncoder.encode("secret"))
+                //.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
