@@ -107,6 +107,7 @@ graalvmNative {
         main {
             imageName = project.name
             mainClass = "com.base.ISLDevsApplication"
+            useFatJar = true
             buildArgs.addAll([
                     '--verbose',
                     '--no-fallback',
@@ -125,6 +126,7 @@ graalvmNative {
         }
     }
 }
+
 
 dependencyUpdates {
     rejectVersionIf {
