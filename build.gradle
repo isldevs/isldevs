@@ -184,6 +184,10 @@ bootRun {
     if (activeProfile == 'dev') classpath = sourceSets.main.runtimeClasspath + configurations.developmentOnly
 }
 
+tasks.named("jar") {
+    enabled = true
+}
+
 tasks.named("bootJar") {
     archiveBaseName = "isldevs"
     archiveClassifier = "standalone"
